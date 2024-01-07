@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => LandingScreen(),
           '/registration': (context) => RegistrationScreen(),
-          // '/search': (context) => SearchScreen(),
+          '/search': (context) => SearchScreen(),
         },
       ),
     );

@@ -5,11 +5,16 @@ import 'package:dispensary/services/database_service.dart';
 
 class PatientProvider extends ChangeNotifier {
   List<Patient> _patients = [];
+  List<Patient> _searchResults = [];
   final DatabaseService _databaseService;
 
   PatientProvider(this._databaseService);
 
-  List<Patient> get patients => _patients;
+  Future<void> initializePatients() async {
+    // Load patients from the database (example)
+    _patients = await _databaseService.getAllPatients();
+    notifyListeners();
+  }
 
   Future<void> registerPatient({
     required String name,
@@ -41,5 +46,23 @@ class PatientProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> searchPatients({
+    required String name,
+    required String mobileNumber,
+    required String gender,
+  }) async {
+    // Search patients in the database based on the provided criteria
+    _searchResults = _patients
+        .where((patient) =>
+            patient.name.toLowerCase().contains(name.toLowerCase()) &&
+            patient.mobileNumber.contains(mobileNumber) &&
+            patient.gender.toLowerCase().contains(gender.toLowerCase()))
+        .toList();
+    notifyListeners();
+  }
+
+  List<Patient> get patients => _patients;
+
+  List<Patient> get searchResults => _searchResults;
   // Add more functions as needed, e.g., searchPatients, editPatient, etc.
 }

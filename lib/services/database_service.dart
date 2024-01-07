@@ -1,4 +1,5 @@
 // database_service.dart
+import 'package:dispensary/models/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite/sqflite.dart';
@@ -44,13 +45,21 @@ class DatabaseService {
     required List<String> allergies,
   }) async {
     await _database.insert('patients', {
-      'name': name,
-      'mobileNumber': mobileNumber,
-      'gender': gender,
-      'address': address,
-      'allergies': allergies.join(','),
+      'name': _wrapWithQuotes(name),
+      'mobileNumber': _wrapWithQuotes(mobileNumber),
+      'gender': _wrapWithQuotes(gender),
+      'address': _wrapWithQuotes(address),
+      'allergies': _wrapWithQuotes(allergies.join(',')),
     });
   }
 
-  // Add methods for CRUD operations
+  // Wrap a string value with single quotes
+  String _wrapWithQuotes(String value) {
+    return "'$value'";
+  }
+
+  Future<List<Patient>> getAllPatients() async {
+    List<Map<String, dynamic>> result = await _database.query('patients');
+    return result.map((map) => Patient.fromMap(map)).toList();
+  } // Add methods for CRUD operations
 }

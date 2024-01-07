@@ -15,4 +15,15 @@ class Patient {
     required this.address,
     required this.allergies,
   });
+
+  factory Patient.fromMap(Map<String, dynamic> map) {
+    return Patient(
+      id: map['id'],
+      name: map['name'],
+      mobileNumber: map['mobileNumber'],
+      gender: map['gender'],
+      address: map['address'],
+      allergies: map['allergies']?.split(',').toList() ?? [],
+    );
+  }
 }
