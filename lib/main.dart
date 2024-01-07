@@ -1,3 +1,4 @@
+import 'package:dispensary/screens/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -24,11 +25,12 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Dispensary App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        // Define initial route or home page
-        // ...
+        initialRoute: '/',
+        routes: {
+          '/': (context) => LandingScreen(),
+          //'/registration': (context) => RegistrationScreen(),
+          // '/search': (context) => SearchScreen(),
+        },
       ),
     );
   }
