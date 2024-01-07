@@ -64,10 +64,5 @@ class PatientProvider extends ChangeNotifier {
   List<Patient> get patients => _patients;
 
   List<Patient> get searchResults => _searchResults;
-  // Add this function to clear search results
-  void clearSearchResults() {
-    _searchResults.clear();
-    notifyListeners();
-  }
   // Add more functions as needed, e.g., searchPatients, editPatient, etc.
 }
