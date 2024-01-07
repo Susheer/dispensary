@@ -32,5 +32,5 @@ This app is uniquely developed with the help of ChatGPT, a powerful language mod
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/dispensary-app.git
+   git clone https://github.com/Susheer/dispensary-app.git
    cd dispensary-app
