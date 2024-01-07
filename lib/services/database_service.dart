@@ -21,9 +21,35 @@ class DatabaseService {
       onCreate: (db, version) {
         debugPrint("-----------Database is created-----------");
         // Create tables and schema
+        db.execute('''
+          CREATE TABLE IF NOT EXISTS patients(
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            mobileNumber TEXT,
+            gender TEXT,
+            address TEXT,
+            allergies TEXT
+          )
+        ''');
         // ...
       },
     );
+  }
+
+  Future<void> savePatient({
+    required String name,
+    required String mobileNumber,
+    required String gender,
+    required String address,
+    required List<String> allergies,
+  }) async {
+    await _database.insert('patients', {
+      'name': name,
+      'mobileNumber': mobileNumber,
+      'gender': gender,
+      'address': address,
+      'allergies': allergies.join(','),
+    });
   }
 
   // Add methods for CRUD operations

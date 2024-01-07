@@ -1,11 +1,11 @@
-// patient.dart
+// patient_model.dart
 class Patient {
-  final int id;
-  final String name;
-  final String mobileNumber;
-  final String gender;
-  final String address;
-  final List<String> allergies;
+  late int id;
+  late String name;
+  late String mobileNumber;
+  late String gender;
+  late String address;
+  late List<String> allergies;
 
   Patient({
     required this.id,
