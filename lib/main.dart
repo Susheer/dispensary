@@ -1,4 +1,5 @@
 // main.dart
+import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => LandingScreen(),
           '/registration': (context) => RegistrationScreen(),
           '/search': (context) => SearchScreen(),
+          '/allPatients': (context) => AllPatientsScreen(),
         },
       ),
     );

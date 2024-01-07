@@ -25,6 +25,13 @@ class LandingScreen extends StatelessWidget {
               },
               child: Text('Search Patients'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to AllPatientsScreen using named route
+                Navigator.pushNamed(context, '/allPatients');
+              },
+              child: Text('View All Patients'),
+            ),
           ],
         ),
       ),
