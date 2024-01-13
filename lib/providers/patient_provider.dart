@@ -1,18 +1,23 @@
 // patient_provider.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/services/database_service.dart';
+import 'package:dispensary/appConfig.dart';
 
 class PatientProvider extends ChangeNotifier {
   List<Patient> _patients = [];
   List<Patient> _searchResults = [];
+
   final DatabaseService _databaseService;
 
   PatientProvider(this._databaseService);
 
   Future<void> initializePatients() async {
     // Load patients from the database (example)
-    _patients = await _databaseService.getAllPatients();
+    _patients =
+        await _databaseService.fetchPaginatedPatients(0, AppConfig.PageSize);
     notifyListeners();
   }
 
@@ -46,6 +51,10 @@ class PatientProvider extends ChangeNotifier {
     );
   }
 
+  Future<int> getPatientsCount() {
+    return _databaseService.getPatientsCount();
+  }
+
   Future<void> searchPatients({
     required String name,
     required String mobileNumber,
@@ -59,6 +68,66 @@ class PatientProvider extends ChangeNotifier {
             patient.gender.toLowerCase().contains(gender.toLowerCase()))
         .toList();
     notifyListeners();
+  }
+
+  // Simulated method to fetch the next page of patients
+  Future<int> fetchNextPage(int startIndex, int pageSize) async {
+    // Simulate fetching data from a data source (e.g., a database)
+    // Replace this with your actual data fetching logic
+    await Future.delayed(Duration(seconds: 2));
+
+    List<Patient> nextPage =
+        await _databaseService.fetchPaginatedPatients(startIndex, pageSize);
+    //_generateDummyPatients(pageSize);
+    if (nextPage.isEmpty != true) {
+      _patients.addAll(nextPage);
+    }
+    notifyListeners();
+    return Future.value(2);
+  }
+
+  Future<void> registerDummyPatient() async {
+    print("registerDummyPatient invoked");
+    const int numberOfPatients = 5;
+    for (int i = 1; i <= numberOfPatients; i++) {
+      await _databaseService.savePatient(
+        name: 'Patient $i',
+        mobileNumber: '+1${Random().nextInt(1000000000)}',
+        gender: Random().nextBool() ? 'Male' : 'Female',
+        address: 'Address $i',
+        allergies: ['a1', 'a2'],
+      );
+      print("Patient $i inserted");
+    }
+  }
+
+  Future<void> deleteAllPatients() async {
+    print("deleteAllPatients invoked");
+    await _databaseService.deleteAllPatients();
+    print("deleteAllPatients All Deleted");
+  }
+
+  // Simulated method to generate dummy patients for testing
+  List<Patient> _generateDummyPatients(int count) {
+    Patient lastPatient;
+    int startCount = 0;
+    if (_patients.isNotEmpty) {
+      lastPatient = _patients.last;
+      startCount = lastPatient.id;
+      startCount++;
+    }
+
+    print("_generateDummyPatients received $count");
+    return List.generate(
+      count,
+      (index) => Patient(
+          id: startCount + index,
+          name: 'Patient ${startCount + index}',
+          address: 'Address ${startCount + index}',
+          mobileNumber: '123456789${startCount + index}',
+          gender: index % 2 == 0 ? 'Male' : 'Female',
+          allergies: ['a1', 'a2']),
+    );
   }
 
   List<Patient> get patients => _patients;

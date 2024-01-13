@@ -61,5 +61,46 @@ class DatabaseService {
   Future<List<Patient>> getAllPatients() async {
     List<Map<String, dynamic>> result = await _database.query('patients');
     return result.map((map) => Patient.fromMap(map)).toList();
-  } // Add methods for CRUD operations
+  }
+
+// Fetch a paginated list of patients from the database
+  Future<List<Patient>> fetchPaginatedPatients(int offset, int pageSize) async {
+    if (_database == null) {
+      throw Exception(
+          'Database not initialized. Call initializeDatabase first.');
+    }
+    List<Map<String, dynamic>> result =
+        await _database.query('patients', limit: pageSize, offset: offset);
+    return result.map((map) => Patient.fromMap(map)).toList();
+  }
+
+  Future<void> deleteAllPatients() async {
+    if (_database == null) {
+      throw Exception(
+          'Database not initialized. Call initializeDatabase first.');
+    }
+
+    // Your SQL query to delete all records from the patients table
+    final String sql = 'DELETE FROM patients';
+
+    await _database.execute(sql);
+  }
+
+  Future<int> getPatientsCount() async {
+    if (_database == null) {
+      throw Exception(
+          'Database not initialized. Call initializeDatabase first.');
+    }
+
+    // Your SQL query to get the count
+    final String sql = 'SELECT COUNT(*) FROM patients';
+
+    final List<Map<String, dynamic>> result = await _database.rawQuery(sql);
+
+    // Extract the count from the result
+    final int count = Sqflite.firstIntValue(result) ?? 0;
+
+    return count;
+  }
+// Add methods for CRUD operations
 }
