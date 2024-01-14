@@ -1,11 +1,15 @@
+import 'package:dispensary/common/account_screen.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/seperator.dart';
+import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine.dart';
-import 'package:flutter/material.dart'; // Import the Patient model
+import 'package:flutter/material.dart';
 
 class PatientScreen extends StatelessWidget {
   final int patientId;
+  Account account =
+      Account(pendingBalance: 2, totalPaid: 11, totalSinceJoining: 22);
   List<Medicine> medicines = [];
   PatientScreen({required this.patientId}) {
     // One-time setup logic can go here
@@ -88,10 +92,7 @@ class PatientScreen extends StatelessWidget {
               buildSection(
                 'Account Details',
                 [
-                  // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                  const Text('Total Since Joining: 1000-/Rs'),
-                  const Text('Total Paid: 800-/Rs'),
-                  const Text('Pending Bal: 200-/Rs'),
+                  AccountScreen(account: account),
                   const Text('Next Follow Up: 02/10/2024'),
                 ],
               ),
@@ -126,25 +127,53 @@ class PatientScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                IconButton(
-                  icon: Icon(Icons.add),
+                buildActionButton(
+                  icon: Icons.local_pharmacy,
                   onPressed: () {
-                    // Add your logic for the "Add" action here
-                    // For example: navigate to a screen for adding a new patient
+                    // Add your logic for the button's onPressed event
                   },
+                  tooltip: 'View My Prescriptions',
                 ),
-                IconButton(
-                  icon: Icon(Icons.search),
+                buildActionButton(
+                  icon: Icons.add_box,
                   onPressed: () {
-                    // Add your logic for the "Search" action here
-                    // For example: navigate to a search screen
+                    // Add your logic for the button's onPressed event
                   },
+                  tooltip: 'Add a New Prescription',
                 ),
-                // Add more IconButton widgets for additional actions as needed
+                buildActionButton(
+                  icon: Icons.account_balance_wallet,
+                  onPressed: () {
+                    // Add your logic for the button's onPressed event
+                  },
+                  tooltip: 'View Account Details',
+                ),
+                buildActionButton(
+                  icon: Icons.event,
+                  onPressed: () {
+                    // Add your logic for the button's onPressed event
+                  },
+                  tooltip: 'Schedule Follow Up',
+                ),
+                // Add more buttons using buildActionButton as needed
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildActionButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required String tooltip,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        icon: Icon(icon),
+        onPressed: onPressed,
       ),
     );
   }
