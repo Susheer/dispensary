@@ -22,7 +22,6 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
     super.didChangeDependencies();
     if (initScreenUponLoad == false) {
       initScreenUponLoad = true;
-      print("didChangeDependencies invoked");
       final patientProvider = Provider.of<PatientProvider>(context);
       patientProvider.getPatientsCount().then((value) {
         patientsCount = value;
@@ -121,23 +120,17 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                     IconButton(
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        print("Button pressed");
                         Provider.of<PatientProvider>(context, listen: false)
                             .registerDummyPatient();
-                        // Add your logic for the "Add" action here
-
-                        // For example: navigate to a screen for adding a new patient
                       },
                     ),
                     IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () {
-                        print("Button pressed");
                         Provider.of<PatientProvider>(context, listen: false)
                             .deleteAllPatients();
                       },
                     ),
-                    // Add more IconButton widgets for additional actions as needed
                   ],
                 ),
               ),
@@ -149,20 +142,14 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
   }
 
   Future<void> _loadMore() async {
-    print("_loadMore invoked");
     if (isLoading != true) {
-      print("Loading new data");
       isLoading = true;
       Provider.of<PatientProvider>(context, listen: false)
           .fetchNextPage(currentPage * pageSize, pageSize)
           .then((_) {
-        print("Loading completed");
         currentPage++;
         isLoading = false;
-        print('isLoading $isLoading currenPage $currentPage');
       });
-    } else {
-      print("Already loading data: isLoading $isLoading");
     }
   }
 }
