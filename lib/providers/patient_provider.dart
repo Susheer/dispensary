@@ -33,7 +33,7 @@ class PatientProvider extends ChangeNotifier {
           1, // Assuming the id is auto-incremented by the database
       name: name,
       mobileNumber: mobileNumber,
-      gender: gender,
+      gender: Patient.parseGender(gender),
       address: address,
       allergies: allergies,
     );
@@ -58,14 +58,14 @@ class PatientProvider extends ChangeNotifier {
   Future<void> searchPatients({
     required String name,
     required String mobileNumber,
-    required String gender,
+    required Gender gender,
   }) async {
     // Search patients in the database based on the provided criteria
     _searchResults = _patients
         .where((patient) =>
             patient.name.toLowerCase().contains(name.toLowerCase()) &&
             patient.mobileNumber.contains(mobileNumber) &&
-            patient.gender.toLowerCase().contains(gender.toLowerCase()))
+            patient.gender == gender)
         .toList();
     notifyListeners();
   }
@@ -125,7 +125,7 @@ class PatientProvider extends ChangeNotifier {
           name: 'Patient ${startCount + index}',
           address: 'Address ${startCount + index}',
           mobileNumber: '123456789${startCount + index}',
-          gender: index % 2 == 0 ? 'Male' : 'Female',
+          gender: index % 2 == 0 ? Gender.Male : Gender.Female,
           allergies: ['a1', 'a2']),
     );
   }

@@ -40,7 +40,7 @@ class SearchScreen extends StatelessWidget {
                     .searchPatients(
                   name: nameController.text,
                   mobileNumber: mobileController.text,
-                  gender: genderController.text,
+                  gender: Patient.parseGender(genderController.text),
                 );
               },
               child: Text('Search'),

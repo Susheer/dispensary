@@ -1,9 +1,15 @@
 // patient_model.dart
+enum Gender {
+  Male,
+  Female,
+  Other,
+}
+
 class Patient {
   late int id;
   late String name;
   late String mobileNumber;
-  late String gender;
+  late Gender gender;
   late String address;
   late List<String> allergies;
 
@@ -21,17 +27,29 @@ class Patient {
       id: map['id'],
       name: map['name'],
       mobileNumber: map['mobileNumber'],
-      gender: map['gender'],
+      gender: parseGender(map['gender']),
       address: map['address'],
       allergies: map['allergies']?.split(',').toList() ?? [],
     );
+  }
+  static Gender parseGender(String gender) {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return Gender.Male;
+      case 'female':
+        return Gender.Female;
+      case 'other':
+        return Gender.Other;
+      default:
+        throw ArgumentError('Invalid gender: $gender');
+    }
   }
 }
 
 class Guardian {
   late String name;
   late String mobileNumber;
-  late String gender;
+  late Gender gender;
   late String address;
   late GuardianRelation relation; // New property
 
@@ -47,10 +65,22 @@ class Guardian {
     return Guardian(
       name: map['name'],
       mobileNumber: map['mobileNumber'],
-      gender: map['gender'],
+      gender: parseGender(map['gender']),
       address: map['address'],
       relation: GuardianRelation.values[map['relation']],
     );
+  }
+  static Gender parseGender(String gender) {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return Gender.Male;
+      case 'female':
+        return Gender.Female;
+      case 'other':
+        return Gender.Other;
+      default:
+        throw ArgumentError('Invalid gender: $gender');
+    }
   }
 }
 

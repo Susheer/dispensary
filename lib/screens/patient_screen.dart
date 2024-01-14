@@ -14,7 +14,7 @@ class PatientScreen extends StatelessWidget {
   Guardian guradian = Guardian(
       name: 'Sudheer',
       mobileNumber: '+1893 39993',
-      gender: 'Male',
+      gender: Gender.Female,
       address: 'Address',
       relation: GuardianRelation.Spouse);
   List<Medicine> medicines = [];
@@ -249,7 +249,7 @@ class PatientScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -306,7 +306,7 @@ class PatientScreen extends StatelessWidget {
       id: patientId,
       name: 'John Doe',
       mobileNumber: '+1234567890',
-      gender: 'Male',
+      gender: Gender.Male,
       address: '123 Main St',
       allergies: ['Pollen', 'Dust'],
     );

@@ -55,7 +55,7 @@ class DatabaseService {
 
   // Wrap a string value with single quotes
   String _wrapWithQuotes(String value) {
-    return "'$value'";
+    return value;
   }
 
   Future<List<Patient>> getAllPatients() async {

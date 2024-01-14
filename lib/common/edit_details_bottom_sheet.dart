@@ -19,6 +19,9 @@ class EditDetailsBottomSheet extends StatefulWidget {
 class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  Gender _selectedGender =
+      Gender.Male; // Default value, you can adjust as needed
 
   void initState() {
     super.initState();
@@ -28,6 +31,12 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
     _mobileController.text = widget.isEditingPatient
         ? widget.patient.mobileNumber
         : widget.guardian.mobileNumber;
+    _addressController.text = widget.isEditingPatient
+        ? widget.patient.address
+        : widget.guardian.address;
+    _selectedGender = widget.isEditingPatient
+        ? widget.patient.gender
+        : widget.guardian.gender;
     // Add similar logic for other form fields
   }
 
@@ -36,6 +45,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
     // Dispose of controllers when the widget is disposed
     _nameController.dispose();
     _mobileController.dispose();
+    _addressController.dispose();
     // Dispose of other controllers...
     super.dispose();
   }
@@ -61,6 +71,13 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
             controller: _mobileController,
             decoration: InputDecoration(labelText: 'Mobile Number'),
           ),
+          // Add form fields for editing details
+          TextFormField(
+            controller: _addressController,
+            decoration: InputDecoration(labelText: 'Address'),
+          ),
+          // Gender Radio Buttons
+          genderWidget(),
           // Add other form fields as needed
           SizedBox(height: 16),
           ElevatedButton(
@@ -70,6 +87,62 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
             },
             child: Text('Save'),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget genderWidget() {
+    return // Gender Radio Buttons
+        Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text('Gender:'),
+          SizedBox(width: 16.0),
+          Row(
+            children: [
+              Radio(
+                value: Gender.Male,
+                groupValue: _selectedGender,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value as Gender;
+                  });
+                },
+              ),
+              Text('Male'),
+            ],
+          ),
+          Row(
+            children: [
+              Radio(
+                value: Gender.Female,
+                groupValue: _selectedGender,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value as Gender;
+                  });
+                },
+              ),
+              Text('Female'),
+            ],
+          ),
+          Row(
+            children: [
+              Radio(
+                value: Gender.Other,
+                groupValue: _selectedGender,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value as Gender;
+                  });
+                },
+              ),
+              Text('Other'),
+            ],
+          ),
+          // Add more gender options as needed...
         ],
       ),
     );
