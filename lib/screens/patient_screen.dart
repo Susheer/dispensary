@@ -44,62 +44,75 @@ class PatientScreen extends StatelessWidget {
             children: [
               // Section 1: Patient Details
               buildSection(
-                'Patient Details',
-                [
+                title: 'Patient Details',
+                content: [
                   Text('Name: ${patient.name}'),
                   Text('Mobile: ${patient.mobileNumber}'),
                   Text('Gender: ${patient.gender}'),
                   Text('Address: ${patient.address}'),
                   // Add more patient details as needed
                 ],
+                enableEdit: true,
+                onEditPressed: () {
+                  print('Edit patient');
+                },
               ),
               const SizedBox(height: 20),
 
               // Section 2: Guardian Details
               buildSection(
-                'Guardian Details',
-                [
+                title: 'Guardian Details',
+                content: [
                   // Add guardian details UI here (e.g., name, mobile, gender radio, address)
                   const Text('Guardian Name: John Doe'),
                   const Text('Guardian Mobile: +9876543210'),
                   const Text('Guardian Gender: Male'),
                   const Text('Guardian Address: 456 Guardian St'),
                 ],
+                enableEdit: true,
+                onEditPressed: () {
+                  print('Edit Guardian Details');
+                },
               ),
               const SizedBox(height: 20),
 
               // Section 2: Guardian Details
               buildSection(
-                'Last Visit',
-                [
-                  // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                  const Text('Problem Reported: Fever and Body Ache'),
-                  const Text('Dignosis: Viral Fever'),
-                  Separator(),
-                  const Text(
-                    'Medicines',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0, // You can adjust the font size as needed
+                  title: 'Last Visit',
+                  content: [
+                    // Add guardian details UI here (e.g., name, mobile, gender radio, address)
+                    const Text('Problem Reported: Fever and Body Ache'),
+                    const Text('Dignosis: Viral Fever'),
+                    Separator(),
+                    const Text(
+                      'Medicines',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize:
+                            14.0, // You can adjust the font size as needed
+                      ),
                     ),
-                  ),
-                  buildMedicineList("Hello", medicines),
-                ],
-              ),
+                    buildMedicineList("Hello", medicines),
+                  ],
+                  enableEdit: false),
               const SizedBox(height: 20),
 
               // Section 3: Account Details
               buildSection(
-                'Account Details',
-                [
+                title: 'Account Details',
+                content: [
                   AccountScreen(account: account),
                   const Text('Next Follow Up: 02/10/2024'),
                 ],
+                enableEdit: true,
+                onEditPressed: () {
+                  print('Edit Account Details');
+                },
               ),
               // Section 4: Action Buttons
               buildSection(
-                'Action Buttons',
-                [
+                title: 'Action Buttons',
+                content: [
                   buildButton('My Prescription', () {
                     // Add your logic for "My Prescription" button
                   }),
@@ -113,6 +126,7 @@ class PatientScreen extends StatelessWidget {
                     // Add your logic for "Account Details" button
                   }),
                 ],
+                enableEdit: false,
               ),
             ],
           ),
@@ -190,7 +204,47 @@ class PatientScreen extends StatelessWidget {
     );
   }
 
-  Widget buildSection(String title, List<Widget> content) {
+  Widget buildSection({
+    required String title,
+    required List<Widget> content,
+    bool enableEdit = false,
+    VoidCallback? onEditPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (enableEdit)
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: onEditPressed,
+                ),
+            ],
+          ),
+          ...content,
+        ],
+      ),
+    );
+  }
+
+  Widget buildSection2(String title, List<Widget> content) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
