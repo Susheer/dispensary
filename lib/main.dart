@@ -1,4 +1,5 @@
 // main.dart
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
         // Add more providers as needed
       ],
       child: MaterialApp(
-        title: 'Dispensary App',
+        title: AppConfig.appName,
         initialRoute: '/',
         routes: {
           '/': (context) => LandingScreen(),
