@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+import 'package:dispensary/models/patient.dart';
+
+class EditDetailsBottomSheet extends StatefulWidget {
+  final Patient patient;
+  final Guardian guardian;
+  final bool isEditingPatient;
+
+  EditDetailsBottomSheet({
+    required this.patient,
+    required this.guardian,
+    required this.isEditingPatient,
+  });
+
+  @override
+  _EditDetailsBottomSheetState createState() => _EditDetailsBottomSheetState();
+}
+
+class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
+
+  void initState() {
+    super.initState();
+    // Auto-populate form fields with existing data
+    _nameController.text =
+        widget.isEditingPatient ? widget.patient.name : widget.guardian.name;
+    _mobileController.text = widget.isEditingPatient
+        ? widget.patient.mobileNumber
+        : widget.guardian.mobileNumber;
+    // Add similar logic for other form fields
+  }
+
+  @override
+  void dispose() {
+    // Dispose of controllers when the widget is disposed
+    _nameController.dispose();
+    _mobileController.dispose();
+    // Dispose of other controllers...
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          // Add form fields for editing details
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(labelText: 'Name'),
+          ),
+          TextFormField(
+            controller: _mobileController,
+            decoration: InputDecoration(labelText: 'Mobile Number'),
+          ),
+          // Add other form fields as needed
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              // Handle form submission and update details
+              _updateDetails();
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updateDetails() {
+    // Update patient details
+    if (widget.isEditingPatient) {
+      widget.patient.name = _nameController.text;
+      widget.patient.mobileNumber = _mobileController.text;
+      // Update other patient details...
+    }
+    // Update guardian details
+    else {
+      widget.guardian.name = _nameController.text;
+      widget.guardian.mobileNumber = _mobileController.text;
+      // Update other guardian details...
+    }
+
+    // Call a method to save the updated details to the database
+    saveUpdatedDetails();
+
+    // Close the bottom sheet
+    Navigator.of(context).pop();
+  }
+
+  void saveUpdatedDetails() {
+    print('saveUpdatedDetails invoked');
+    // Implement logic to save updated details to the database
+  }
+}
