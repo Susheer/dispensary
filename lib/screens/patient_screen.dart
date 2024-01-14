@@ -15,7 +15,7 @@ class PatientScreen extends StatefulWidget {
   List<Medicine> medicines = [];
 
   PatientScreen({required this.patientId}) {
-    //medicines = generateDummyMedicines();
+    medicines = generateDummyMedicines();
   }
   @override
   State<PatientScreen> createState() => _PatientScreenState();
