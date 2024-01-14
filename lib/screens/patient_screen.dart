@@ -1,4 +1,5 @@
 import 'package:dispensary/common/account_screen.dart';
+import 'package:dispensary/common/edit_details_bottom_sheet.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/account_model.dart';
@@ -10,6 +11,12 @@ class PatientScreen extends StatelessWidget {
   final int patientId;
   Account account =
       Account(pendingBalance: 2, totalPaid: 11, totalSinceJoining: 22);
+  Guardian guradian = Guardian(
+      name: 'Sudheer',
+      mobileNumber: '+1893 39993',
+      gender: 'Male',
+      address: 'Address',
+      relation: GuardianRelation.Spouse);
   List<Medicine> medicines = [];
   PatientScreen({required this.patientId}) {
     // One-time setup logic can go here
@@ -55,6 +62,14 @@ class PatientScreen extends StatelessWidget {
                 enableEdit: true,
                 onEditPressed: () {
                   print('Edit patient');
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => EditDetailsBottomSheet(
+                      patient: patient,
+                      guardian: guradian,
+                      isEditingPatient: true,
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 20),
@@ -64,14 +79,22 @@ class PatientScreen extends StatelessWidget {
                 title: 'Guardian Details',
                 content: [
                   // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                  const Text('Guardian Name: John Doe'),
-                  const Text('Guardian Mobile: +9876543210'),
-                  const Text('Guardian Gender: Male'),
-                  const Text('Guardian Address: 456 Guardian St'),
+                  Text('Guardian Name: ${guradian.name}'),
+                  Text('Guardian Mobile: ${guradian.mobileNumber}'),
+                  Text('Guardian Gender: ${guradian.gender}'),
+                  Text('Guardian Address: ${guradian.address}'),
                 ],
                 enableEdit: true,
                 onEditPressed: () {
                   print('Edit Guardian Details');
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => EditDetailsBottomSheet(
+                      patient: patient,
+                      guardian: guradian,
+                      isEditingPatient: false,
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 20),
