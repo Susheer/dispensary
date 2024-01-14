@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/common/patient_details_widget.dart';
 import 'package:dispensary/appConfig.dart';
 
 class AllPatientsScreen extends StatefulWidget {
@@ -92,12 +93,7 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                             }
 
                             Patient patient = patients[index];
-                            return ListTile(
-                              title: Text(patient.name + patient.id.toString()),
-                              subtitle: Text(
-                                'Mobile: ${patient.mobileNumber}, Gender: ${patient.gender}',
-                              ),
-                            );
+                            return PatientDetailsWidget(patient: patient);
                           },
                         ),
                       )
