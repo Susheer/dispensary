@@ -27,3 +27,36 @@ class Patient {
     );
   }
 }
+
+class Guardian {
+  late String name;
+  late String mobileNumber;
+  late String gender;
+  late String address;
+  late GuardianRelation relation; // New property
+
+  Guardian({
+    required this.name,
+    required this.mobileNumber,
+    required this.gender,
+    required this.address,
+    required this.relation,
+  });
+
+  factory Guardian.fromMap(Map<String, dynamic> map) {
+    return Guardian(
+      name: map['name'],
+      mobileNumber: map['mobileNumber'],
+      gender: map['gender'],
+      address: map['address'],
+      relation: GuardianRelation.values[map['relation']],
+    );
+  }
+}
+
+enum GuardianRelation {
+  Parent,
+  Spouse,
+  Sibling,
+  Other,
+}
