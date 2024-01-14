@@ -33,7 +33,9 @@ class _PatientScreenState extends State<PatientScreen> {
         .fetchPatientById(widget.patientId)
         .then((value) {
       if (value != null) {
-        patient = value;
+        setState(() {
+          patient = value;
+        });
       }
     });
   }
