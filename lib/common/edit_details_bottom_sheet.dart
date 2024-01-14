@@ -5,11 +5,12 @@ class EditDetailsBottomSheet extends StatefulWidget {
   final Patient patient;
   final Guardian guardian;
   final bool isEditingPatient;
-
+  void Function(EditFormResponse) onSavePressed;
   EditDetailsBottomSheet({
     required this.patient,
     required this.guardian,
     required this.isEditingPatient,
+    required this.onSavePressed,
   });
 
   @override
@@ -150,27 +151,32 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
 
   void _updateDetails() {
     // Update patient details
+    EditFormResponse res = EditFormResponse();
+    res.address = _addressController.text;
+    res.name = _nameController.text;
+    res.gender = _selectedGender;
+    res.allergies = widget.patient.allergies;
+    res.mobileNumber = _mobileController.text;
     if (widget.isEditingPatient) {
-      widget.patient.name = _nameController.text;
-      widget.patient.mobileNumber = _mobileController.text;
-      // Update other patient details...
+      res.id = widget.patient.id;
+      res.isPatient = true;
+    } else {
+      res.isPatient = false;
+      res.relation = widget.guardian.relation;
     }
-    // Update guardian details
-    else {
-      widget.guardian.name = _nameController.text;
-      widget.guardian.mobileNumber = _mobileController.text;
-      // Update other guardian details...
-    }
-
-    // Call a method to save the updated details to the database
-    saveUpdatedDetails();
-
+    widget.onSavePressed(res);
     // Close the bottom sheet
     Navigator.of(context).pop();
   }
+}
 
-  void saveUpdatedDetails() {
-    print('saveUpdatedDetails invoked');
-    // Implement logic to save updated details to the database
-  }
+class EditFormResponse {
+  late int id;
+  late String name;
+  late Gender gender;
+  late String address;
+  late String mobileNumber;
+  late List<String> allergies;
+  late GuardianRelation? relation;
+  late bool isPatient;
 }

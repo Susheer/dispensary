@@ -7,20 +7,47 @@ import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine.dart';
 import 'package:flutter/material.dart';
 
-class PatientScreen extends StatelessWidget {
+class PatientScreen extends StatefulWidget {
   final int patientId;
+  List<Medicine> medicines = [];
+  PatientScreen({required this.patientId}) {
+    // One-time setup logic can go here
+    medicines = generateDummyMedicines();
+  }
+
+  @override
+  State<PatientScreen> createState() => _PatientScreenState();
+}
+
+class _PatientScreenState extends State<PatientScreen> {
   Account account =
       Account(pendingBalance: 2, totalPaid: 11, totalSinceJoining: 22);
+
   Guardian guradian = Guardian(
       name: 'Sudheer',
       mobileNumber: '+1893 39993',
       gender: Gender.Female,
       address: 'Address',
       relation: GuardianRelation.Spouse);
-  List<Medicine> medicines = [];
-  PatientScreen({required this.patientId}) {
-    // One-time setup logic can go here
-    medicines = generateDummyMedicines();
+
+  void onSave(EditFormResponse response) {
+    print("Handle onSave sheeet");
+    setState(() {
+      if (response.isPatient == true) {
+      } else {
+        guradian = Guardian(
+            name: response.name,
+            mobileNumber: response.mobileNumber,
+            gender: response.gender,
+            address: response.address,
+            relation: response.relation ?? GuardianRelation.Spouse);
+      }
+    });
+  }
+
+  void saveUpdatedDetails() {
+    print('saveUpdatedDetails invoked');
+    // Implement logic to save updated details to the database
   }
 
   @override
@@ -29,7 +56,7 @@ class PatientScreen extends StatelessWidget {
     // Implement a function to fetch patient details by ID in your DatabaseService
 
     // For now, let's assume we have a Patient object
-    Patient patient = fetchPatientById(patientId);
+    Patient patient = fetchPatientById(widget.patientId);
 
     return Scaffold(
       appBar: AppBar(
@@ -68,6 +95,7 @@ class PatientScreen extends StatelessWidget {
                       patient: patient,
                       guardian: guradian,
                       isEditingPatient: true,
+                      onSavePressed: onSave,
                     ),
                   );
                 },
@@ -93,6 +121,7 @@ class PatientScreen extends StatelessWidget {
                       patient: patient,
                       guardian: guradian,
                       isEditingPatient: false,
+                      onSavePressed: onSave,
                     ),
                   );
                 },
@@ -115,7 +144,7 @@ class PatientScreen extends StatelessWidget {
                             14.0, // You can adjust the font size as needed
                       ),
                     ),
-                    buildMedicineList("Hello", medicines),
+                    buildMedicineList("Hello", widget.medicines),
                   ],
                   enableEdit: false),
               const SizedBox(height: 20),
@@ -130,6 +159,9 @@ class PatientScreen extends StatelessWidget {
                 enableEdit: true,
                 onEditPressed: () {
                   print('Edit Account Details');
+                  setState(() {
+                    guradian.name = "testing";
+                  });
                 },
               ),
               // Section 4: Action Buttons
