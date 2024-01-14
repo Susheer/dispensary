@@ -27,28 +27,50 @@ class PatientProvider extends ChangeNotifier {
     required String gender,
     required String address,
     required List<String> allergies,
+    String? guardianName,
+    String? guardianMobileNumber,
+    String? guardianGender,
+    String? guardianAddress,
+    String? relation,
   }) async {
+    Gender? gen;
+    GuardianRelation? rel;
+    if (guardianGender != null && guardianGender.trim() != "") {
+      gen = Patient.parseGender(guardianGender);
+    }
+
+    if (relation != null && relation.trim() != "") {
+      rel = Patient.parseRelation(relation);
+    }
     Patient newPatient = Patient(
-      id: _patients.length +
-          1, // Assuming the id is auto-incremented by the database
-      name: name,
-      mobileNumber: mobileNumber,
-      gender: Patient.parseGender(gender),
-      address: address,
-      allergies: allergies,
-    );
+        id: _patients.length +
+            1, // Assuming the id is auto-incremented by the database
+        name: name,
+        mobileNumber: mobileNumber,
+        gender: Patient.parseGender(gender),
+        address: address,
+        allergies: allergies,
+        guardianName: guardianName,
+        guardianMobileNumber: guardianMobileNumber,
+        guardianGender: gen,
+        guardianAddress: guardianAddress,
+        relation: rel);
 
     _patients.add(newPatient);
     notifyListeners();
 
     // Save to SQLFlite Db using DatabaseService
     await _databaseService.savePatient(
-      name: name,
-      mobileNumber: mobileNumber,
-      gender: gender,
-      address: address,
-      allergies: allergies,
-    );
+        name: name,
+        mobileNumber: mobileNumber,
+        gender: gender,
+        address: address,
+        allergies: allergies,
+        guardianName: guardianName ?? "",
+        guardianMobileNumber: guardianMobileNumber ?? "",
+        guardianGender: guardianGender ?? "",
+        guardianAddress: guardianAddress ?? "",
+        guardianRelation: relation ?? "");
   }
 
   Future<int> getPatientsCount() {
@@ -96,6 +118,11 @@ class PatientProvider extends ChangeNotifier {
         gender: Random().nextBool() ? 'Male' : 'Female',
         address: 'Address $i',
         allergies: ['a1', 'a2'],
+        guardianName: 'Guardian Name $i',
+        guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
+        guardianGender: Random().nextBool() ? 'Male' : 'Female',
+        guardianAddress: 'Guardian Address $i',
+        guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
       );
       print("Patient $i inserted");
     }
@@ -105,6 +132,10 @@ class PatientProvider extends ChangeNotifier {
     print("deleteAllPatients invoked");
     await _databaseService.deleteAllPatients();
     print("deleteAllPatients All Deleted");
+  }
+
+  Future<Patient?> fetchPatientById(int patientId) async {
+    return _databaseService.fetchPatientById(patientId);
   }
 
   // Simulated method to generate dummy patients for testing

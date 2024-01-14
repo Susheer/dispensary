@@ -3,12 +3,10 @@ import 'package:dispensary/models/patient.dart';
 
 class EditDetailsBottomSheet extends StatefulWidget {
   final Patient patient;
-  final Guardian guardian;
   final bool isEditingPatient;
   void Function(EditFormResponse) onSavePressed;
   EditDetailsBottomSheet({
     required this.patient,
-    required this.guardian,
     required this.isEditingPatient,
     required this.onSavePressed,
   });
@@ -27,17 +25,18 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   void initState() {
     super.initState();
     // Auto-populate form fields with existing data
-    _nameController.text =
-        widget.isEditingPatient ? widget.patient.name : widget.guardian.name;
+    _nameController.text = widget.isEditingPatient
+        ? widget.patient.name
+        : widget.patient.guardianName ?? "";
     _mobileController.text = widget.isEditingPatient
         ? widget.patient.mobileNumber
-        : widget.guardian.mobileNumber;
+        : widget.patient.guardianMobileNumber ?? "";
     _addressController.text = widget.isEditingPatient
         ? widget.patient.address
-        : widget.guardian.address;
+        : widget.patient.guardianAddress ?? "";
     _selectedGender = widget.isEditingPatient
         ? widget.patient.gender
-        : widget.guardian.gender;
+        : widget.patient.guardianGender ?? Gender.Other;
     // Add similar logic for other form fields
   }
 
@@ -162,7 +161,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
       res.isPatient = true;
     } else {
       res.isPatient = false;
-      res.relation = widget.guardian.relation;
+      res.relation = widget.patient.relation;
     }
     widget.onSavePressed(res);
     // Close the bottom sheet

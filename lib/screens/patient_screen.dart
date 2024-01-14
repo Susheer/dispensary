@@ -5,44 +5,41 @@ import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine.dart';
+import 'package:dispensary/providers/patient_provider.dart';
+import 'package:dispensary/screens/not_found_message.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PatientScreen extends StatefulWidget {
   final int patientId;
   List<Medicine> medicines = [];
-  PatientScreen({required this.patientId}) {
-    // One-time setup logic can go here
-    medicines = generateDummyMedicines();
-  }
 
+  PatientScreen({required this.patientId}) {
+    //medicines = generateDummyMedicines();
+  }
   @override
   State<PatientScreen> createState() => _PatientScreenState();
 }
 
 class _PatientScreenState extends State<PatientScreen> {
+  Patient? patient;
   Account account =
       Account(pendingBalance: 2, totalPaid: 11, totalSinceJoining: 22);
 
-  Guardian guradian = Guardian(
-      name: 'Sudheer',
-      mobileNumber: '+1893 39993',
-      gender: Gender.Female,
-      address: 'Address',
-      relation: GuardianRelation.Spouse);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Provider.of<PatientProvider>(context)
+        .fetchPatientById(widget.patientId)
+        .then((value) {
+      if (value != null) {
+        patient = value;
+      }
+    });
+  }
 
   void onSave(EditFormResponse response) {
     print("Handle onSave sheeet");
-    setState(() {
-      if (response.isPatient == true) {
-      } else {
-        guradian = Guardian(
-            name: response.name,
-            mobileNumber: response.mobileNumber,
-            gender: response.gender,
-            address: response.address,
-            relation: response.relation ?? GuardianRelation.Spouse);
-      }
-    });
   }
 
   void saveUpdatedDetails() {
@@ -56,7 +53,6 @@ class _PatientScreenState extends State<PatientScreen> {
     // Implement a function to fetch patient details by ID in your DatabaseService
 
     // For now, let's assume we have a Patient object
-    Patient patient = fetchPatientById(widget.patientId);
 
     return Scaffold(
       appBar: AppBar(
@@ -80,24 +76,25 @@ class _PatientScreenState extends State<PatientScreen> {
               buildSection(
                 title: 'Patient Details',
                 content: [
-                  Text('Name: ${patient.name}'),
-                  Text('Mobile: ${patient.mobileNumber}'),
-                  Text('Gender: ${patient.gender}'),
-                  Text('Address: ${patient.address}'),
+                  Text('Name: ${patient?.name}'),
+                  Text('Mobile: ${patient?.mobileNumber}'),
+                  Text('Gender: ${patient?.gender}'),
+                  Text('Address: ${patient?.address}'),
                   // Add more patient details as needed
                 ],
                 enableEdit: true,
                 onEditPressed: () {
                   print('Edit patient');
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => EditDetailsBottomSheet(
-                      patient: patient,
-                      guardian: guradian,
-                      isEditingPatient: true,
-                      onSavePressed: onSave,
-                    ),
-                  );
+                  if (patient != null) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => EditDetailsBottomSheet(
+                        patient: patient!,
+                        isEditingPatient: true,
+                        onSavePressed: onSave,
+                      ),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 20),
@@ -107,23 +104,24 @@ class _PatientScreenState extends State<PatientScreen> {
                 title: 'Guardian Details',
                 content: [
                   // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                  Text('Guardian Name: ${guradian.name}'),
-                  Text('Guardian Mobile: ${guradian.mobileNumber}'),
-                  Text('Guardian Gender: ${guradian.gender}'),
-                  Text('Guardian Address: ${guradian.address}'),
+                  Text('Guardian Name: ${patient?.guardianName}'),
+                  Text('Guardian Mobile: ${patient?.guardianMobileNumber}'),
+                  Text('Guardian Gender: ${patient?.guardianGender}'),
+                  Text('Guardian Address: ${patient?.guardianAddress}'),
                 ],
                 enableEdit: true,
                 onEditPressed: () {
                   print('Edit Guardian Details');
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => EditDetailsBottomSheet(
-                      patient: patient,
-                      guardian: guradian,
-                      isEditingPatient: false,
-                      onSavePressed: onSave,
-                    ),
-                  );
+                  if (patient != null) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => EditDetailsBottomSheet(
+                        patient: patient!,
+                        isEditingPatient: false,
+                        onSavePressed: onSave,
+                      ),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 20),
@@ -160,7 +158,7 @@ class _PatientScreenState extends State<PatientScreen> {
                 onEditPressed: () {
                   print('Edit Account Details');
                   setState(() {
-                    guradian.name = "testing";
+                    patient?.guardianName = "testing";
                   });
                 },
               ),
@@ -299,48 +297,10 @@ class _PatientScreenState extends State<PatientScreen> {
     );
   }
 
-  Widget buildSection2(String title, List<Widget> content) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      margin: const EdgeInsets.all(5.0),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          ...content,
-        ],
-      ),
-    );
-  }
-
   Widget buildButton(String label, VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
       child: Text(label),
-    );
-  }
-
-  // Replace this with actual database call to fetch patient details by ID
-  Patient fetchPatientById(int patientId) {
-    // Simulating fetching details from the database
-    return Patient(
-      id: patientId,
-      name: 'John Doe',
-      mobileNumber: '+1234567890',
-      gender: Gender.Male,
-      address: '123 Main St',
-      allergies: ['Pollen', 'Dust'],
     );
   }
 }

@@ -29,7 +29,12 @@ class DatabaseService {
             mobileNumber TEXT,
             gender TEXT,
             address TEXT,
-            allergies TEXT
+            allergies TEXT,
+            guardianName TEXT,
+            guardianMobileNumber TEXT,
+            guardianGender TEXT,
+            guardianAddress TEXT,
+            guardianRelation TEXT
           )
         ''');
         // ...
@@ -43,6 +48,11 @@ class DatabaseService {
     required String gender,
     required String address,
     required List<String> allergies,
+    required String guardianName,
+    required String guardianMobileNumber,
+    required String guardianGender,
+    required String guardianAddress,
+    required String guardianRelation,
   }) async {
     await _database.insert('patients', {
       'name': _wrapWithQuotes(name),
@@ -50,6 +60,11 @@ class DatabaseService {
       'gender': _wrapWithQuotes(gender),
       'address': _wrapWithQuotes(address),
       'allergies': _wrapWithQuotes(allergies.join(',')),
+      'guardianName': _wrapWithQuotes(guardianName),
+      'guardianMobileNumber': _wrapWithQuotes(guardianMobileNumber),
+      'guardianGender': _wrapWithQuotes(guardianGender),
+      'guardianAddress': _wrapWithQuotes(guardianAddress),
+      'guardianRelation': _wrapWithQuotes(guardianRelation),
     });
   }
 
@@ -101,6 +116,24 @@ class DatabaseService {
     final int count = Sqflite.firstIntValue(result) ?? 0;
 
     return count;
+  }
+
+  Future<Patient?> fetchPatientById(int patientId) async {
+    // Fetch patient details from the database based on patientId
+    List<Map<String, dynamic>> results = await _database.query(
+      'patients',
+      where: 'id = ?',
+      whereArgs: [patientId],
+    );
+
+    // Check if the results list is not empty
+    if (results.isNotEmpty) {
+      // Convert the result to a Patient object
+      return Patient.fromMap(results.first);
+    }
+
+    // If patient not found, return null
+    return null;
   }
 // Add methods for CRUD operations
 }
