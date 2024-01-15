@@ -53,41 +53,45 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16),
-          // Add form fields for editing details
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(labelText: 'Name'),
-          ),
-          TextFormField(
-            controller: _mobileController,
-            decoration: InputDecoration(labelText: 'Mobile Number'),
-          ),
-          // Add form fields for editing details
-          TextFormField(
-            controller: _addressController,
-            decoration: InputDecoration(labelText: 'Address'),
-          ),
-          // Gender Radio Buttons
-          genderWidget(),
-          // Add other form fields as needed
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              // Handle form submission and update details
-              _updateDetails();
-            },
-            child: Text('Save'),
-          ),
-        ],
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            // Add form fields for editing details
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            TextFormField(
+              controller: _mobileController,
+              decoration: InputDecoration(labelText: 'Mobile Number'),
+            ),
+            // Add form fields for editing details
+            TextFormField(
+              controller: _addressController,
+              decoration: InputDecoration(labelText: 'Address'),
+            ),
+            // Gender Radio Buttons
+            genderWidget(),
+            // Add other form fields as needed
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Handle form submission and update details
+                _updateDetails();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }

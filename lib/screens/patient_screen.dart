@@ -57,6 +57,7 @@ class _PatientScreenState extends State<PatientScreen> {
     // For now, let's assume we have a Patient object
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Patient Details'),
         actions: [
@@ -90,10 +91,13 @@ class _PatientScreenState extends State<PatientScreen> {
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => EditDetailsBottomSheet(
-                        patient: patient!,
-                        isEditingPatient: true,
-                        onSavePressed: onSave,
+                      isScrollControlled: true,
+                      builder: (context) => SingleChildScrollView(
+                        child: EditDetailsBottomSheet(
+                          patient: patient!,
+                          isEditingPatient: true,
+                          onSavePressed: onSave,
+                        ),
                       ),
                     );
                   }
@@ -117,10 +121,13 @@ class _PatientScreenState extends State<PatientScreen> {
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => EditDetailsBottomSheet(
-                        patient: patient!,
-                        isEditingPatient: false,
-                        onSavePressed: onSave,
+                      isScrollControlled: true,
+                      builder: (context) => SingleChildScrollView(
+                        child: EditDetailsBottomSheet(
+                          patient: patient!,
+                          isEditingPatient: false,
+                          onSavePressed: onSave,
+                        ),
                       ),
                     );
                   }
