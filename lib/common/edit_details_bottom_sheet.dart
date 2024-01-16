@@ -20,6 +20,8 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _allergiesController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   Gender _selectedGender =
       Gender.Male; // Default value, you can adjust as needed
 
@@ -63,58 +65,80 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            // Add form fields for editing details
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextFormField(
-              controller: _mobileController,
-              decoration: InputDecoration(labelText: 'Mobile Number'),
-            ),
-            // Add form fields for editing details
-            TextFormField(
-              controller: _addressController,
-              decoration: InputDecoration(labelText: 'Address'),
-            ),
-            if (widget.isEditingPatient == true)
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              // Add form fields for editing details
               TextFormField(
-                controller: _allergiesController,
-                decoration: const InputDecoration(labelText: 'Allergies'),
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a valid name.';
+                    }
+                    return null;
+                  }),
+              TextFormField(
+                  controller: _mobileController,
+                  decoration: const InputDecoration(labelText: 'Mobile Number'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a valid mobile number.';
+                    }
+                    return null;
+                  }),
+              // Add form fields for editing details
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter allergies.';
+                    return 'Please enter valid address.';
                   }
-
-                  List<String> allergyList = value.split(',');
-
-                  if (allergyList.any((allergy) => allergy.trim().isEmpty)) {
-                    return 'Invalid format. Please enter valid, comma-separated allergies.';
-                  }
-
                   return null;
                 },
               ),
-            // Gender Radio Buttons
-            genderWidget(),
-            // Add other form fields as needed
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Handle form submission and update details
-                _updateDetails();
-              },
-              child: Text('Save'),
-            ),
-          ],
+              if (widget.isEditingPatient == true)
+                TextFormField(
+                  controller: _allergiesController,
+                  decoration: const InputDecoration(labelText: 'Allergies'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter allergies.';
+                    }
+
+                    List<String> allergyList = value.split(',');
+
+                    if (allergyList.any((allergy) => allergy.trim().isEmpty)) {
+                      return 'Invalid format. Please enter valid, comma-separated allergies.';
+                    }
+
+                    return null;
+                  },
+                ),
+              // Gender Radio Buttons
+              genderWidget(),
+              // Add other form fields as needed
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Handle form submission and update details
+                  if (_formKey.currentState!.validate()) {
+                    _updateDetails();
+                  }
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -126,8 +150,8 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Text('Gender:'),
-          SizedBox(width: 16.0),
+          const Text('Gender:'),
+          const SizedBox(width: 16.0),
           Row(
             children: [
               Radio(
@@ -139,7 +163,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Male'),
+              const Text('Male'),
             ],
           ),
           Row(
@@ -153,7 +177,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Female'),
+              const Text('Female'),
             ],
           ),
           Row(
@@ -167,7 +191,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Other'),
+              const Text('Other'),
             ],
           ),
           // Add more gender options as needed...
