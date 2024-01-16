@@ -4,7 +4,7 @@ import 'package:dispensary/models/patient.dart';
 class EditDetailsBottomSheet extends StatefulWidget {
   final Patient patient;
   final bool isEditingPatient;
-  void Function(EditFormResponse) onSavePressed;
+  void Function(Patient) onSavePressed;
   EditDetailsBottomSheet({
     required this.patient,
     required this.isEditingPatient,
@@ -19,6 +19,9 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _allergiesController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   Gender _selectedGender =
       Gender.Male; // Default value, you can adjust as needed
 
@@ -37,57 +40,106 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
     _selectedGender = widget.isEditingPatient
         ? widget.patient.gender
         : widget.patient.guardianGender ?? Gender.Other;
+    if (widget.isEditingPatient == true) {
+      _allergiesController.text = widget.patient.allergies.join(',');
+    }
+
     // Add similar logic for other form fields
   }
 
   @override
   void dispose() {
+    super.dispose();
     // Dispose of controllers when the widget is disposed
     _nameController.dispose();
     _mobileController.dispose();
     _addressController.dispose();
+    _allergiesController.dispose();
     // Dispose of other controllers...
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Edit ${widget.isEditingPatient ? 'Patient' : 'Guardian'} Details',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              // Add form fields for editing details
+              TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a valid name.';
+                    }
+                    return null;
+                  }),
+              TextFormField(
+                  controller: _mobileController,
+                  decoration: const InputDecoration(labelText: 'Mobile Number'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a valid mobile number.';
+                    }
+                    return null;
+                  }),
+              // Add form fields for editing details
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter valid address.';
+                  }
+                  return null;
+                },
+              ),
+              if (widget.isEditingPatient == true)
+                TextFormField(
+                  controller: _allergiesController,
+                  decoration: const InputDecoration(labelText: 'Allergies'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter allergies.';
+                    }
+
+                    List<String> allergyList = value.split(',');
+
+                    if (allergyList.any((allergy) => allergy.trim().isEmpty)) {
+                      return 'Invalid format. Please enter valid, comma-separated allergies.';
+                    }
+
+                    return null;
+                  },
+                ),
+              // Gender Radio Buttons
+              genderWidget(),
+              // Add other form fields as needed
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Handle form submission and update details
+                  if (_formKey.currentState!.validate()) {
+                    _updateDetails();
+                  }
+                },
+                child: const Text('Save'),
+              ),
+            ],
           ),
-          SizedBox(height: 16),
-          // Add form fields for editing details
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(labelText: 'Name'),
-          ),
-          TextFormField(
-            controller: _mobileController,
-            decoration: InputDecoration(labelText: 'Mobile Number'),
-          ),
-          // Add form fields for editing details
-          TextFormField(
-            controller: _addressController,
-            decoration: InputDecoration(labelText: 'Address'),
-          ),
-          // Gender Radio Buttons
-          genderWidget(),
-          // Add other form fields as needed
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              // Handle form submission and update details
-              _updateDetails();
-            },
-            child: Text('Save'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -98,8 +150,8 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Text('Gender:'),
-          SizedBox(width: 16.0),
+          const Text('Gender:'),
+          const SizedBox(width: 16.0),
           Row(
             children: [
               Radio(
@@ -111,7 +163,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Male'),
+              const Text('Male'),
             ],
           ),
           Row(
@@ -125,7 +177,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Female'),
+              const Text('Female'),
             ],
           ),
           Row(
@@ -139,7 +191,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
                   });
                 },
               ),
-              Text('Other'),
+              const Text('Other'),
             ],
           ),
           // Add more gender options as needed...
@@ -149,21 +201,42 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   }
 
   void _updateDetails() {
+    Patient newP;
+    Map<String, dynamic> obj = Map();
     // Update patient details
-    EditFormResponse res = EditFormResponse();
-    res.address = _addressController.text;
-    res.name = _nameController.text;
-    res.gender = _selectedGender;
-    res.allergies = widget.patient.allergies;
-    res.mobileNumber = _mobileController.text;
+    obj['id'] = widget.patient.id;
     if (widget.isEditingPatient) {
-      res.id = widget.patient.id;
-      res.isPatient = true;
+      obj['name'] = _nameController.text;
+      obj['mobileNumber'] = _mobileController.text;
+      obj['address'] = _addressController.text;
+      obj['gender'] = Patient.parseGenderToString(_selectedGender);
+      obj['allergies'] = _allergiesController.text;
+      // keep guardian info as it was.
+      obj['guardianName'] = widget.patient.guardianName ?? "";
+      obj['guardianMobileNumber'] = widget.patient.guardianMobileNumber ?? "";
+      obj['guardianAddress'] = widget.patient.guardianAddress ?? "";
+      obj['guardianRelation'] = Patient.parseRelationToString(
+          widget.patient.relation ?? GuardianRelation.Other);
+      obj['guardianGender'] =
+          Patient.parseGenderToString(widget.patient.gender);
     } else {
-      res.isPatient = false;
-      res.relation = widget.patient.relation;
+      // keep patient info as it was.
+      obj['mobileNumber'] = widget.patient.mobileNumber;
+      obj["name"] = widget.patient.name;
+      obj["gender"] = Patient.parseGenderToString(widget.patient.gender);
+      obj["address"] = widget.patient.address;
+      obj["allergies"] = widget.patient.allergies.join(",");
+
+      // update only guardian specific info
+      obj['guardianName'] = _nameController.text;
+      obj['guardianMobileNumber'] = _mobileController.text;
+      obj['guardianAddress'] = _addressController.text;
+      obj['guardianRelation'] = Patient.parseRelationToString(
+          widget.patient.relation ?? GuardianRelation.Other);
+      obj['guardianGender'] = Patient.parseGenderToString(_selectedGender);
     }
-    widget.onSavePressed(res);
+    newP = Patient.fromMap(obj);
+    widget.onSavePressed(newP);
     // Close the bottom sheet
     Navigator.of(context).pop();
   }

@@ -73,6 +73,19 @@ class Patient {
     }
   }
 
+  static String parseGenderToString(Gender gender) {
+    switch (gender) {
+      case Gender.Male:
+        return 'male';
+      case Gender.Female:
+        return 'female';
+      case Gender.Other:
+        return 'other';
+      default:
+        return 'other';
+    }
+  }
+
   static GuardianRelation parseRelation(String relation) {
     switch (relation.toLowerCase()) {
       case 'parent':
@@ -85,6 +98,21 @@ class Patient {
         return GuardianRelation.Other;
       default:
         throw ArgumentError('Invalid relation: $relation');
+    }
+  }
+
+  static String parseRelationToString(GuardianRelation relation) {
+    switch (relation) {
+      case GuardianRelation.Parent:
+        return 'parent';
+      case GuardianRelation.Spouse:
+        return 'spouse';
+      case GuardianRelation.Sibling:
+        return 'sibling';
+      case GuardianRelation.Other:
+        return 'other';
+      default:
+        return 'other';
     }
   }
 }

@@ -68,6 +68,13 @@ class DatabaseService {
     });
   }
 
+  Future<int> updatePatientByPatientId(
+      {required int id, required Map<String, String> obj}) async {
+    int rowEffected = await _database
+        .update('patients', obj, where: "id = ?", whereArgs: [id]);
+    return rowEffected;
+  }
+
   // Wrap a string value with single quotes
   String _wrapWithQuotes(String value) {
     return value;

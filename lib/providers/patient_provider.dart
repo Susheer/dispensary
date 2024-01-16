@@ -117,7 +117,7 @@ class PatientProvider extends ChangeNotifier {
         mobileNumber: '+1${Random().nextInt(1000000000)}',
         gender: Random().nextBool() ? 'Male' : 'Female',
         address: 'Address $i',
-        allergies: ['a1', 'a2'],
+        allergies: 'Peanuts, Pollen, Dust Mites, Shellfish, Latex'.split(','),
         guardianName: 'Guardian Name $i',
         guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
         guardianGender: Random().nextBool() ? 'Male' : 'Female',
@@ -132,6 +132,44 @@ class PatientProvider extends ChangeNotifier {
     print("deleteAllPatients invoked");
     await _databaseService.deleteAllPatients();
     print("deleteAllPatients All Deleted");
+  }
+
+  Future<bool> updateGuardianByPatientId(Patient p) async {
+    Map<String, String> obj = {
+      'guardianName': p.guardianName ?? "",
+      'guardianMobileNumber': p.guardianMobileNumber ?? "",
+      'guardianGender':
+          Patient.parseGenderToString(p.guardianGender ?? Gender.Other),
+      'guardianAddress': p.guardianAddress ?? "",
+      'guardianRelation':
+          Patient.parseRelationToString(p.relation ?? GuardianRelation.Other),
+    };
+
+    int totalRowAffected =
+        await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
+    if (totalRowAffected >= 1) {
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<bool> updatePatientByPatientId(Patient p) async {
+    Map<String, String> obj = {
+      'name': p.name ?? "",
+      'mobileNumber': p.mobileNumber ?? "",
+      'gender': Patient.parseGenderToString(p.gender),
+      'address': p.address ?? "",
+      'allergies': p.allergies.join(',')
+    };
+
+    int totalRowAffected =
+        await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
+    if (totalRowAffected >= 1) {
+      return true;
+    }
+
+    return false;
   }
 
   Future<Patient?> fetchPatientById(int patientId) async {

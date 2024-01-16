@@ -1,4 +1,5 @@
 import 'package:dispensary/common/account_screen.dart';
+import 'package:dispensary/common/badge.dart';
 import 'package:dispensary/common/edit_details_bottom_sheet.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/seperator.dart';
@@ -40,8 +41,40 @@ class _PatientScreenState extends State<PatientScreen> {
     });
   }
 
-  void onSave(EditFormResponse response) {
+  void onPatientUpdate(Patient response) async {
+    if (patient != null) {
+      bool isUpdated =
+          await Provider.of<PatientProvider>(context, listen: false)
+              .updatePatientByPatientId(response);
+      if (isUpdated == true) {
+        updateScreen(response.id);
+      }
+    }
+
     print("Handle onSave sheeet");
+  }
+
+  void updateScreen(int patientId) {
+    Provider.of<PatientProvider>(context, listen: false)
+        .fetchPatientById(patientId)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          patient = value;
+        });
+      }
+    });
+  }
+
+  void onGuardianUpdate(Patient response) async {
+    if (patient != null) {
+      bool isUpdated =
+          await Provider.of<PatientProvider>(context, listen: false)
+              .updateGuardianByPatientId(response);
+      if (isUpdated == true) {
+        updateScreen(response.id);
+      }
+    }
   }
 
   void saveUpdatedDetails() {
@@ -57,6 +90,7 @@ class _PatientScreenState extends State<PatientScreen> {
     // For now, let's assume we have a Patient object
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Patient Details'),
         actions: [
@@ -82,6 +116,17 @@ class _PatientScreenState extends State<PatientScreen> {
                   Text('Mobile: ${patient?.mobileNumber}'),
                   Text('Gender: ${patient?.gender}'),
                   Text('Address: ${patient?.address}'),
+                  Separator(),
+                  const Text(
+                    'Allergies',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0, // You can adjust the font size as needed
+                    ),
+                  ),
+                  BadgeContainer(
+                    badges: patient?.allergies ?? [],
+                  )
                   // Add more patient details as needed
                 ],
                 enableEdit: true,
@@ -90,10 +135,13 @@ class _PatientScreenState extends State<PatientScreen> {
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => EditDetailsBottomSheet(
-                        patient: patient!,
-                        isEditingPatient: true,
-                        onSavePressed: onSave,
+                      isScrollControlled: true,
+                      builder: (context) => SingleChildScrollView(
+                        child: EditDetailsBottomSheet(
+                          patient: patient!,
+                          isEditingPatient: true,
+                          onSavePressed: onPatientUpdate,
+                        ),
                       ),
                     );
                   }
@@ -117,10 +165,13 @@ class _PatientScreenState extends State<PatientScreen> {
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => EditDetailsBottomSheet(
-                        patient: patient!,
-                        isEditingPatient: false,
-                        onSavePressed: onSave,
+                      isScrollControlled: true,
+                      builder: (context) => SingleChildScrollView(
+                        child: EditDetailsBottomSheet(
+                          patient: patient!,
+                          isEditingPatient: false,
+                          onSavePressed: onGuardianUpdate,
+                        ),
                       ),
                     );
                   }
