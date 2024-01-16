@@ -39,7 +39,11 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConfig.appName,
         theme: ThemeData(
-            colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+          colorSchemeSeed: const Color(0xff6750a4),
+          useMaterial3: true,
+          snackBarTheme:
+              const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
+        ),
         initialRoute: '/',
         routes: {
           '/': (context) => LandingScreen(),

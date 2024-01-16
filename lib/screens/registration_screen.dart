@@ -1,6 +1,8 @@
 // registration_screen.dart
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/providers/patient_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
   @override
@@ -322,16 +324,47 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState?.save();
-
-      // Do something with the collected data, e.g., save it to the database
-
-      // Navigate to the review page or perform other actions as needed
+      await Provider.of<PatientProvider>(context, listen: false)
+          .registerPatient(
+              name: name,
+              mobileNumber: mobileNumber,
+              gender: Patient.parseGenderToString(gender),
+              address: address,
+              allergies: allergies,
+              guardianName: guardianName,
+              guardianMobileNumber: guardianMobileNumber,
+              guardianAddress: guardianAddress,
+              guardianGender: Patient.parseGenderToString(guardianGender),
+              relation: Patient.parseRelationToString(relation));
       _navigateToReview();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User registered successfully'),
+        ),
+      );
+      setState(() {
+        name = "";
+        mobileNumber = "";
+        gender = Gender.Other;
+        address = "";
+        allergies = [];
+        guardianName = "";
+        guardianMobileNumber = "";
+        guardianAddress = "";
+        guardianGender = Gender.Other;
+        relation = GuardianRelation.Other;
+      });
+      await Future.delayed(Duration(seconds: 1));
+      Navigator.pop(context);
     } else {
-      print('_submittedForm else');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Fill all the details.'),
+        ),
+      );
     }
   }
 
