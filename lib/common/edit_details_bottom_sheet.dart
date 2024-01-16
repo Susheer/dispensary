@@ -4,7 +4,7 @@ import 'package:dispensary/models/patient.dart';
 class EditDetailsBottomSheet extends StatefulWidget {
   final Patient patient;
   final bool isEditingPatient;
-  void Function(EditFormResponse) onSavePressed;
+  void Function(Patient) onSavePressed;
   EditDetailsBottomSheet({
     required this.patient,
     required this.isEditingPatient,
@@ -153,21 +153,42 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   }
 
   void _updateDetails() {
+    Patient newP;
+    Map<String, dynamic> obj = Map();
     // Update patient details
-    EditFormResponse res = EditFormResponse();
-    res.address = _addressController.text;
-    res.name = _nameController.text;
-    res.gender = _selectedGender;
-    res.allergies = widget.patient.allergies;
-    res.mobileNumber = _mobileController.text;
+    obj['id'] = widget.patient.id;
     if (widget.isEditingPatient) {
-      res.id = widget.patient.id;
-      res.isPatient = true;
+      obj['name'] = _nameController.text;
+      obj['mobileNumber'] = _mobileController.text;
+      obj['address'] = _addressController.text;
+      obj['gender'] = Patient.parseGenderToString(_selectedGender);
+      obj['allergies'] = "v1,v2,v3";
+      // keep guardian info as it was.
+      obj['guardianName'] = widget.patient.guardianName ?? "";
+      obj['guardianMobileNumber'] = widget.patient.guardianMobileNumber ?? "";
+      obj['guardianAddress'] = widget.patient.guardianAddress ?? "";
+      obj['guardianRelation'] = Patient.parseRelationToString(
+          widget.patient.relation ?? GuardianRelation.Other);
+      obj['guardianGender'] =
+          Patient.parseGenderToString(widget.patient.gender);
     } else {
-      res.isPatient = false;
-      res.relation = widget.patient.relation;
+      // keep patient info as it was.
+      obj['mobileNumber'] = widget.patient.mobileNumber;
+      obj["name"] = widget.patient.name;
+      obj["gender"] = Patient.parseGenderToString(widget.patient.gender);
+      obj["address"] = widget.patient.address;
+      obj["allergies"] = widget.patient.allergies.join(",");
+
+      // update only guardian specific info
+      obj['guardianName'] = _nameController.text;
+      obj['guardianMobileNumber'] = _mobileController.text;
+      obj['guardianAddress'] = _addressController.text;
+      obj['guardianRelation'] = Patient.parseRelationToString(
+          widget.patient.relation ?? GuardianRelation.Other);
+      obj['guardianGender'] = Patient.parseGenderToString(_selectedGender);
     }
-    widget.onSavePressed(res);
+    newP = Patient.fromMap(obj);
+    widget.onSavePressed(newP);
     // Close the bottom sheet
     Navigator.of(context).pop();
   }

@@ -40,8 +40,40 @@ class _PatientScreenState extends State<PatientScreen> {
     });
   }
 
-  void onSave(EditFormResponse response) {
+  void onPatientUpdate(Patient response) async {
+    if (patient != null) {
+      bool isUpdated =
+          await Provider.of<PatientProvider>(context, listen: false)
+              .updatePatientByPatientId(response);
+      if (isUpdated == true) {
+        updateScreen(response.id);
+      }
+    }
+
     print("Handle onSave sheeet");
+  }
+
+  void updateScreen(int patientId) {
+    Provider.of<PatientProvider>(context, listen: false)
+        .fetchPatientById(patientId)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          patient = value;
+        });
+      }
+    });
+  }
+
+  void onGuardianUpdate(Patient response) async {
+    if (patient != null) {
+      bool isUpdated =
+          await Provider.of<PatientProvider>(context, listen: false)
+              .updateGuardianByPatientId(response);
+      if (isUpdated == true) {
+        updateScreen(response.id);
+      }
+    }
   }
 
   void saveUpdatedDetails() {
@@ -96,7 +128,7 @@ class _PatientScreenState extends State<PatientScreen> {
                         child: EditDetailsBottomSheet(
                           patient: patient!,
                           isEditingPatient: true,
-                          onSavePressed: onSave,
+                          onSavePressed: onPatientUpdate,
                         ),
                       ),
                     );
@@ -126,7 +158,7 @@ class _PatientScreenState extends State<PatientScreen> {
                         child: EditDetailsBottomSheet(
                           patient: patient!,
                           isEditingPatient: false,
-                          onSavePressed: onSave,
+                          onSavePressed: onGuardianUpdate,
                         ),
                       ),
                     );
