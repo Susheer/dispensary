@@ -114,14 +114,16 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.person_add),
+                      tooltip: 'Add Bulk Patient',
                       onPressed: () {
                         Provider.of<PatientProvider>(context, listen: false)
                             .registerDummyPatient();
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.search),
+                      icon: const Icon(Icons.delete),
+                      tooltip: "Claer table",
                       onPressed: () {
                         Provider.of<PatientProvider>(context, listen: false)
                             .deleteAllPatients();

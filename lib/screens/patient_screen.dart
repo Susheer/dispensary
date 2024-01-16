@@ -7,7 +7,6 @@ import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine.dart';
 import 'package:dispensary/providers/patient_provider.dart';
-import 'package:dispensary/screens/not_found_message.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,8 +49,6 @@ class _PatientScreenState extends State<PatientScreen> {
         updateScreen(response.id);
       }
     }
-
-    print("Handle onSave sheeet");
   }
 
   void updateScreen(int patientId) {
@@ -60,6 +57,8 @@ class _PatientScreenState extends State<PatientScreen> {
         .then((value) {
       if (value != null) {
         setState(() {
+          Provider.of<PatientProvider>(context, listen: false)
+              .updatePatientInList(value);
           patient = value;
         });
       }
