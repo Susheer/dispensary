@@ -19,6 +19,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _allergiesController = TextEditingController();
   Gender _selectedGender =
       Gender.Male; // Default value, you can adjust as needed
 
@@ -37,17 +38,22 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
     _selectedGender = widget.isEditingPatient
         ? widget.patient.gender
         : widget.patient.guardianGender ?? Gender.Other;
+    if (widget.isEditingPatient == true) {
+      _allergiesController.text = widget.patient.allergies.join(',');
+    }
+
     // Add similar logic for other form fields
   }
 
   @override
   void dispose() {
+    super.dispose();
     // Dispose of controllers when the widget is disposed
     _nameController.dispose();
     _mobileController.dispose();
     _addressController.dispose();
+    _allergiesController.dispose();
     // Dispose of other controllers...
-    super.dispose();
   }
 
   @override
@@ -79,6 +85,24 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
               controller: _addressController,
               decoration: InputDecoration(labelText: 'Address'),
             ),
+            if (widget.isEditingPatient == true)
+              TextFormField(
+                controller: _allergiesController,
+                decoration: const InputDecoration(labelText: 'Allergies'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter allergies.';
+                  }
+
+                  List<String> allergyList = value.split(',');
+
+                  if (allergyList.any((allergy) => allergy.trim().isEmpty)) {
+                    return 'Invalid format. Please enter valid, comma-separated allergies.';
+                  }
+
+                  return null;
+                },
+              ),
             // Gender Radio Buttons
             genderWidget(),
             // Add other form fields as needed
@@ -162,7 +186,7 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
       obj['mobileNumber'] = _mobileController.text;
       obj['address'] = _addressController.text;
       obj['gender'] = Patient.parseGenderToString(_selectedGender);
-      obj['allergies'] = "v1,v2,v3";
+      obj['allergies'] = _allergiesController.text;
       // keep guardian info as it was.
       obj['guardianName'] = widget.patient.guardianName ?? "";
       obj['guardianMobileNumber'] = widget.patient.guardianMobileNumber ?? "";
