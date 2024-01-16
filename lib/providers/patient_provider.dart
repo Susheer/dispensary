@@ -1,4 +1,5 @@
 // patient_provider.dart
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:dispensary/appConfig.dart';
 class PatientProvider extends ChangeNotifier {
   List<Patient> _patients = [];
   List<Patient> _searchResults = [];
+  int _patientsCount = 0;
 
   final DatabaseService _databaseService;
 
@@ -16,6 +18,7 @@ class PatientProvider extends ChangeNotifier {
 
   Future<void> initializePatients() async {
     // Load patients from the database (example)
+    _patientsCount = await _databaseService.getPatientsCount();
     _patients =
         await _databaseService.fetchPaginatedPatients(0, AppConfig.PageSize);
     notifyListeners();
@@ -92,25 +95,19 @@ class PatientProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Simulated method to fetch the next page of patients
-  Future<int> fetchNextPage(int startIndex, int pageSize) async {
-    // Simulate fetching data from a data source (e.g., a database)
-    // Replace this with your actual data fetching logic
-    await Future.delayed(Duration(seconds: 2));
-
+  Future<void> fetchNextPage(int startIndex, int pageSize) async {
+    await Future.delayed(const Duration(seconds: 2));
     List<Patient> nextPage =
         await _databaseService.fetchPaginatedPatients(startIndex, pageSize);
-    //_generateDummyPatients(pageSize);
     if (nextPage.isEmpty != true) {
       _patients.addAll(nextPage);
+      notifyListeners();
     }
-    notifyListeners();
-    return Future.value(2);
   }
 
   Future<void> registerDummyPatient() async {
     print("registerDummyPatient invoked");
-    const int numberOfPatients = 5;
+    const int numberOfPatients = 50;
     for (int i = 1; i <= numberOfPatients; i++) {
       await _databaseService.savePatient(
         name: 'Patient $i',
@@ -177,6 +174,13 @@ class PatientProvider extends ChangeNotifier {
     return _databaseService.fetchPatientById(patientId);
   }
 
+  void deleteMe(int patientId) async {
+    await _databaseService.deletePatientById(patientId);
+    _patients = _patients.where((el) => el.id != patientId).toList();
+    _patientsCount = await _databaseService.getPatientsCount();
+    notifyListeners();
+  }
+
   void updatePatientInList(Patient p) async {
     int index = _patients.indexWhere((patient) => patient.id == p.id);
     if (index != -1) {
@@ -209,7 +213,14 @@ class PatientProvider extends ChangeNotifier {
   }
 
   List<Patient> get patients => _patients;
+  void refreshList() {
+    List<Patient> tempList = [];
+    tempList.addAll(_patients);
+    _patients = tempList;
+    notifyListeners();
+  }
 
+  int get patientsCount => _patientsCount;
   List<Patient> get searchResults => _searchResults;
   // Add more functions as needed, e.g., searchPatients, editPatient, etc.
 }

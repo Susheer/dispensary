@@ -76,6 +76,10 @@ class _PatientScreenState extends State<PatientScreen> {
     }
   }
 
+  void deleteMe(int id) {
+    Provider.of<PatientProvider>(context, listen: false).deleteMe(id);
+  }
+
   void saveUpdatedDetails() {
     print('saveUpdatedDetails invoked');
     // Implement logic to save updated details to the database
@@ -91,12 +95,14 @@ class _PatientScreenState extends State<PatientScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Patient Details'),
+        title: const Text('Patient Details'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit), // Example action icon
+            tooltip: "Delete forever",
+            icon: const Icon(Icons.delete_forever), // Example action icon
             onPressed: () {
-              // Add your logic for the edit action here
+              deleteMe(widget.patientId);
+              Navigator.pop(context);
             },
           ),
         ],
