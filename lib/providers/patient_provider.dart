@@ -131,6 +131,8 @@ class PatientProvider extends ChangeNotifier {
   Future<void> deleteAllPatients() async {
     print("deleteAllPatients invoked");
     await _databaseService.deleteAllPatients();
+    _patients.clear();
+    notifyListeners();
     print("deleteAllPatients All Deleted");
   }
 
@@ -150,7 +152,6 @@ class PatientProvider extends ChangeNotifier {
     if (totalRowAffected >= 1) {
       return true;
     }
-
     return false;
   }
 
@@ -168,12 +169,19 @@ class PatientProvider extends ChangeNotifier {
     if (totalRowAffected >= 1) {
       return true;
     }
-
     return false;
   }
 
   Future<Patient?> fetchPatientById(int patientId) async {
     return _databaseService.fetchPatientById(patientId);
+  }
+
+  void updatePatientInList(Patient p) async {
+    int index = _patients.indexWhere((patient) => patient.id == p.id);
+    if (index != -1) {
+      _patients[index] = p;
+      notifyListeners();
+    }
   }
 
   // Simulated method to generate dummy patients for testing
