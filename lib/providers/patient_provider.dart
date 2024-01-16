@@ -117,7 +117,7 @@ class PatientProvider extends ChangeNotifier {
         mobileNumber: '+1${Random().nextInt(1000000000)}',
         gender: Random().nextBool() ? 'Male' : 'Female',
         address: 'Address $i',
-        allergies: ['a1', 'a2'],
+        allergies: 'Peanuts, Pollen, Dust Mites, Shellfish, Latex'.split(','),
         guardianName: 'Guardian Name $i',
         guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
         guardianGender: Random().nextBool() ? 'Male' : 'Female',

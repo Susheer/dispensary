@@ -8,16 +8,16 @@ class Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.yellow,
-        borderRadius: BorderRadius.circular(12.0),
+        color: Color.fromARGB(115, 255, 235, 59),
+        borderRadius:
+            BorderRadius.circular(12.0), // Adjust the radius as needed
       ),
       child: Text(
         badge,
         style: TextStyle(
           color: Colors.black,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
