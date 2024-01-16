@@ -125,6 +125,15 @@ class DatabaseService {
     return count;
   }
 
+  Future<bool> deletePatientById(int patientId) async {
+    await _database.delete(
+      'patients',
+      where: 'id = ?',
+      whereArgs: [patientId],
+    );
+    return true;
+  }
+
   Future<Patient?> fetchPatientById(int patientId) async {
     // Fetch patient details from the database based on patientId
     List<Map<String, dynamic>> results = await _database.query(

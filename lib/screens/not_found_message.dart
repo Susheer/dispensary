@@ -7,19 +7,21 @@ class NotFoundMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height * 0.7,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.error,
             size: 50.0,
             color: Colors.red,
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16.0,
               fontWeight: FontWeight.bold,
             ),

@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         // Add more providers as needed
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: AppConfig.appName,
         theme: ThemeData(
           colorSchemeSeed: const Color(0xff6750a4),

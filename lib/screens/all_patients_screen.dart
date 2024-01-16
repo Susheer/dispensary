@@ -1,4 +1,5 @@
 // all_patients_screen.dart
+import 'package:dispensary/screens/not_found_message.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
@@ -15,7 +16,6 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
   int pageSize = AppConfig.PageSize;
   int currentPage = 0;
   bool isLoading = false;
-  int patientsCount = 0;
   bool initScreenUponLoad = false;
 
   @override
@@ -24,11 +24,8 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
     if (initScreenUponLoad == false) {
       initScreenUponLoad = true;
       final patientProvider = Provider.of<PatientProvider>(context);
-      patientProvider.getPatientsCount().then((value) {
-        patientsCount = value;
-      });
-      currentPage++;
       patientProvider.initializePatients();
+      currentPage++;
     }
   }
 
@@ -42,18 +39,24 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
           appBar: AppBar(
             title: const Text('Patient List'),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  // Add your logic for the "Add" action here
-                  // For example: navigate to a screen for adding a new patient
-                },
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  '${patients.length}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.search),
+                icon: const Icon(Icons.refresh),
                 onPressed: () {
-                  // Add your logic for the "Search" action here
-                  // For example: navigate to a search screen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AllPatientsScreen()),
+                  );
                 },
               ),
               // Add more IconButton widgets for additional actions as needed
@@ -63,33 +66,25 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
             child: Column(
               children: [
                 // Display the number of records
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Number of Records: ${patients.length}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+
                 // Display the list of patients
                 patients.isNotEmpty
                     ? Expanded(
                         child: ListView.builder(
-                          itemCount: ((patients.length + 1) < patientsCount)
+                          itemCount: ((patients.length + 1) <
+                                  patientProvider.patientsCount)
                               ? patients.length + 1
-                              : patientsCount, // Add 1 for loading indicator
+                              : patientProvider
+                                  .patientsCount, // Add 1 for loading indicator
                           itemBuilder: (context, index) {
                             if (index == patients.length) {
                               // Reached the end, load more
                               if (isLoading == false) {
                                 _loadMore();
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
                               }
-
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
                             }
 
                             Patient patient = patients[index];
@@ -97,9 +92,7 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                           },
                         ),
                       )
-                    : const Center(
-                        child: Text('No patients available.'),
-                      ),
+                    : NotFoundMessage(message: "No patients available")
               ],
             ),
           ),
@@ -142,12 +135,10 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
   Future<void> _loadMore() async {
     if (isLoading != true) {
       isLoading = true;
-      Provider.of<PatientProvider>(context, listen: false)
-          .fetchNextPage(currentPage * pageSize, pageSize)
-          .then((_) {
-        currentPage++;
-        isLoading = false;
-      });
+      await Provider.of<PatientProvider>(context, listen: false)
+          .fetchNextPage(currentPage * pageSize, pageSize);
+      currentPage++;
+      isLoading = false;
     }
   }
 }
