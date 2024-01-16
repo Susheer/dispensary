@@ -1,4 +1,5 @@
 import 'package:dispensary/common/account_screen.dart';
+import 'package:dispensary/common/badge.dart';
 import 'package:dispensary/common/edit_details_bottom_sheet.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/seperator.dart';
@@ -115,6 +116,17 @@ class _PatientScreenState extends State<PatientScreen> {
                   Text('Mobile: ${patient?.mobileNumber}'),
                   Text('Gender: ${patient?.gender}'),
                   Text('Address: ${patient?.address}'),
+                  Separator(),
+                  const Text(
+                    'Allergies',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0, // You can adjust the font size as needed
+                    ),
+                  ),
+                  BadgeContainer(
+                    badges: patient?.allergies ?? [],
+                  )
                   // Add more patient details as needed
                 ],
                 enableEdit: true,
