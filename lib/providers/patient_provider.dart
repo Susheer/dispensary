@@ -124,6 +124,7 @@ class PatientProvider extends ChangeNotifier {
         guardianAddress: 'Guardian Address $i',
         guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
       );
+      initializePatients();
       print("Patient $i inserted");
     }
   }
