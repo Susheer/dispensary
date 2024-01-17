@@ -1,9 +1,11 @@
 import 'package:dispensary/common/medication_form.dart';
+import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/models/medicine_model.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class AddPrescriptionScreen extends StatefulWidget {
   Patient patient;
@@ -14,6 +16,7 @@ class AddPrescriptionScreen extends StatefulWidget {
 
 class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   int _currentStep = 0;
+  late AutoCompleteTextField<Medicine> medicineNameTextField;
   TextEditingController detailsController = TextEditingController();
   TextEditingController diagnosisController = TextEditingController();
   TextEditingController problemController = TextEditingController();
@@ -27,7 +30,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Prescription'),
+        title: const Text('Add Prescription'),
       ),
       body: Stepper(
         type: StepperType.vertical,
@@ -52,58 +55,59 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
         },
         steps: [
           Step(
-            title: Text('Prescription Details'),
+            title: const Text('Prescription Details'),
             content: Column(
               children: [
                 TextFormField(
                   controller: detailsController,
-                  decoration: InputDecoration(labelText: 'Details'),
+                  decoration: const InputDecoration(labelText: "Docter's note"),
                 ),
                 TextFormField(
                   controller: diagnosisController,
-                  decoration: InputDecoration(labelText: 'Diagnosis'),
+                  decoration: const InputDecoration(labelText: 'Diagnosis'),
                 ),
                 TextFormField(
                   controller: problemController,
-                  decoration: InputDecoration(labelText: 'Problem'),
+                  decoration: const InputDecoration(labelText: 'Problem'),
                 ),
                 TextFormField(
                   controller: totalAmountController,
-                  decoration: InputDecoration(labelText: 'Total Amount'),
+                  decoration: const InputDecoration(labelText: 'Total Amount'),
                   keyboardType: TextInputType.number,
                 ),
                 TextFormField(
                   controller: remainingAmountController,
-                  decoration: InputDecoration(labelText: 'Remaining Amount'),
+                  decoration:
+                      const InputDecoration(labelText: 'Remaining Amount'),
                   keyboardType: TextInputType.number,
                 ),
                 TextFormField(
                   controller: paidAmountController,
-                  decoration: InputDecoration(labelText: 'Paid Amount'),
+                  decoration: const InputDecoration(labelText: 'Paid Amount'),
                   keyboardType: TextInputType.number,
                 ),
               ],
             ),
           ),
           Step(
-            title: Text('Add Medications'),
+            title: const Text('Add Medications'),
             content: Column(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _showAddMedicationBottomSheet(context);
-                  },
-                  child: Text('Add Medications'),
-                ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 if (prescriptionLines.isNotEmpty)
-                  Text('Prescription Lines:',
+                  const Text('Prescription Lines:',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 for (var line in prescriptionLines)
                   ListTile(
                     title: Text(line.medicine.name),
                     subtitle: Text('${line.doses} | ${line.duration}'),
                   ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showAddMedicationBottomSheet(context);
+                  },
+                  child: const Text('Add Medications'),
+                ),
               ],
             ),
           ),
