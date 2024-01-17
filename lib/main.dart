@@ -1,6 +1,8 @@
 // main.dart
 import 'package:dispensary/appConfig.dart';
+import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
+import 'package:dispensary/screens/new_medicine_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +36,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => PrescriptionProvider(databaseService),
         ),
+        ChangeNotifierProvider(
+          create: (context) => MedicineProvider(databaseService),
+        ),
         // Add more providers as needed
       ],
       child: MaterialApp(
@@ -51,6 +56,7 @@ class MyApp extends StatelessWidget {
           '/registration': (context) => RegistrationScreen(),
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
+          '/addMedicine': (context) => NewMedicineScreen()
         },
       ),
     );

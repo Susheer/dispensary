@@ -66,6 +66,15 @@ class MedicineProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> insertMedicine(Medicine medicine) async {
+    await _databaseService.db.insert(
+      'medicines',
+      medicine.toMapWithoutId(),
+    );
+    _medicines.insert(0, medicine);
+    notifyListeners();
+  }
+
   Future<Medicine?> getMedicineById(int sysMedicineId) async {
     List<Map<String, dynamic>> results = await _databaseService.db.query(
       'medicines',
