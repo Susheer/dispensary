@@ -1,3 +1,4 @@
+import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/services/database_service.dart';
@@ -6,7 +7,6 @@ import 'package:sqflite/sqflite.dart';
 
 class PrescriptionProvider extends ChangeNotifier {
   final DatabaseService _databaseService;
-
   PrescriptionProvider(this._databaseService);
 
   // Prescription CRUD methods

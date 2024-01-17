@@ -1,9 +1,11 @@
 import 'package:dispensary/common/medication_form.dart';
+import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/models/medicine_model.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class AddPrescriptionScreen extends StatefulWidget {
   Patient patient;
@@ -14,6 +16,7 @@ class AddPrescriptionScreen extends StatefulWidget {
 
 class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   int _currentStep = 0;
+  late AutoCompleteTextField<Medicine> medicineNameTextField;
   TextEditingController detailsController = TextEditingController();
   TextEditingController diagnosisController = TextEditingController();
   TextEditingController problemController = TextEditingController();
@@ -57,7 +60,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
               children: [
                 TextFormField(
                   controller: detailsController,
-                  decoration: const InputDecoration(labelText: 'Details'),
+                  decoration: const InputDecoration(labelText: "Docter's note"),
                 ),
                 TextFormField(
                   controller: diagnosisController,
@@ -90,12 +93,6 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
             title: const Text('Add Medications'),
             content: Column(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _showAddMedicationBottomSheet(context);
-                  },
-                  child: const Text('Add Medications'),
-                ),
                 const SizedBox(height: 10),
                 if (prescriptionLines.isNotEmpty)
                   const Text('Prescription Lines:',
@@ -105,6 +102,12 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                     title: Text(line.medicine.name),
                     subtitle: Text('${line.doses} | ${line.duration}'),
                   ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showAddMedicationBottomSheet(context);
+                  },
+                  child: const Text('Add Medications'),
+                ),
               ],
             ),
           ),

@@ -24,6 +24,15 @@ class Medicine {
     };
   }
 
+  Map<String, dynamic> toMapWithoutId() {
+    return {
+      'name': name,
+      'description': description,
+      'created_date': createdDate.toIso8601String(),
+      'updated_date': updatedDate.toIso8601String(),
+    };
+  }
+
   factory Medicine.fromMap(Map<String, dynamic> map) {
     return Medicine(
       sysMedicineId: map['sys_medicine_id'],

@@ -79,6 +79,7 @@ class DatabaseService {
     );
   }
 
+  Database get db => _database;
   Future<void> savePatient({
     required String name,
     required String mobileNumber,
