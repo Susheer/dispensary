@@ -8,12 +8,7 @@ class MedicineProvider extends ChangeNotifier {
   int medicineCountInDb = 0;
   final DatabaseService _databaseService;
 
-  MedicineProvider(this._databaseService) {
-    medicinesCount().then((value) {
-      medicineCountInDb = value;
-    });
-    loadAllMedicines();
-  }
+  MedicineProvider(this._databaseService);
 
   List<Medicine> get medicines => _medicines;
 
@@ -23,6 +18,13 @@ class MedicineProvider extends ChangeNotifier {
         await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
     notifyListeners();
+  }
+
+  void initList() {
+    medicinesCount().then((value) {
+      medicineCountInDb = value;
+      loadAllMedicines();
+    });
   }
 
   void insertsDummyMedicines() async {
@@ -50,7 +52,7 @@ class MedicineProvider extends ChangeNotifier {
   void deleteMedicineById(int sysMedicineId) async {
     await _databaseService.db.delete(
       'medicines',
-      where: 'id = ?',
+      where: 'sys_medicine_id = ?',
       whereArgs: [sysMedicineId],
     );
     notifyListeners();
@@ -102,5 +104,16 @@ class MedicineProvider extends ChangeNotifier {
     final int count = Sqflite.firstIntValue(result) ?? 0;
 
     return count;
+  }
+
+  Future<void> fetchNextPage(int startIndex, int pageSize) async {
+    List<Map<String, dynamic>> result = await _databaseService.db
+        .query('medicines', limit: startIndex, offset: pageSize);
+    List<Medicine> nextPage =
+        result.map((map) => Medicine.fromMap(map)).toList();
+    if (nextPage.isEmpty != true) {
+      _medicines.addAll(nextPage);
+    }
+    notifyListeners();
   }
 }

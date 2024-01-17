@@ -35,9 +35,9 @@ class LandingScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navigate to AllPatientsScreen using named route
-                Navigator.pushNamed(context, '/addMedicine');
+                Navigator.pushNamed(context, '/allMedicine');
               },
-              child: const Text('Add Medicine'),
+              child: const Text('All Medicine'),
             ),
           ],
         ),
