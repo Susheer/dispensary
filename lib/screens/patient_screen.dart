@@ -5,8 +5,9 @@ import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
-import 'package:dispensary/models/medicine.dart';
+import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/providers/patient_provider.dart';
+import 'package:dispensary/screens/add_prescription_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -262,6 +263,15 @@ class _PatientScreenState extends State<PatientScreen> {
                 buildActionButton(
                   icon: Icons.add_box,
                   onPressed: () {
+                    if (patient != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddPrescriptionScreen(patient: patient!),
+                        ),
+                      );
+                    }
                     // Add your logic for the button's onPressed event
                   },
                   tooltip: 'Add a New Prescription',
@@ -367,29 +377,23 @@ class _PatientScreenState extends State<PatientScreen> {
 List<Medicine> generateDummyMedicines() {
   return [
     Medicine(
-      id: 1,
-      name: 'Aspirin',
-      dosage: '500mg',
-      strength: 'Low',
-      description: 'Pain reliever',
-      price: 5.99,
-    ),
+        sysMedicineId: 1,
+        name: 'Aspirin',
+        description: 'Pain reliever',
+        createdDate: DateTime.timestamp(),
+        updatedDate: DateTime.timestamp()),
     Medicine(
-      id: 2,
-      name: 'Amoxicillin',
-      dosage: '250mg',
-      strength: 'Medium',
-      description: 'Antibiotic',
-      price: 10.99,
-    ),
+        sysMedicineId: 2,
+        name: 'Amoxicillin',
+        description: 'Antibiotic',
+        createdDate: DateTime.timestamp(),
+        updatedDate: DateTime.timestamp()),
     Medicine(
-      id: 3,
-      name: 'Ibuprofen',
-      dosage: '200mg',
-      strength: 'High',
-      description: 'Anti-inflammatory',
-      price: 7.49,
-    ),
+        sysMedicineId: 3,
+        name: 'Ibuprofen',
+        description: 'Anti-inflammatory',
+        createdDate: DateTime.timestamp(),
+        updatedDate: DateTime.timestamp()),
     // Add more dummy medicines as needed
   ];
 }

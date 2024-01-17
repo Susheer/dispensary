@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           create: (context) => PatientProvider(databaseService),
         ),
         ChangeNotifierProvider(
-          create: (context) => PrescriptionProvider(),
+          create: (context) => PrescriptionProvider(databaseService),
         ),
         // Add more providers as needed
       ],
