@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dispensary/models/medicine.dart';
+import 'package:dispensary/models/medicine_model.dart';
 
 class MedicineCard extends StatelessWidget {
   final Medicine medicine;
@@ -23,12 +23,8 @@ class MedicineCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8.0),
-            Text('Dosage: ${medicine.dosage}'),
-            Text('Strength: ${medicine.strength}'),
             if (medicine.description != null)
               Text('Description: ${medicine.description}'),
-            if (medicine.price != null)
-              Text('Price: \$${medicine.price!.toStringAsFixed(2)}'),
           ],
         ),
       ),
