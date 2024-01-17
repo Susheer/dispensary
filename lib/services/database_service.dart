@@ -37,6 +37,43 @@ class DatabaseService {
             guardianRelation TEXT
           )
         ''');
+        db.execute('''
+          CREATE TABLE IF NOT EXISTS prescriptions (
+            sys_prescription_id INTEGER PRIMARY KEY,
+            patient_id INTEGER,
+            details TEXT,
+            diagnosis TEXT,
+            problem TEXT,
+            created_date TEXT,
+            updated_date TEXT,
+            total_amount REAL,
+            paid_amount REAL
+            )
+          ''');
+        db.execute('''
+          CREATE TABLE IF NOT EXISTS medicines (
+            sys_medicine_id INTEGER PRIMARY KEY,
+            name TEXT,
+            description TEXT,
+            created_date TEXT,
+            updated_date TEXT
+         )
+         ''');
+
+        db.execute('''
+          CREATE TABLE IF NOT EXISTS prescription_line (
+            sys_prescription_line_id INTEGER PRIMARY KEY,
+            medicine_id INTEGER,  
+            prescription_id INTEGER, 
+            doses TEXT,
+            duration TEXT,
+            notes TEXT,
+            strength TEXT,
+            FOREIGN KEY (medicine_id) REFERENCES medicines(sys_medicine_id),
+            FOREIGN KEY (prescription_id) REFERENCES prescriptions(sys_prescription_id)
+         )
+         ''');
+
         // ...
       },
     );
