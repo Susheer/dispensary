@@ -1,3 +1,4 @@
+import 'package:dispensary/common/medication_form.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
@@ -114,26 +115,29 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   void _showAddMedicationBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return AddMedicationForm((formData) {
-          setState(() {
-            prescriptionLines.add(PrescriptionLine(
-              sysPrescriptionLineId: prescriptionLines.length + 1,
-              medicine: Medicine(
-                sysMedicineId: 0, // Replace with actual medicine ID
-                name: formData['medicineName'],
-                description: '',
-                createdDate: DateTime.now(),
-                updatedDate: DateTime.now(),
-              ),
-              doses: formData['doses'],
-              duration: formData['duration'],
-              notes: formData['notes'],
-              strength: formData['strength'],
-            ));
-          });
-          Navigator.pop(context);
-        });
+        return SingleChildScrollView(
+          child: MedicationForm((formData) {
+            setState(() {
+              prescriptionLines.add(PrescriptionLine(
+                sysPrescriptionLineId: prescriptionLines.length + 1,
+                medicine: Medicine(
+                  sysMedicineId: 0, // Replace with actual medicine ID
+                  name: formData['medicineName'],
+                  description: '',
+                  createdDate: DateTime.now(),
+                  updatedDate: DateTime.now(),
+                ),
+                doses: formData['doses'],
+                duration: formData['duration'],
+                notes: formData['notes'],
+                strength: formData['strength'],
+              ));
+            });
+            Navigator.pop(context);
+          }),
+        );
       },
     );
   }
@@ -142,77 +146,5 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
     // Implement logic to save prescription data
     // Access data using controllers: detailsController.text, diagnosisController.text, etc.
     // Also, use the prescriptionLines list to access medication data
-  }
-}
-
-class AddMedicationForm extends StatefulWidget {
-  final Function(Map<String, dynamic>) onSave;
-
-  AddMedicationForm(this.onSave);
-
-  @override
-  _AddMedicationFormState createState() => _AddMedicationFormState();
-}
-
-class _AddMedicationFormState extends State<AddMedicationForm> {
-  TextEditingController medicineNameController = TextEditingController();
-  TextEditingController dosesController = TextEditingController();
-  TextEditingController durationController = TextEditingController();
-  TextEditingController strengthController = TextEditingController();
-  TextEditingController notesController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Add Medication',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 16),
-          TextFormField(
-            controller: medicineNameController,
-            decoration: InputDecoration(labelText: 'Medicine Name'),
-          ),
-          TextFormField(
-            controller: dosesController,
-            decoration: InputDecoration(labelText: 'Doses'),
-          ),
-          TextFormField(
-            controller: durationController,
-            decoration: InputDecoration(labelText: 'Duration'),
-          ),
-          TextFormField(
-            controller: strengthController,
-            decoration: InputDecoration(labelText: 'Strength'),
-          ),
-          TextFormField(
-            controller: notesController,
-            decoration: InputDecoration(labelText: 'Notes'),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Map<String, dynamic> formData = {
-                'medicineName': medicineNameController.text,
-                'doses': dosesController.text,
-                'duration': durationController.text,
-                'strength': strengthController.text,
-                'notes': notesController.text,
-              };
-              widget.onSave(formData);
-            },
-            child: Text('Save'),
-          ),
-        ],
-      ),
-    );
   }
 }
