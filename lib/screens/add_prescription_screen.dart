@@ -1,6 +1,7 @@
 import 'package:dispensary/common/medication_form.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
+import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
@@ -56,7 +57,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
           type: StepperType.vertical,
           currentStep: _currentStep,
           onStepContinue: () {
-            if (_currentStep < 2) {
+            if (_currentStep < 1) {
               if (_formPrescriptionDetails.currentState!.validate()) {
                 setState(() {
                   _currentStep += 1;
@@ -77,7 +78,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                   updatedDate: DateTime.now(),
                   totalAmount: totalAmount ?? 0.0,
                   paidAmount: paidAmount ?? 0.0);
-              savePrescriptionData(prescription.toMap());
+              savePrescriptionData(prescription);
               Navigator.pop(context);
             }
           },
@@ -202,11 +203,20 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
     );
   }
 
+  Future<List<Medicine>> getMedicinesFromDb() async {
+    List<Medicine> medicines =
+        Provider.of<MedicineProvider>(context, listen: false).medicines;
+    return medicines;
+  }
+
   Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
     await Provider.of<MedicineProvider>(context, listen: false)
         .justLoadAllMedicines();
-    List<Medicine> medicines =
-        await Provider.of<MedicineProvider>(context, listen: false).medicines;
+    List<Medicine> medicines = await getMedicinesFromDb();
+    invokeBottomSheet(medicines);
+  }
+
+  void invokeBottomSheet(List<Medicine> medicines) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -218,8 +228,16 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
     );
   }
 
-  void savePrescriptionData(Map<String, dynamic> prescriptionForm) {
+  void savePrescriptionData(Prescription prescription) async {
     // save data to db;
+    try {
+      Provider.of<PrescriptionProvider>(context, listen: false)
+          .storePrescriptionAndLines(prescription);
+      displayMessage("Prescription added");
+    } on Exception catch (e) {
+      // TODO
+      displayMessage("Failed! please re-start app and try again");
+    }
   }
 
   void addPrescriptionLine(Map<String, dynamic> medicationFormData) {

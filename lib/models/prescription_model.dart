@@ -43,7 +43,6 @@ class Prescription {
 
   Map<String, dynamic> toMapIgnoreSysId() {
     return {
-      'sys_prescription_id': sysPrescriptionId,
       'prescription_lines':
           prescriptionLines.map((line) => line.toMapIgnoreSysId()).toList(),
       'patient_id': patientId,
@@ -72,4 +71,6 @@ class Prescription {
       paidAmount: map['paid_amount'],
     );
   }
+
+  copyWith({required sysPrescriptionId}) {}
 }
