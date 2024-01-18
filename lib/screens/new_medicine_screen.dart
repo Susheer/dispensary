@@ -62,16 +62,23 @@ class _NewMedicineScreenState extends State<NewMedicineScreen> {
                     createdDate: DateTime.now(),
                     updatedDate: DateTime.now(),
                   );
-                  if (_formKey.currentState!.validate()) {}
-                  await Provider.of<MedicineProvider>(context, listen: false)
-                      .insertMedicine(newMedicine);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('New medicine added.'),
-                    ),
-                  );
-                  Future.delayed(Duration(seconds: 2));
-                  Navigator.of(context).pop();
+                  if (_formKey.currentState!.validate()) {
+                    await Provider.of<MedicineProvider>(context, listen: false)
+                        .insertMedicine(newMedicine);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('New medicine added.'),
+                      ),
+                    );
+                    Future.delayed(Duration(seconds: 2));
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Fill all details'),
+                      ),
+                    );
+                  }
                 },
                 child: const Text('Add Medicine'),
               ),

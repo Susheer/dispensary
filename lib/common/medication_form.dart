@@ -37,6 +37,7 @@ class _MedicationFormState extends State<MedicationForm> {
       GlobalKey();
   final GlobalKey<AutoCompleteTextFieldState<String>> dosesTextFieldKey =
       GlobalKey();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -95,6 +96,15 @@ class _MedicationFormState extends State<MedicationForm> {
         );
       },
     );
+
+    // dosesController.text = selectedValue;
+  }
+
+  String? onValidate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Can not left blank';
+    }
+    return null;
   }
 
   @override
@@ -104,57 +114,77 @@ class _MedicationFormState extends State<MedicationForm> {
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Add Medication',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Add Medication',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            medicineNameTextField ?? const SizedBox(height: 16),
-            dosesTextField ?? const SizedBox(height: 16),
-            TextFormField(
-              controller: strengthController,
-              decoration: const InputDecoration(labelText: 'Strength'),
-            ),
-            TextFormField(
-              controller: notesController,
-              decoration:
-                  const InputDecoration(labelText: 'Notes ex. As needed'),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Map<String, dynamic> formData = {
-                      'medicineName': medicineNameTextField?.controller?.text,
-                      'doses': dosesController.text,
-                      'duration': durationController.text,
-                      'strength': strengthController.text,
-                      'notes': notesController.text,
-                    };
-                    widget.onSave(formData);
-                  },
-                  child: const Text('Add Medication'),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 16),
+              medicineNameTextField ?? const SizedBox(height: 16),
+              dosesTextField ?? const SizedBox(height: 16),
+              TextFormField(
+                controller: strengthController,
+                validator: onValidate,
+                decoration:
+                    const InputDecoration(labelText: 'Strength (500mg)'),
+              ),
+              TextFormField(
+                controller: notesController,
+                validator: onValidate,
+                decoration: const InputDecoration(labelText: 'Notes (SoP)'),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Medication added'),
+                          ),
+                        );
+                        Map<String, dynamic> formData = {
+                          'medicineName':
+                              medicineNameTextField?.controller?.text,
+                          'doses': dosesController.text,
+                          'duration': durationController.text,
+                          'strength': strengthController.text,
+                          'notes': notesController.text,
+                        };
+                        widget.onSave(formData);
+                        Navigator.of(context).pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Fill all details'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Add Medication'),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
