@@ -70,6 +70,8 @@ class _NewMedicineScreenState extends State<NewMedicineScreen> {
                       content: Text('New medicine added.'),
                     ),
                   );
+                  Future.delayed(Duration(seconds: 2));
+                  Navigator.of(context).pop();
                 },
                 child: const Text('Add Medicine'),
               ),

@@ -1,4 +1,5 @@
 // all_patients_screen.dart
+import 'package:dispensary/common/edit_medicine_bottom_sheet.dart';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/new_medicine_screen.dart';
@@ -63,7 +64,7 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () {
-                  Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => NewMedicineScreen(),
@@ -104,13 +105,52 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
                             return ListTile(
                               title: Text(medicine.name),
                               subtitle: Text(medicine.description),
-                              trailing: IconButton(
-                                tooltip: "Delete",
-                                icon: const Icon(
-                                    Icons.delete), // Example action icon
-                                onPressed: () {
-                                  deleteMe(medicine.sysMedicineId);
-                                },
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: "Edit",
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () {
+                                      // Show the bottom sheet when the button is clicked
+                                      showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        context: context,
+                                        builder: (context) =>
+                                            EditMedicineBottomSheet(
+                                          initialData: {
+                                            'name': medicine.name,
+                                            'description': medicine.description
+                                          },
+                                          onSave: (updatedData) {
+                                            Medicine updatedMedicine = Medicine(
+                                                sysMedicineId:
+                                                    medicine.sysMedicineId,
+                                                name: updatedData['name'],
+                                                description:
+                                                    updatedData['description'],
+                                                createdDate:
+                                                    medicine.createdDate,
+                                                updatedDate: DateTime.now());
+
+                                            medicineProvider.updateMedicineById(
+                                                updatedMedicine.sysMedicineId,
+                                                updatedMedicine);
+                                            print('Updated Data: $updatedData');
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    tooltip: "Delete",
+                                    icon: const Icon(
+                                        Icons.delete), // Example action icon
+                                    onPressed: () {
+                                      deleteMe(medicine.sysMedicineId);
+                                    },
+                                  ),
+                                ],
                               ),
                               onTap: () {
                                 // Handle the entire ListTile click here if needed

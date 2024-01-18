@@ -5,13 +5,13 @@ import 'package:sqflite/sqflite.dart';
 
 class MedicineProvider extends ChangeNotifier {
   List<Medicine> _medicines = [];
-  int medicineCountInDb = 0;
+  int _medicineCountInDb = 0;
   final DatabaseService _databaseService;
 
   MedicineProvider(this._databaseService);
 
   List<Medicine> get medicines => _medicines;
-
+  int get medicineCountInDb => _medicineCountInDb;
   // Medicines CRUD
   void loadAllMedicines() async {
     final List<Map<String, dynamic>> maps =
@@ -22,7 +22,7 @@ class MedicineProvider extends ChangeNotifier {
 
   void initList() {
     medicinesCount().then((value) {
-      medicineCountInDb = value;
+      _medicineCountInDb = value;
       loadAllMedicines();
     });
   }
@@ -62,7 +62,7 @@ class MedicineProvider extends ChangeNotifier {
     await _databaseService.db.update(
       'medicines',
       medicine.toMapWithoutId(),
-      where: 'id = ?',
+      where: 'sys_medicine_id = ?',
       whereArgs: [sysMedicineId],
     );
     notifyListeners();
