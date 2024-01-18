@@ -31,6 +31,7 @@ class _MedicationFormState extends State<MedicationForm> {
   TextEditingController durationController = TextEditingController();
   TextEditingController strengthController = TextEditingController();
   TextEditingController notesController = TextEditingController();
+  late Medicine medicine;
   String selectedValue = '0-0-0';
   bool listLoaded = false;
   final GlobalKey<AutoCompleteTextFieldState<Medicine>> medicineNameKey =
@@ -58,10 +59,9 @@ class _MedicationFormState extends State<MedicationForm> {
         return a.name.compareTo(b.name);
       },
       itemSubmitted: (item) {
-        print('Itemmmm${item.name}');
         nameController.text = item.name;
+        medicine = item;
         return item.name;
-        // Handle selected item
       },
       itemBuilder: (context, item) {
         return ListTile(
@@ -87,7 +87,6 @@ class _MedicationFormState extends State<MedicationForm> {
       itemSubmitted: (item) {
         dosesController.text = item;
         return item;
-        // Handle selected item
       },
       itemBuilder: (context, item) {
         return ListTile(
@@ -95,8 +94,6 @@ class _MedicationFormState extends State<MedicationForm> {
         );
       },
     );
-
-    // dosesController.text = selectedValue;
   }
 
   String? onValidate(String? value) {
@@ -159,15 +156,26 @@ class _MedicationFormState extends State<MedicationForm> {
                             content: Text('Medication added'),
                           ),
                         );
-                        Map<String, dynamic> formData = {
-                          'medicineName':
-                              medicineNameTextField?.controller?.text,
-                          'doses': dosesController.text,
-                          'duration': durationController.text,
-                          'strength': strengthController.text,
-                          'notes': notesController.text,
-                        };
-                        widget.onSave(formData);
+                        if (medicine != null && medicine.sysMedicineId > 0) {
+                          Map<String, dynamic> formData = {
+                            "sysMedicineId": medicine.sysMedicineId,
+                            "description": medicine.description,
+                            'medicineName':
+                                medicineNameTextField?.controller?.text,
+                            'doses': dosesController.text,
+                            'duration': durationController.text,
+                            'strength': strengthController.text,
+                            'notes': notesController.text,
+                          };
+                          widget.onSave(formData);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Clear medication form and fill again.'),
+                            ),
+                          );
+                        }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
