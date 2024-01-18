@@ -1,11 +1,14 @@
 import 'package:dispensary/common/medication_form.dart';
-import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/providers/medicine_provider.dart';
+import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class AddPrescriptionScreen extends StatefulWidget {
   Patient patient;
@@ -23,8 +26,25 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   TextEditingController totalAmountController = TextEditingController();
   TextEditingController remainingAmountController = TextEditingController();
   TextEditingController paidAmountController = TextEditingController();
-
+  final GlobalKey<FormState> _formPrescriptionDetails = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formMedications = GlobalKey<FormState>();
   List<PrescriptionLine> prescriptionLines = [];
+  double? totalAmount;
+  double? paidAmount;
+  String? onValidate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Can not left blank';
+    }
+    return null;
+  }
+
+  void displayMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,123 +52,216 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
       appBar: AppBar(
         title: const Text('Add Prescription'),
       ),
-      body: Stepper(
-        type: StepperType.vertical,
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_currentStep < 2) {
-            setState(() {
-              _currentStep += 1;
-            });
-          } else {
-            // Save prescription data and navigate away (you can replace this logic)
-            savePrescriptionData();
-            Navigator.pop(context);
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) {
-            setState(() {
-              _currentStep -= 1;
-            });
-          }
-        },
-        steps: [
-          Step(
-            title: const Text('Prescription Details'),
-            content: Column(
-              children: [
-                TextFormField(
-                  controller: detailsController,
-                  decoration: const InputDecoration(labelText: "Docter's note"),
+      body: SingleChildScrollView(
+        child: Stepper(
+          type: StepperType.vertical,
+          currentStep: _currentStep,
+          onStepContinue: () {
+            if (_currentStep < 1) {
+              if (_formPrescriptionDetails.currentState!.validate()) {
+                setState(() {
+                  _currentStep += 1;
+                });
+              } else {
+                displayMessage("Complete medication details");
+              }
+            } else {
+              // Save prescription data and navigate away (you can replace this logic)
+              Prescription prescription = Prescription(
+                  sysPrescriptionId: 1, // temp id
+                  prescriptionLines: prescriptionLines,
+                  patientId: widget.patient.id,
+                  details: detailsController.text,
+                  diagnosis: diagnosisController.text,
+                  problem: problemController.text,
+                  createdDate: DateTime.now(),
+                  updatedDate: DateTime.now(),
+                  totalAmount: totalAmount ?? 0.0,
+                  paidAmount: paidAmount ?? 0.0);
+              savePrescriptionData(prescription);
+              Navigator.pop(context);
+            }
+          },
+          onStepCancel: () {
+            if (_currentStep > 0) {
+              setState(() {
+                _currentStep -= 1;
+              });
+            }
+          },
+          steps: [
+            Step(
+              title: const Text('Prescription Details'),
+              content: Form(
+                key: _formPrescriptionDetails,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: detailsController,
+                      validator: onValidate,
+                      decoration:
+                          const InputDecoration(labelText: "Docter's note"),
+                    ),
+                    TextFormField(
+                      controller: diagnosisController,
+                      validator: onValidate,
+                      decoration: const InputDecoration(labelText: 'Diagnosis'),
+                    ),
+                    TextFormField(
+                      controller: problemController,
+                      validator: onValidate,
+                      decoration: const InputDecoration(labelText: 'Problem'),
+                    ),
+                    TextFormField(
+                      controller: totalAmountController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*$'),
+                        ),
+                      ],
+                      validator: onValidate,
+                      decoration:
+                          const InputDecoration(labelText: 'Total Amount'),
+                      onChanged: (value) {
+                        setState(() {
+                          try {
+                            totalAmount = double.parse(value);
+                          } catch (e) {
+                            totalAmount = null;
+                          }
+                        });
+                      },
+                    ),
+                    TextFormField(
+                      enabled: false,
+                      controller: remainingAmountController,
+                      validator: onValidate,
+                      decoration:
+                          const InputDecoration(labelText: 'Remaining Amount'),
+                      keyboardType: TextInputType.number,
+                    ),
+                    TextFormField(
+                      controller: paidAmountController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*$'),
+                        ),
+                      ],
+                      validator: onValidate,
+                      decoration:
+                          const InputDecoration(labelText: 'Paid Amount'),
+                      onChanged: (value) {
+                        setState(() {
+                          try {
+                            paidAmount = double.parse(value);
+                            double amt =
+                                (totalAmount ?? 0.0) - (paidAmount ?? 0.0);
+                            remainingAmountController.text = amt.toString();
+                          } catch (e) {
+                            paidAmount = null;
+                          }
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                TextFormField(
-                  controller: diagnosisController,
-                  decoration: const InputDecoration(labelText: 'Diagnosis'),
-                ),
-                TextFormField(
-                  controller: problemController,
-                  decoration: const InputDecoration(labelText: 'Problem'),
-                ),
-                TextFormField(
-                  controller: totalAmountController,
-                  decoration: const InputDecoration(labelText: 'Total Amount'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextFormField(
-                  controller: remainingAmountController,
-                  decoration:
-                      const InputDecoration(labelText: 'Remaining Amount'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextFormField(
-                  controller: paidAmountController,
-                  decoration: const InputDecoration(labelText: 'Paid Amount'),
-                  keyboardType: TextInputType.number,
-                ),
-              ],
+              ),
             ),
-          ),
-          Step(
-            title: const Text('Add Medications'),
-            content: Column(
-              children: [
-                const SizedBox(height: 10),
-                if (prescriptionLines.isNotEmpty)
-                  const Text('Prescription Lines:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                for (var line in prescriptionLines)
-                  ListTile(
-                    title: Text(line.medicine.name),
-                    subtitle: Text('${line.doses} | ${line.duration}'),
-                  ),
-                ElevatedButton(
-                  onPressed: () {
-                    _showAddMedicationBottomSheet(context);
-                  },
-                  child: const Text('Add Medications'),
+            Step(
+              title: const Text('Add Medications'),
+              content: Form(
+                key: _formMedications,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    if (prescriptionLines.isNotEmpty)
+                      const Text('Prescription Lines:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    for (var line in prescriptionLines)
+                      ListTile(
+                        title: Text(
+                            '${line.medicine.name}${line.strength == null ? "" : "-" + line.strength} '),
+                        subtitle: Text('${line.doses} | ${line.duration}'),
+                      ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _showAddMedicationBottomSheet(context);
+                      },
+                      child: const Text('Add Medications'),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void _showAddMedicationBottomSheet(BuildContext context) {
+  Future<List<Medicine>> getMedicinesFromDb() async {
+    List<Medicine> medicines =
+        Provider.of<MedicineProvider>(context, listen: false).medicines;
+    return medicines;
+  }
+
+  Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
+    await Provider.of<MedicineProvider>(context, listen: false)
+        .justLoadAllMedicines();
+    List<Medicine> medicines = await getMedicinesFromDb();
+    invokeBottomSheet(medicines);
+  }
+
+  void invokeBottomSheet(List<Medicine> medicines) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return SingleChildScrollView(
-          child: MedicationForm((formData) {
-            setState(() {
-              prescriptionLines.add(PrescriptionLine(
-                sysPrescriptionLineId: prescriptionLines.length + 1,
-                medicine: Medicine(
-                  sysMedicineId: 0, // Replace with actual medicine ID
-                  name: formData['medicineName'],
-                  description: '',
-                  createdDate: DateTime.now(),
-                  updatedDate: DateTime.now(),
-                ),
-                doses: formData['doses'],
-                duration: formData['duration'],
-                notes: formData['notes'],
-                strength: formData['strength'],
-              ));
-            });
-            Navigator.pop(context);
-          }),
+          child: MedicationForm(addPrescriptionLine, medicines),
         );
       },
     );
   }
 
-  void savePrescriptionData() {
-    // Implement logic to save prescription data
-    // Access data using controllers: detailsController.text, diagnosisController.text, etc.
-    // Also, use the prescriptionLines list to access medication data
+  void savePrescriptionData(Prescription prescription) async {
+    // save data to db;
+    try {
+      Provider.of<PrescriptionProvider>(context, listen: false)
+          .storePrescriptionAndLines(prescription);
+      displayMessage("Prescription added");
+    } on Exception catch (e) {
+      // TODO
+      displayMessage("Failed! please re-start app and try again");
+    }
+  }
+
+  void addPrescriptionLine(Map<String, dynamic> medicationFormData) {
+    Medicine medicine = Medicine(
+      sysMedicineId: medicationFormData[
+          'sysMedicineId'], // Replace with actual medicine ID
+      name: medicationFormData['medicineName'],
+      description: medicationFormData['description'],
+      createdDate: DateTime.now(), // remove while saveing to db
+      updatedDate: DateTime.now(), // remove while saveing to db
+    );
+
+    PrescriptionLine aLine = PrescriptionLine(
+      sysPrescriptionLineId: prescriptionLines.length + 1,
+      medicine: medicine,
+      doses: medicationFormData['doses'],
+      duration: medicationFormData['duration'],
+      notes: medicationFormData['notes'],
+      strength: medicationFormData['strength'],
+    );
+    setState(() {
+      prescriptionLines.add(
+          aLine); // add to line list, as one prescription may have severline lines.
+    });
+    Navigator.pop(context);
   }
 }

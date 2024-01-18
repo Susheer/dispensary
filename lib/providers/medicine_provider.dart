@@ -13,7 +13,7 @@ class MedicineProvider extends ChangeNotifier {
   List<Medicine> get medicines => _medicines;
   int get medicineCountInDb => _medicineCountInDb;
   // Medicines CRUD
-  void loadAllMedicines() async {
+  Future<void> loadAllMedicines() async {
     final List<Map<String, dynamic>> maps =
         await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
@@ -27,19 +27,95 @@ class MedicineProvider extends ChangeNotifier {
     });
   }
 
-  void insertsDummyMedicines() async {
-    List<Medicine> dummyMedicines = [];
+  Future<void> justLoadAllMedicines() async {
+    final List<Map<String, dynamic>> maps =
+        await _databaseService.db.query('medicines');
+    _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
+  }
 
-    for (int i = 1; i <= 500; i++) {
-      Medicine medicineObj = Medicine(
-        sysMedicineId: i,
-        name: 'Medicine $i',
-        description: 'Description for Medicine $i',
+  Future<void> clearAllMedicines() async {
+    _medicines.clear();
+    notifyListeners();
+  }
+
+  void insertsDummyMedicines() async {
+    // Creating a list of Medicine objects for 10 commonly used medicines
+    List<Medicine> medicines = [
+      Medicine(
+        sysMedicineId: 1,
+        name: 'Aspirin',
+        description: 'Pain reliever and anti-inflammatory drug',
         createdDate: DateTime.now(),
         updatedDate: DateTime.now(),
-      );
-      await _databaseService.db
-          .insert('medicines', medicineObj.toMapWithoutId());
+      ),
+      Medicine(
+        sysMedicineId: 2,
+        name: 'Ibuprofen',
+        description: 'Nonsteroidal anti-inflammatory drug (NSAID)',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 3,
+        name: 'Acetaminophen',
+        description: 'Pain reliever and fever reducer',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 4,
+        name: 'Amoxicillin',
+        description: 'Antibiotic used to treat bacterial infections',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 5,
+        name: 'Ciprofloxacin',
+        description: 'Antibiotic used to treat various bacterial infections',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 6,
+        name: 'Metformin',
+        description: 'Oral diabetes medicine',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 7,
+        name: 'Lisinopril',
+        description: 'ACE inhibitor used to treat high blood pressure',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 8,
+        name: 'Simvastatin',
+        description: 'Cholesterol-lowering medication',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 9,
+        name: 'Omeprazole',
+        description: 'Proton pump inhibitor used to reduce stomach acid',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+      Medicine(
+        sysMedicineId: 10,
+        name: 'Hydrochlorothiazide',
+        description: 'Diuretic used to treat high blood pressure',
+        createdDate: DateTime.now(),
+        updatedDate: DateTime.now(),
+      ),
+    ];
+
+    print('Insert in db:');
+    for (var medicine in medicines) {
+      await _databaseService.db.insert('medicines', medicine.toMapWithoutId());
     }
     notifyListeners();
   }

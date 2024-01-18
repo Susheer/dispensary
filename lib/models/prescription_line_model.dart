@@ -28,6 +28,16 @@ class PrescriptionLine {
     };
   }
 
+  Map<String, dynamic> toMapIgnoreSysId() {
+    return {
+      'medicine': medicine.toMap(),
+      'doses': doses,
+      'duration': duration,
+      'notes': notes,
+      'strength': strength,
+    };
+  }
+
   factory PrescriptionLine.fromMap(Map<String, dynamic> map) {
     return PrescriptionLine(
       sysPrescriptionLineId: map['sys_prescription_line_id'],
