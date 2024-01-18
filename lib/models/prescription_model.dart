@@ -41,6 +41,22 @@ class Prescription {
     };
   }
 
+  Map<String, dynamic> toMapIgnoreSysId() {
+    return {
+      'sys_prescription_id': sysPrescriptionId,
+      'prescription_lines':
+          prescriptionLines.map((line) => line.toMapIgnoreSysId()).toList(),
+      'patient_id': patientId,
+      'details': details,
+      'diagnosis': diagnosis,
+      'problem': problem,
+      'created_date': createdDate.toIso8601String(),
+      'updated_date': updatedDate.toIso8601String(),
+      'total_amount': totalAmount,
+      'paid_amount': paidAmount,
+    };
+  }
+
   factory Prescription.fromMap(Map<String, dynamic> map) {
     return Prescription(
       sysPrescriptionId: map['sys_prescription_id'],

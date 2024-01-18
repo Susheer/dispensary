@@ -13,7 +13,7 @@ class MedicineProvider extends ChangeNotifier {
   List<Medicine> get medicines => _medicines;
   int get medicineCountInDb => _medicineCountInDb;
   // Medicines CRUD
-  void loadAllMedicines() async {
+  Future<void> loadAllMedicines() async {
     final List<Map<String, dynamic>> maps =
         await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
@@ -25,6 +25,17 @@ class MedicineProvider extends ChangeNotifier {
       _medicineCountInDb = value;
       loadAllMedicines();
     });
+  }
+
+  Future<void> justLoadAllMedicines() async {
+    final List<Map<String, dynamic>> maps =
+        await _databaseService.db.query('medicines');
+    _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
+  }
+
+  Future<void> clearAllMedicines() async {
+    _medicines.clear();
+    notifyListeners();
   }
 
   void insertsDummyMedicines() async {

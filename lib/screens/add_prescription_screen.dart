@@ -1,11 +1,12 @@
 import 'package:dispensary/common/medication_form.dart';
-import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:provider/provider.dart';
 
 class AddPrescriptionScreen extends StatefulWidget {
   Patient patient;
@@ -116,7 +117,11 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
     );
   }
 
-  void _showAddMedicationBottomSheet(BuildContext context) {
+  Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
+    await Provider.of<MedicineProvider>(context, listen: false)
+        .justLoadAllMedicines();
+    List<Medicine> medicines =
+        await Provider.of<MedicineProvider>(context, listen: false).medicines;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -140,7 +145,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
               ));
             });
             Navigator.pop(context);
-          }),
+          }, medicines),
         );
       },
     );

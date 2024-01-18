@@ -1,37 +1,51 @@
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:dispensary/models/medicine_model.dart';
+import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MedicationForm extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
-
-  const MedicationForm(this.onSave);
+  List<Medicine> medicines;
+  List<String> dosesValues = [
+    '0-0-0',
+    '0-0-1',
+    '0-1-0',
+    '0-1-1',
+    '1-0-0',
+    '1-0-1',
+    '1-1-0',
+    '1-1-1',
+  ];
+  MedicationForm(this.onSave, this.medicines);
 
   @override
   _MedicationFormState createState() => _MedicationFormState();
 }
 
 class _MedicationFormState extends State<MedicationForm> {
-  late AutoCompleteTextField<Medicine> medicineNameTextField;
+  late AutoCompleteTextField<Medicine>? medicineNameTextField;
+  late AutoCompleteTextField<String>? dosesTextField;
   TextEditingController nameController = TextEditingController();
   TextEditingController dosesController = TextEditingController();
   TextEditingController durationController = TextEditingController();
   TextEditingController strengthController = TextEditingController();
   TextEditingController notesController = TextEditingController();
-
-  final GlobalKey<AutoCompleteTextFieldState<Medicine>> key = GlobalKey();
-
-  List<Medicine> medicineList =
-      generateDummyMedicines(); // Replace with actual data from the Medicine table
+  String selectedValue = '0-0-0';
+  bool listLoaded = false;
+  final GlobalKey<AutoCompleteTextFieldState<Medicine>> medicineNameKey =
+      GlobalKey();
+  final GlobalKey<AutoCompleteTextFieldState<String>> dosesTextFieldKey =
+      GlobalKey();
 
   @override
   void initState() {
     super.initState();
     medicineNameTextField = AutoCompleteTextField<Medicine>(
-      key: key,
+      key: medicineNameKey,
       clearOnSubmit: false,
       controller: nameController,
-      suggestions: medicineList,
+      suggestions: widget.medicines,
       style: const TextStyle(color: Colors.black, fontSize: 16.0),
       decoration: const InputDecoration(
         labelText: 'Medicine Name',
@@ -54,56 +68,94 @@ class _MedicationFormState extends State<MedicationForm> {
         );
       },
     );
+    dosesTextField = AutoCompleteTextField<String>(
+      key: dosesTextFieldKey,
+      clearOnSubmit: false,
+      controller: dosesController,
+      suggestions: widget.dosesValues,
+      style: const TextStyle(color: Colors.black, fontSize: 16.0),
+      decoration: const InputDecoration(
+        labelText: 'Doses',
+      ),
+      itemFilter: (item, query) {
+        return item.toLowerCase().contains(query.toLowerCase());
+      },
+      itemSorter: (a, b) {
+        return a.compareTo(b);
+      },
+      itemSubmitted: (item) {
+        print('Itemmmm${item}');
+        dosesController.text = item;
+        return item;
+        // Handle selected item
+      },
+      itemBuilder: (context, item) {
+        return ListTile(
+          title: Text(item),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Add Medication',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return Container(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Add Medication',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          medicineNameTextField,
-          TextFormField(
-            controller: dosesController,
-            decoration: const InputDecoration(labelText: 'Doses'),
-          ),
-          TextFormField(
-            controller: durationController,
-            decoration: const InputDecoration(labelText: 'Duration'),
-          ),
-          TextFormField(
-            controller: strengthController,
-            decoration: const InputDecoration(labelText: 'Strength'),
-          ),
-          TextFormField(
-            controller: notesController,
-            decoration: const InputDecoration(labelText: 'Notes'),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Map<String, dynamic> formData = {
-                'medicineName': medicineNameTextField.controller?.text,
-                'doses': dosesController.text,
-                'duration': durationController.text,
-                'strength': strengthController.text,
-                'notes': notesController.text,
-              };
-              widget.onSave(formData);
-            },
-            child: const Text('Save'),
-          ),
-        ],
+            const SizedBox(height: 16),
+            medicineNameTextField ?? const SizedBox(height: 16),
+            dosesTextField ?? const SizedBox(height: 16),
+            TextFormField(
+              controller: strengthController,
+              decoration: const InputDecoration(labelText: 'Strength'),
+            ),
+            TextFormField(
+              controller: notesController,
+              decoration:
+                  const InputDecoration(labelText: 'Notes ex. As needed'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Map<String, dynamic> formData = {
+                      'medicineName': medicineNameTextField?.controller?.text,
+                      'doses': dosesController.text,
+                      'duration': durationController.text,
+                      'strength': strengthController.text,
+                      'notes': notesController.text,
+                    };
+                    widget.onSave(formData);
+                  },
+                  child: const Text('Add Medication'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
