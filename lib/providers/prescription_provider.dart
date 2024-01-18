@@ -1,5 +1,4 @@
 import 'package:dispensary/models/medicine_model.dart';
-import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +48,51 @@ class PrescriptionProvider extends ChangeNotifier {
     });
   }
 
+  Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(
+      int patientId) async {
+    final List<Map<String, dynamic>> prescriptionsData =
+        await _databaseService.db.query(
+      'prescriptions',
+      where: 'patient_id = ?',
+      whereArgs: [patientId],
+    );
+
+    List<Prescription> prescriptions = [];
+    for (final Map<String, dynamic> prescriptionData in prescriptionsData) {
+      //final Prescription prescription = Prescription.fromMap(prescriptionData);
+      int sysPrescriptionId = prescriptionData['sys_prescription_id'];
+      // Fetch PrescriptionLines for each Prescription
+      final List<Map<String, dynamic>> prescriptionLinesData =
+          await _databaseService.db.query('prescription_line',
+              where: 'prescription_id = ?', whereArgs: [sysPrescriptionId]);
+
+      for (Map<String, dynamic> lineData in prescriptionLinesData) {
+        final Medicine? medicine =
+            await getMedicineById(lineData['medicine_id'] as int);
+        if (medicine != null) {
+          lineData['medicine'] = medicine;
+        }
+      }
+      prescriptionData['prescription_lines'] = prescriptionLinesData;
+      Prescription prescription = Prescription.fromMap(prescriptionData);
+      prescriptions.add(prescription);
+    }
+
+    return prescriptions;
+  }
+
+  Future<Medicine?> getMedicineById(int sysMedicineId) async {
+    List<Map<String, dynamic>> results = await _databaseService.db.query(
+      'medicines',
+      where: 'sys_medicine_id = ?',
+      whereArgs: [sysMedicineId],
+    );
+    // Check if the results list is not empty
+    if (results.isNotEmpty) {
+      // Convert the result to a Patient object
+      return Medicine.fromMap(results.first);
+    }
+  }
   // Future<int> insertPrescription(Prescription prescription) async {
 
   //   return await _databaseService.insert('prescriptions', prescription.toMap());
