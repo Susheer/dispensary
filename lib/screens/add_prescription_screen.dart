@@ -100,7 +100,8 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 for (var line in prescriptionLines)
                   ListTile(
-                    title: Text(line.medicine.name),
+                    title: Text(
+                        '${line.medicine.name}${line.strength == null ? "" : "-" + line.strength} '),
                     subtitle: Text('${line.doses} | ${line.duration}'),
                   ),
                 ElevatedButton(

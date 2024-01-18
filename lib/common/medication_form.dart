@@ -85,7 +85,6 @@ class _MedicationFormState extends State<MedicationForm> {
         return a.compareTo(b);
       },
       itemSubmitted: (item) {
-        print('Itemmmm${item}');
         dosesController.text = item;
         return item;
         // Handle selected item
@@ -131,6 +130,12 @@ class _MedicationFormState extends State<MedicationForm> {
               medicineNameTextField ?? const SizedBox(height: 16),
               dosesTextField ?? const SizedBox(height: 16),
               TextFormField(
+                controller: durationController,
+                validator: onValidate,
+                decoration:
+                    const InputDecoration(labelText: 'Duration (3 Days)'),
+              ),
+              TextFormField(
                 controller: strengthController,
                 validator: onValidate,
                 decoration:
@@ -163,7 +168,6 @@ class _MedicationFormState extends State<MedicationForm> {
                           'notes': notesController.text,
                         };
                         widget.onSave(formData);
-                        Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
