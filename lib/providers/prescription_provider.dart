@@ -134,6 +134,8 @@ class PrescriptionProvider extends ChangeNotifier {
     Prescription fakePrescription =
         FakePrescriptionGenerator.generateFakePrescription(patientId);
     await storePrescriptionAndLines(fakePrescription);
+    dbCount++;
+    notifyListeners();
     //getPrescriptionsByPatientIdWithDetails(patientId, offset: 0, pageSize: 25);
   }
 
