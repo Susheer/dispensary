@@ -1,12 +1,12 @@
 import 'medicine_model.dart';
 
 class PrescriptionLine {
-  final int sysPrescriptionLineId;
-  final Medicine medicine;
-  final String doses;
-  final String duration;
-  final String notes;
-  final String strength;
+  int sysPrescriptionLineId;
+  Medicine medicine;
+  String doses;
+  String duration;
+  String notes;
+  String strength;
 
   PrescriptionLine({
     required int sysPrescriptionLineId,
@@ -16,6 +16,55 @@ class PrescriptionLine {
     required this.notes,
     required this.strength,
   }) : sysPrescriptionLineId = sysPrescriptionLineId;
+
+  PrescriptionLine copyWith({
+    int? sysPrescriptionLineId,
+    Medicine? medicine,
+    String? doses,
+    String? duration,
+    String? notes,
+    String? strength,
+  }) {
+    return PrescriptionLine(
+      sysPrescriptionLineId:
+          sysPrescriptionLineId ?? this.sysPrescriptionLineId,
+      medicine: medicine ?? this.medicine,
+      doses: doses ?? this.doses,
+      duration: duration ?? this.duration,
+      notes: notes ?? this.notes,
+      strength: strength ?? this.strength,
+    );
+  }
+
+// Setter for sysPrescriptionLineId
+  set setSysPrescriptionLineId(int newSysPrescriptionLineId) {
+    sysPrescriptionLineId = newSysPrescriptionLineId;
+  }
+
+  // Setter for medicine
+  set setMedicine(Medicine newMedicine) {
+    medicine = newMedicine;
+  }
+
+  // Setter for doses
+  set setDoses(String newDoses) {
+    doses = newDoses;
+  }
+
+  // Setter for duration
+  set setDuration(String newDuration) {
+    duration = newDuration;
+  }
+
+  // Setter for notes
+  set setNotes(String newNotes) {
+    notes = newNotes;
+  }
+
+  // Setter for strength
+  set setStrength(String newStrength) {
+    strength = newStrength;
+  }
 
   Map<String, dynamic> toMap() {
     return {

@@ -49,6 +49,59 @@ class PrescriptionProvider extends ChangeNotifier {
     });
   }
 
+  Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(
+      int patientId) async {
+    final List<Map<String, dynamic>> prescriptionsData =
+        await _databaseService.db.query(
+      'prescriptions',
+      where: 'patient_id = ?',
+      whereArgs: [patientId],
+    );
+
+    List<Prescription> prescriptions = [];
+    for (final Map<String, dynamic> prescriptionData in prescriptionsData) {
+      Prescription prescription = Prescription.fromMap(prescriptionData);
+      int sysPrescriptionId = prescription.sysPrescriptionId;
+      final List<Map<String, dynamic>> prescriptionLinesData =
+          await _databaseService.db.query('prescription_line',
+              where: 'prescription_id = ?', whereArgs: [sysPrescriptionId]);
+      List<int> sysIdOfBadLines = [];
+      for (final Map<String, dynamic> lineData in prescriptionLinesData) {
+        final Medicine? medicine =
+            await getMedicineById(lineData['medicine_id'] as int);
+        if (medicine != null) {
+          PrescriptionLine line = PrescriptionLine(
+              sysPrescriptionLineId: lineData['sys_prescription_line_id'],
+              medicine: medicine!, // won't be null
+              doses: lineData['doses'],
+              duration: lineData['duration'],
+              notes: lineData['notes'],
+              strength: lineData['strength']);
+          prescription.prescriptionLines.add(line);
+        } else {
+          // @todo
+          // medicine is null;
+          // do not consider this line, try remove all such lines from db;
+          sysIdOfBadLines.add(lineData['sys_prescription_line_id']);
+        }
+      }
+      prescriptions.add(prescription);
+    }
+    return prescriptions;
+  }
+
+  Future<Medicine?> getMedicineById(int sysMedicineId) async {
+    List<Map<String, dynamic>> results = await _databaseService.db.query(
+      'medicines',
+      where: 'sys_medicine_id = ?',
+      whereArgs: [sysMedicineId],
+    );
+    // Check if the results list is not empty
+    if (results.isNotEmpty) {
+      // Convert the result to a Patient object
+      return Medicine.fromMap(results.first);
+    }
+  }
   // Future<int> insertPrescription(Prescription prescription) async {
 
   //   return await _databaseService.insert('prescriptions', prescription.toMap());

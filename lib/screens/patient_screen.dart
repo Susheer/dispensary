@@ -6,7 +6,9 @@ import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine_model.dart';
+import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/providers/patient_provider.dart';
+import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:dispensary/screens/add_prescription_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -225,7 +227,9 @@ class _PatientScreenState extends State<PatientScreen> {
               buildSection(
                 title: 'Action Buttons',
                 content: [
-                  buildButton('My Prescription', () {
+                  buildButton('My Prescription', () async {
+                    if (widget.patientId != null)
+                      await getMyPrescriptions(widget.patientId);
                     // Add your logic for "My Prescription" button
                   }),
                   buildButton('Add Prescription', () {
@@ -370,6 +374,13 @@ class _PatientScreenState extends State<PatientScreen> {
       onPressed: onPressed,
       child: Text(label),
     );
+  }
+
+  Future<List<Prescription>> getMyPrescriptions(int pId) async {
+    List<Prescription> pList =
+        await Provider.of<PrescriptionProvider>(context, listen: false)
+            .getPrescriptionsByPatientIdWithDetails(pId);
+    return pList;
   }
 }
 
