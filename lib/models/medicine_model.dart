@@ -1,10 +1,10 @@
 // medicine_model.dart
 class Medicine {
-  final int sysMedicineId;
-  final String name;
-  final String description;
-  final DateTime createdDate;
-  final DateTime updatedDate;
+  int sysMedicineId;
+  String name;
+  String description;
+  DateTime createdDate;
+  DateTime updatedDate;
 
   Medicine({
     required this.sysMedicineId,
@@ -13,6 +13,48 @@ class Medicine {
     required this.createdDate,
     required this.updatedDate,
   });
+
+  // CopyWith method to create a new instance with modified values
+  Medicine copyWith({
+    int? sysMedicineId,
+    String? name,
+    String? description,
+    DateTime? createdDate,
+    DateTime? updatedDate,
+  }) {
+    return Medicine(
+      sysMedicineId: sysMedicineId ?? this.sysMedicineId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdDate: createdDate ?? this.createdDate,
+      updatedDate: updatedDate ?? this.updatedDate,
+    );
+  }
+
+  // Setter for sysMedicineId
+  set setSysMedicineId(int newSysMedicineId) {
+    sysMedicineId = newSysMedicineId;
+  }
+
+  // Setter for name
+  set setName(String newName) {
+    name = newName;
+  }
+
+  // Setter for description
+  set setDescription(String newDescription) {
+    description = newDescription;
+  }
+
+  // Setter for createdDate
+  set setCreatedDate(DateTime newCreatedDate) {
+    createdDate = newCreatedDate;
+  }
+
+  // Setter for updatedDate
+  set setUpdatedDate(DateTime newUpdatedDate) {
+    updatedDate = newUpdatedDate;
+  }
 
   Map<String, dynamic> toMap() {
     return {

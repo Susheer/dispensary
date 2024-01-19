@@ -1,4 +1,5 @@
 import 'package:dispensary/models/medicine_model.dart';
+import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -59,25 +60,33 @@ class PrescriptionProvider extends ChangeNotifier {
 
     List<Prescription> prescriptions = [];
     for (final Map<String, dynamic> prescriptionData in prescriptionsData) {
-      //final Prescription prescription = Prescription.fromMap(prescriptionData);
-      int sysPrescriptionId = prescriptionData['sys_prescription_id'];
-      // Fetch PrescriptionLines for each Prescription
+      Prescription prescription = Prescription.fromMap(prescriptionData);
+      int sysPrescriptionId = prescription.sysPrescriptionId;
       final List<Map<String, dynamic>> prescriptionLinesData =
           await _databaseService.db.query('prescription_line',
               where: 'prescription_id = ?', whereArgs: [sysPrescriptionId]);
-
-      for (Map<String, dynamic> lineData in prescriptionLinesData) {
+      List<int> sysIdOfBadLines = [];
+      for (final Map<String, dynamic> lineData in prescriptionLinesData) {
         final Medicine? medicine =
             await getMedicineById(lineData['medicine_id'] as int);
         if (medicine != null) {
-          lineData['medicine'] = medicine;
+          PrescriptionLine line = PrescriptionLine(
+              sysPrescriptionLineId: lineData['sys_prescription_line_id'],
+              medicine: medicine!, // won't be null
+              doses: lineData['doses'],
+              duration: lineData['duration'],
+              notes: lineData['notes'],
+              strength: lineData['strength']);
+          prescription.prescriptionLines.add(line);
+        } else {
+          // @todo
+          // medicine is null;
+          // do not consider this line, try remove all such lines from db;
+          sysIdOfBadLines.add(lineData['sys_prescription_line_id']);
         }
       }
-      prescriptionData['prescription_lines'] = prescriptionLinesData;
-      Prescription prescription = Prescription.fromMap(prescriptionData);
       prescriptions.add(prescription);
     }
-
     return prescriptions;
   }
 
