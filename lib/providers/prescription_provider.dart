@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
@@ -8,6 +11,12 @@ class PrescriptionProvider extends ChangeNotifier {
   final DatabaseService _databaseService;
   PrescriptionProvider(this._databaseService);
 
+  final _prescriptionsController = StreamController<List<Prescription>>();
+  StreamController get prescriptionController => _prescriptionsController;
+
+  // Create a getter to access the stream
+  Stream<List<Prescription>> get prescriptionsStream =>
+      _prescriptionsController.stream;
   // Prescription CRUD methods
   Future<void> storePrescriptionAndLines(Prescription prescription) async {
     // Start the transaction
@@ -50,7 +59,9 @@ class PrescriptionProvider extends ChangeNotifier {
   }
 
   Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(
-      int patientId) async {
+      int patientId,
+      {int offset = 0,
+      int pageSize = AppConfig.PrescriptionSize}) async {
     final List<Map<String, dynamic>> prescriptionsData =
         await _databaseService.db.query(
       'prescriptions',
@@ -64,7 +75,10 @@ class PrescriptionProvider extends ChangeNotifier {
       int sysPrescriptionId = prescription.sysPrescriptionId;
       final List<Map<String, dynamic>> prescriptionLinesData =
           await _databaseService.db.query('prescription_line',
-              where: 'prescription_id = ?', whereArgs: [sysPrescriptionId]);
+              where: 'prescription_id = ?',
+              whereArgs: [sysPrescriptionId],
+              offset: offset,
+              limit: pageSize);
       List<int> sysIdOfBadLines = [];
       for (final Map<String, dynamic> lineData in prescriptionLinesData) {
         final Medicine? medicine =
@@ -101,6 +115,18 @@ class PrescriptionProvider extends ChangeNotifier {
       // Convert the result to a Patient object
       return Medicine.fromMap(results.first);
     }
+  }
+
+  Future<int> countPrescriptionsByPatientId(int patientId) async {
+    final List<Map<String, dynamic>> result = await _databaseService.db.query(
+      'prescriptions',
+      columns: ['COUNT(*) as count'],
+      where: 'patient_id = ?',
+      whereArgs: [patientId],
+    );
+
+    final count = result.firstWhere((map) => true)['count'] as int?;
+    return count ?? 0;
   }
   // Future<int> insertPrescription(Prescription prescription) async {
 
