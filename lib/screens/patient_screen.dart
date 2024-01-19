@@ -10,6 +10,7 @@ import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/providers/patient_provider.dart';
 import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:dispensary/screens/add_prescription_screen.dart';
+import 'package:dispensary/screens/prescription_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -228,8 +229,18 @@ class _PatientScreenState extends State<PatientScreen> {
                 title: 'Action Buttons',
                 content: [
                   buildButton('My Prescription', () async {
-                    if (widget.patientId != null)
-                      await getMyPrescriptions(widget.patientId);
+                    if (widget.patientId != null) {
+                      if (patient != null && patient?.id != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PrescriptionScreen(patientId: patient!.id),
+                          ),
+                        );
+                      }
+                    }
+                    //await getMyPrescriptions(widget.patientId);
                     // Add your logic for "My Prescription" button
                   }),
                   buildButton('Add Prescription', () {
