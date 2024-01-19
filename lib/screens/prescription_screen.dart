@@ -15,17 +15,14 @@ class PrescriptionScreen extends StatefulWidget {
 
 class _PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
-  int pageSize = AppConfig.PrescriptionSize;
   int currentPage = 0;
   bool isLoadingNextPage = false;
   bool initScreenUponLoad = false;
-  List<Prescription> presscriptionList = [];
-  late Stream<List<Prescription>> stream;
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
+    isLoadingNextPage = false;
     initScreenUponLoad = false;
   }
 
@@ -52,18 +49,20 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Prescriptions'),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Patient Details Section ${_prescriptionProvider.dbCount}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      appBar: AppBar(title: const Text('Prescriptions'), actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            '${_prescriptionProvider.getPrescriptionList.length}/${_prescriptionProvider.dbCount}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+      ]),
+      body: Column(
+        children: [
           Expanded(
             child: Consumer<PrescriptionProvider>(
               builder: (context, prescriptionProvider, child) {
