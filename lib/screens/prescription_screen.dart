@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   final int patientId;
-
   PrescriptionScreen({required this.patientId});
 
   @override
@@ -18,25 +17,36 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
   int pageSize = AppConfig.PrescriptionSize;
   int currentPage = 0;
-  bool isLoading = false;
+  bool isLoadingNextPage = false;
   bool initScreenUponLoad = false;
   List<Prescription> presscriptionList = [];
-  late int prescriptionsCount;
+  late Stream<List<Prescription>> stream;
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    initScreenUponLoad = false;
+  }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
     print("PrescriptionScreenState didChangeDependencies Invoked");
     if (initScreenUponLoad == false) {
-      //initScreenUponLoad = true;
-      _prescriptionProvider =
-          Provider.of<PrescriptionProvider>(context, listen: false);
-      prescriptionsCount = await _prescriptionProvider
+      initScreenUponLoad = true;
+      _prescriptionProvider = Provider.of<PrescriptionProvider>(context);
+      await _prescriptionProvider
           .countPrescriptionsByPatientId(widget.patientId);
-      List<Prescription> list = await _prescriptionProvider
-          .getPrescriptionsByPatientIdWithDetails(widget.patientId);
-      _prescriptionProvider.prescriptionController.add(list);
+      await _prescriptionProvider.initPrescriptionList(widget.patientId);
     }
+  }
+
+  int getItemCount(int snapshotLength, int totalAvailableCount) {
+    if ((snapshotLength + 1) < totalAvailableCount) {
+      return snapshotLength + 1;
+    }
+    return totalAvailableCount; // reached to the end of list
   }
 
   @override
@@ -47,46 +57,72 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
       ),
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Text(
-              'Patient Details Section',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Patient Details Section ${_prescriptionProvider.dbCount}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Prescription>>(
-              stream: _prescriptionProvider.prescriptionsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Prescription> prescriptions = snapshot.data!;
+            child: Consumer<PrescriptionProvider>(
+              builder: (context, prescriptionProvider, child) {
+                List<Prescription> prescriptions =
+                    prescriptionProvider.getPrescriptionList;
+                if (prescriptions.isNotEmpty) {
+                  debugPrint("prescriptions.length ${prescriptions.length}");
+                  int itemCount = getItemCount(
+                      prescriptions.length, prescriptionProvider.dbCount);
                   return ListView.builder(
-                    itemCount: prescriptions.length,
+                    itemCount: itemCount,
                     itemBuilder: (context, index) {
-                      return PrescriptionWidget(
-                        sysPrescriptionId:
-                            prescriptions[index].sysPrescriptionId,
-                        patientId: prescriptions[index].patientId,
-                        details: prescriptions[index].details,
-                        diagnosis: prescriptions[index].diagnosis,
-                        problem: prescriptions[index].problem,
-                        createdDate: prescriptions[index].createdDate,
-                        updatedDate: prescriptions[index].updatedDate,
-                        totalAmount: prescriptions[index].totalAmount,
-                        paidAmount: prescriptions[index].paidAmount,
-                        lines: prescriptions[index].prescriptionLines,
-                      );
+                      if (index == prescriptions.length) {
+                        // All data was available in 'prescriptions' has been displayed.
+                        //Now load new data if data are there in db.
+                        debugPrint('-----reached at end-----');
+                        if (index < prescriptionProvider.dbCount) {
+                          debugPrint(
+                              '-index: $index < prescriptionsCount: ${prescriptionProvider.dbCount} = true-------');
+                          // stop incrementing calling loadOtherPage untill current req is completed.
+                          if (isLoadingNextPage == false) {
+                            debugPrint('Before calling loadMore');
+                            // now stop calling next page
+                            isLoadingNextPage = true;
+                            int nextPage = currentPage + 1;
+                            loadOtherPage(nextPage);
+                            debugPrint('After calling loadMore');
+                          }
+                        }
+                      }
+                      if (isLoadingNextPage == true) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (index < prescriptions.length) {
+                        return PrescriptionWidget(
+                          sysPrescriptionId:
+                              prescriptions[index].sysPrescriptionId,
+                          patientId: prescriptions[index].patientId,
+                          details: prescriptions[index].details,
+                          diagnosis: prescriptions[index].diagnosis,
+                          problem: prescriptions[index].problem,
+                          createdDate: prescriptions[index].createdDate,
+                          updatedDate: prescriptions[index].updatedDate,
+                          totalAmount: prescriptions[index].totalAmount,
+                          paidAmount: prescriptions[index].paidAmount,
+                          lines: prescriptions[index].prescriptionLines,
+                        );
+                      } else {
+                        return const Center(
+                          child:
+                              Text("Ohh, Is there any more data? Refreash it"),
+                        );
+                      }
                     },
                   );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
                 }
+                return const Text("No Prescription found");
               },
             ),
           ),
@@ -97,20 +133,29 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.home),
+              onPressed: () {
+                setState(() {});
+              },
+              icon: const Icon(Icons.refresh),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.search),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person),
+              onPressed: () {
+                _prescriptionProvider.addFakePrescriptions(widget.patientId);
+              },
+              icon: const Icon(Icons.add),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> loadOtherPage(nextPage) async {
+    debugPrint('loadOtherPage invoked');
+    debugPrint('loading page:- ${nextPage}');
+    await await Future.delayed(const Duration(seconds: 5));
+    await _prescriptionProvider.loadNextPage(widget.patientId, nextPage);
+    isLoadingNextPage = false;
+    debugPrint('loading page: completed');
   }
 }

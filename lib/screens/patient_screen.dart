@@ -189,24 +189,24 @@ class _PatientScreenState extends State<PatientScreen> {
               const SizedBox(height: 20),
 
               // Section 2: Guardian Details
-              buildSection(
-                  title: 'Last Visit',
-                  content: [
-                    // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                    const Text('Problem Reported: Fever and Body Ache'),
-                    const Text('Dignosis: Viral Fever'),
-                    Separator(),
-                    const Text(
-                      'Medicines',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize:
-                            14.0, // You can adjust the font size as needed
-                      ),
-                    ),
-                    buildMedicineList("Hello", widget.medicines),
-                  ],
-                  enableEdit: false),
+              // buildSection(
+              //     title: 'Last Visit',
+              //     content: [
+              //       // Add guardian details UI here (e.g., name, mobile, gender radio, address)
+              //       const Text('Problem Reported: Fever and Body Ache'),
+              //       const Text('Dignosis: Viral Fever'),
+              //       Separator(),
+              //       const Text(
+              //         'Medicines',
+              //         style: TextStyle(
+              //           fontWeight: FontWeight.bold,
+              //           fontSize:
+              //               14.0, // You can adjust the font size as needed
+              //         ),
+              //       ),
+              //       buildMedicineList("Hello", widget.medicines),
+              //     ],
+              //     enableEdit: false),
               const SizedBox(height: 20),
 
               // Section 3: Account Details
