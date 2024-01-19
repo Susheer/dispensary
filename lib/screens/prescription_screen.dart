@@ -88,7 +88,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                             debugPrint('Before calling loadMore');
                             // now stop calling next page
                             isLoadingNextPage = true;
-                            int nextPage = currentPage + 1;
+                            currentPage = currentPage + 1;
+                            int nextPage = currentPage;
                             loadOtherPage(nextPage);
                             debugPrint('After calling loadMore');
                           }
