@@ -146,17 +146,18 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
+            ElevatedButton(
               onPressed: () {
+                // Add your button click logic here
                 setState(() {});
               },
-              icon: const Icon(Icons.refresh),
+              child: const Text('Refresh'),
             ),
-            IconButton(
+            ElevatedButton(
               onPressed: () {
                 _prescriptionProvider.addFakePrescriptions(widget.patientId);
               },
-              icon: const Icon(Icons.add),
+              child: const Text('Add Fake Prescription'),
             ),
           ],
         ),
