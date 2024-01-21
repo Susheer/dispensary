@@ -6,35 +6,33 @@ class LandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dispensary App'),
+        title: const Text('Dispensary App'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Welcome to Dispensary App'),
+            const Text('Welcome to Dispensary App'),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/registration');
               },
-              child: Text('Register Patient'),
+              child: const Text('Register Patient'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/search');
               },
-              child: Text('Search Patients'),
+              child: const Text('Search Patients'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigate to AllPatientsScreen using named route
                 Navigator.pushNamed(context, '/allPatients');
               },
-              child: Text('View All Patients'),
+              child: const Text('View All Patients'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigate to AllPatientsScreen using named route
                 Navigator.pushNamed(context, '/allMedicine');
               },
               child: const Text('All Medicine'),
