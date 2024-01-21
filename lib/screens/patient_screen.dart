@@ -234,17 +234,23 @@ class _PatientScreenState extends State<PatientScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                PrescriptionScreen(patientId: patient!.id),
+                            builder: (context) => PrescriptionScreen(
+                                patientId: patient!.id, patient: patient!),
                           ),
                         );
                       }
                     }
-                    //await getMyPrescriptions(widget.patientId);
-                    // Add your logic for "My Prescription" button
                   }),
                   buildButton('Add Prescription', () {
-                    // Add your logic for "Add Prescription" button
+                    if (patient != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddPrescriptionScreen(patient: patient!),
+                        ),
+                      );
+                    }
                   }),
                   buildButton('Schedule Follow Up', () {
                     // Add your logic for "Schedule Follow Up" button

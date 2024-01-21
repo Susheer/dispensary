@@ -1,5 +1,6 @@
 import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
+import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,8 @@ import 'package:provider/provider.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   final int patientId;
-  PrescriptionScreen({required this.patientId});
+  Patient patient;
+  PrescriptionScreen({required this.patientId, required this.patient});
 
   @override
   _PrescriptionScreenState createState() => _PrescriptionScreenState();
@@ -101,6 +103,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                       }
                       if (index < prescriptions.length) {
                         return PrescriptionWidget(
+                          patientName: widget.patient.name,
                           sysPrescriptionId:
                               prescriptions[index].sysPrescriptionId,
                           patientId: prescriptions[index].patientId,
@@ -153,7 +156,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   Future<void> loadOtherPage(nextPage) async {
     debugPrint('loadOtherPage invoked');
     debugPrint('loading page:- ${nextPage}');
-    await await Future.delayed(const Duration(seconds: 5));
+    await await Future.delayed(const Duration(seconds: 1));
     await _prescriptionProvider.loadNextPage(widget.patientId, nextPage);
     isLoadingNextPage = false;
     debugPrint('loading page: completed');

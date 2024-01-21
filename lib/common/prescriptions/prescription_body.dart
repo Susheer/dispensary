@@ -1,4 +1,5 @@
 import 'package:dispensary/common/prescriptions/prescription_line_card.dart';
+import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,7 @@ class PrescriptionBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Separator(),
         const Text(
           'Prescription Lines:',
           style: TextStyle(fontWeight: FontWeight.bold),

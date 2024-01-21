@@ -5,11 +5,38 @@ import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 
 class FakePrescriptionGenerator {
+  static List<String> chiefComplaints = [
+    'Pain: Describing discomfort in various body parts.',
+    'Cough: Noting persistent or severe coughing.',
+    'Fatigue: Reporting unusual or persistent tiredness.',
+    'Shortness of Breath: Expressing difficulty breathing or breathlessness.',
+    'Fever: Noting an elevated body temperature.',
+    'Digestive Issues: Describing problems such as abdominal discomfort, bloating, nausea, or diarrhea.',
+    'Dizziness or Vertigo: Reporting feelings of lightheadedness, dizziness, or spinning sensations.',
+    'Skin Changes: Noting concerns like rashes, itching, or changes in skin appearance.',
+    'Headaches: Mentioning chronic or severe headaches.',
+    'Weight Changes: Noting sudden or unexplained weight loss or gain.',
+  ];
+
+  static List<String> medicines = [
+    'Acetaminophen',
+    'Ibuprofen',
+    'Lisinopril',
+    'Amoxicillin',
+    'Atorvastatin',
+    'Metformin',
+    'Omeprazole',
+    'Albuterol',
+    'Ciprofloxacin',
+    'Diphenhydramine',
+  ];
+
   static Prescription generateFakePrescription(int patientId) {
     // Generate random values for prescription details
-    String details = 'Prescription details for patient $patientId';
-    String diagnosis = 'Diagnosis for patient $patientId';
-    String problem = 'Problem for patient $patientId';
+    String details = "Docter's notes.";
+    String diagnosis = 'Diagnosis done.';
+    String problem =
+        chiefComplaints[Random().nextInt(chiefComplaints.length - 1)];
     DateTime createdDate = DateTime.now();
     DateTime updatedDate = DateTime.now();
     double totalAmount = Random().nextDouble() * 100.0;
@@ -26,15 +53,16 @@ class FakePrescriptionGenerator {
             index + 1, // Assuming sysPrescriptionLineId is auto-incremented
         medicine: Medicine(
           sysMedicineId: numberOfLines,
-          name: 'Medicine $numberOfLines',
-          description: 'Description for medicine $numberOfLines',
+          name: medicines[index],
+          description: 'Descriptionssss',
           createdDate: DateTime.now(),
           updatedDate: DateTime.now(),
         ),
-        doses: 'Dose $index',
-        duration: 'Duration $index',
-        notes: 'Notes $index',
-        strength: 'Strength $index',
+        doses:
+            '${Random().nextInt(1)}-${Random().nextInt(1)}-${Random().nextInt(1)}',
+        duration: '${Random().nextInt(9)} Days',
+        notes: 'SoP',
+        strength: '${Random().nextInt(100)}Mg',
       );
     });
 

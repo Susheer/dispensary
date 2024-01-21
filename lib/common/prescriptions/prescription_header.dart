@@ -1,8 +1,13 @@
+import 'package:dispensary/common/seperator.dart';
+import 'package:dispensary/common/typography.dart';
+import 'package:dispensary/utils.dart/prescriptionUtil.dart';
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class PrescriptionHeader extends StatelessWidget {
   final int sysPrescriptionId;
   final int patientId;
+  final String patientName;
   final String details;
   final String diagnosis;
   final String problem;
@@ -11,10 +16,12 @@ class PrescriptionHeader extends StatelessWidget {
   final double totalAmount;
   final double paidAmount;
   final VoidCallback onTap;
+  static const TextStyle labelStyle = TextStyle(fontWeight: FontWeight.bold);
 
   PrescriptionHeader({
     required this.sysPrescriptionId,
     required this.patientId,
+    required this.patientName,
     required this.details,
     required this.diagnosis,
     required this.problem,
@@ -30,22 +37,47 @@ class PrescriptionHeader extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        decoration:
+            BoxDecoration(border: Border.all(color: Colors.yellow, width: 1)),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Prescription ID: $sysPrescriptionId'),
-            Text('Patient ID: $patientId'),
-            Text('Details: $details'),
-            Text('Diagnosis: $diagnosis'),
-            Text('Problem: $problem'),
-            Text('Created Date: ${createdDate.toLocal()}'),
-            Text('Updated Date: ${updatedDate.toLocal()}'),
-            Text('Total Amount: $totalAmount'),
-            Text('Paid Amount: $paidAmount'),
+            RowWithLabelAndValueSet(
+                isOverflow: true,
+                label1: 'Prescription:',
+                value1: sysPrescriptionId.toString(),
+                label2: 'Updated: ',
+                value2: timeago.format(createdDate)),
+            RowWithLabelAndValueSet(
+                isOverflow: true,
+                label1: 'Pending Bal:',
+                value1: PrescriptionUtil.calPendingBal(totalAmount, paidAmount),
+                label2: 'Created: ',
+                value2: formatDate(createdDate)),
+            Typography2(label: 'Patient Name', value: patientName),
+            ...[
+              const Text(
+                'Chief Complaint:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                problem,
+              )
+            ]
           ],
         ),
       ),
     );
+  }
+
+  String formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString().substring(2);
+
+    return '$day/$month/$year';
   }
 }
