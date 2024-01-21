@@ -8,9 +8,8 @@ class PrescriptionHeader extends StatelessWidget {
   final int sysPrescriptionId;
   final int patientId;
   final String patientName;
-  final String details;
   final String diagnosis;
-  final String problem;
+  final String chiefComplaint;
   final DateTime createdDate;
   final DateTime updatedDate;
   final double totalAmount;
@@ -22,9 +21,8 @@ class PrescriptionHeader extends StatelessWidget {
     required this.sysPrescriptionId,
     required this.patientId,
     required this.patientName,
-    required this.details,
     required this.diagnosis,
-    required this.problem,
+    required this.chiefComplaint,
     required this.createdDate,
     required this.updatedDate,
     required this.totalAmount,
@@ -62,7 +60,7 @@ class PrescriptionHeader extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                problem,
+                chiefComplaint,
               )
             ]
           ],

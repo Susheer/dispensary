@@ -20,9 +20,8 @@ class AddPrescriptionScreen extends StatefulWidget {
 class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
   int _currentStep = 0;
   late AutoCompleteTextField<Medicine> medicineNameTextField;
-  TextEditingController detailsController = TextEditingController();
   TextEditingController diagnosisController = TextEditingController();
-  TextEditingController problemController = TextEditingController();
+  TextEditingController chiefComplaintController = TextEditingController();
   TextEditingController totalAmountController = TextEditingController();
   TextEditingController remainingAmountController = TextEditingController();
   TextEditingController paidAmountController = TextEditingController();
@@ -71,9 +70,8 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                   sysPrescriptionId: 1, // temp id
                   prescriptionLines: prescriptionLines,
                   patientId: widget.patient.id,
-                  details: detailsController.text,
                   diagnosis: diagnosisController.text,
-                  problem: problemController.text,
+                  chiefComplaint: chiefComplaintController.text,
                   createdDate: DateTime.now(),
                   updatedDate: DateTime.now(),
                   totalAmount: totalAmount ?? 0.0,
@@ -97,20 +95,16 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                 child: Column(
                   children: [
                     TextFormField(
-                      controller: detailsController,
+                      controller: chiefComplaintController,
                       validator: onValidate,
                       decoration:
-                          const InputDecoration(labelText: "Docter's note"),
+                          const InputDecoration(labelText: 'Chief Complaint'),
                     ),
                     TextFormField(
                       controller: diagnosisController,
                       validator: onValidate,
-                      decoration: const InputDecoration(labelText: 'Diagnosis'),
-                    ),
-                    TextFormField(
-                      controller: problemController,
-                      validator: onValidate,
-                      decoration: const InputDecoration(labelText: 'Problem'),
+                      decoration:
+                          const InputDecoration(labelText: 'Medical Diagnosis'),
                     ),
                     TextFormField(
                       controller: totalAmountController,
@@ -133,14 +127,6 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                           }
                         });
                       },
-                    ),
-                    TextFormField(
-                      enabled: false,
-                      controller: remainingAmountController,
-                      validator: onValidate,
-                      decoration:
-                          const InputDecoration(labelText: 'Remaining Amount'),
-                      keyboardType: TextInputType.number,
                     ),
                     TextFormField(
                       controller: paidAmountController,
@@ -166,6 +152,12 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                           }
                         });
                       },
+                    ),
+                    TextFormField(
+                      enabled: false,
+                      controller: remainingAmountController,
+                      decoration:
+                          const InputDecoration(labelText: 'Remaining Amount'),
                     ),
                   ],
                 ),
@@ -235,7 +227,6 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
           .storePrescriptionAndLines(prescription);
       displayMessage("Prescription added");
     } on Exception catch (e) {
-      // TODO
       displayMessage("Failed! please re-start app and try again");
     }
   }
@@ -259,8 +250,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
       strength: medicationFormData['strength'],
     );
     setState(() {
-      prescriptionLines.add(
-          aLine); // add to line list, as one prescription may have severline lines.
+      prescriptionLines.add(aLine);
     });
     Navigator.pop(context);
   }

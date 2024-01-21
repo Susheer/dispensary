@@ -8,9 +8,8 @@ class PrescriptionWidget extends StatefulWidget {
   final int sysPrescriptionId;
   final int patientId;
   final String patientName;
-  final String details;
   final String diagnosis;
-  final String problem;
+  final String chiefComplaint;
   final DateTime createdDate;
   final DateTime updatedDate;
   final double totalAmount;
@@ -21,9 +20,8 @@ class PrescriptionWidget extends StatefulWidget {
   PrescriptionWidget(
       {required this.sysPrescriptionId,
       required this.patientId,
-      required this.details,
       required this.diagnosis,
-      required this.problem,
+      required this.chiefComplaint,
       required this.patientName,
       required this.createdDate,
       required this.updatedDate,
@@ -50,9 +48,8 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
               sysPrescriptionId: widget.sysPrescriptionId,
               patientName: widget.patientName,
               patientId: widget.patientId,
-              details: widget.details,
               diagnosis: widget.diagnosis,
-              problem: widget.problem,
+              chiefComplaint: widget.chiefComplaint,
               createdDate: widget.createdDate,
               updatedDate: widget.updatedDate,
               totalAmount: widget.totalAmount,
@@ -82,32 +79,35 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
       child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
         if (isBodyVisible == true)
           IconButton(
-            icon: const Icon(Icons.arrow_circle_up),
+            icon: const Icon(Icons.arrow_drop_up),
             tooltip: "Hide medications",
             onPressed: toggleMedicationButton,
           ),
         if (isBodyVisible == false)
           IconButton(
-            icon: const Icon(Icons.arrow_circle_down),
+            icon: const Icon(Icons.arrow_drop_down),
             tooltip: "Show Medications",
             onPressed: toggleMedicationButton,
           ),
         IconButton(
-          icon: const Icon(Icons.share_rounded),
+          icon: const Icon(
+            Icons.share_rounded,
+            size: 16,
+          ),
           tooltip: "Share",
           onPressed: () {
             showAlert(message: 'Share this prescription.');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.edit_document),
+          icon: const Icon(Icons.edit_document, size: 17),
           tooltip: "Edit Medication",
           onPressed: () {
             showAlert(message: 'Edit Medication');
           },
         ),
         IconButton(
-          icon: const Icon(Icons.account_balance_wallet),
+          icon: const Icon(Icons.account_balance_wallet, size: 17),
           tooltip: "Edit Balance",
           onPressed: () {
             showAlert(message: 'Edit Balance');

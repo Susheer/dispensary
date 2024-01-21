@@ -31,7 +31,6 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    print("PrescriptionScreenState didChangeDependencies Invoked");
     if (initScreenUponLoad == false) {
       initScreenUponLoad = true;
       _prescriptionProvider = Provider.of<PrescriptionProvider>(context);
@@ -107,9 +106,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                           sysPrescriptionId:
                               prescriptions[index].sysPrescriptionId,
                           patientId: prescriptions[index].patientId,
-                          details: prescriptions[index].details,
                           diagnosis: prescriptions[index].diagnosis,
-                          problem: prescriptions[index].problem,
+                          chiefComplaint: prescriptions[index].chiefComplaint,
                           createdDate: prescriptions[index].createdDate,
                           updatedDate: prescriptions[index].updatedDate,
                           totalAmount: prescriptions[index].totalAmount,
@@ -125,7 +123,20 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                     },
                   );
                 }
-                return const Text("No Prescription found");
+                return const Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.notes,
+                      size: 50,
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Text("No Prescription found"),
+                  ],
+                ));
               },
             ),
           ),

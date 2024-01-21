@@ -41,9 +41,8 @@ class DatabaseService {
           CREATE TABLE IF NOT EXISTS prescriptions (
             sys_prescription_id INTEGER PRIMARY KEY,
             patient_id INTEGER,
-            details TEXT,
             diagnosis TEXT,
-            problem TEXT,
+            chief_complaint TEXT,
             created_date TEXT,
             updated_date TEXT,
             total_amount REAL,

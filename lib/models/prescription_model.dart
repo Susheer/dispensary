@@ -4,9 +4,8 @@ class Prescription {
   late int sysPrescriptionId;
   late List<PrescriptionLine> prescriptionLines;
   late int patientId;
-  late String details;
   late String diagnosis;
-  late String problem;
+  late String chiefComplaint;
   late DateTime createdDate;
   late DateTime updatedDate;
   late double totalAmount;
@@ -16,9 +15,8 @@ class Prescription {
     required this.sysPrescriptionId,
     required this.prescriptionLines,
     required this.patientId,
-    required this.details,
     required this.diagnosis,
-    required this.problem,
+    required this.chiefComplaint,
     required this.createdDate,
     required this.updatedDate,
     required this.totalAmount,
@@ -29,9 +27,8 @@ class Prescription {
     sysPrescriptionId = 0;
     prescriptionLines = [];
     patientId = 0;
-    details = "";
     diagnosis = "";
-    problem = "";
+    chiefComplaint = "";
     createdDate = DateTime.now();
     updatedDate = DateTime.now();
     totalAmount = 0.0;
@@ -43,9 +40,8 @@ class Prescription {
     int? sysPrescriptionId,
     List<PrescriptionLine>? prescriptionLines,
     int? patientId,
-    String? details,
     String? diagnosis,
-    String? problem,
+    String? chiefComplaint,
     DateTime? createdDate,
     DateTime? updatedDate,
     double? totalAmount,
@@ -55,9 +51,8 @@ class Prescription {
       sysPrescriptionId: sysPrescriptionId ?? this.sysPrescriptionId,
       prescriptionLines: prescriptionLines ?? this.prescriptionLines,
       patientId: patientId ?? this.patientId,
-      details: details ?? this.details,
       diagnosis: diagnosis ?? this.diagnosis,
-      problem: problem ?? this.problem,
+      chiefComplaint: chiefComplaint ?? this.chiefComplaint,
       createdDate: createdDate ?? this.createdDate,
       updatedDate: updatedDate ?? this.updatedDate,
       totalAmount: totalAmount ?? this.totalAmount,
@@ -80,19 +75,14 @@ class Prescription {
     patientId = newPatientId;
   }
 
-  // Setter for details
-  set setDetails(String newDetails) {
-    details = newDetails;
-  }
-
   // Setter for diagnosis
   set setDiagnosis(String newDiagnosis) {
     diagnosis = newDiagnosis;
   }
 
-  // Setter for problem
-  set setProblem(String newProblem) {
-    problem = newProblem;
+  // Setter for chiefComplaint
+  set setChiefComplaint(String newChiefComplaint) {
+    chiefComplaint = newChiefComplaint;
   }
 
   // Setter for createdDate
@@ -121,9 +111,8 @@ class Prescription {
       'prescription_lines':
           prescriptionLines.map((line) => line.toMap()).toList(),
       'patient_id': patientId,
-      'details': details,
       'diagnosis': diagnosis,
-      'problem': problem,
+      'chief_complaint': chiefComplaint,
       'created_date': createdDate.toIso8601String(),
       'updated_date': updatedDate.toIso8601String(),
       'total_amount': totalAmount,
@@ -136,9 +125,8 @@ class Prescription {
       'prescription_lines':
           prescriptionLines.map((line) => line.toMapIgnoreSysId()).toList(),
       'patient_id': patientId,
-      'details': details,
       'diagnosis': diagnosis,
-      'problem': problem,
+      'chief_complaint': chiefComplaint,
       'created_date': createdDate.toIso8601String(),
       'updated_date': updatedDate.toIso8601String(),
       'total_amount': totalAmount,
@@ -159,9 +147,8 @@ class Prescription {
       sysPrescriptionId: map['sys_prescription_id'],
       prescriptionLines: pLines,
       patientId: map['patient_id'],
-      details: map['details'],
       diagnosis: map['diagnosis'],
-      problem: map['problem'],
+      chiefComplaint: map['chief_complaint'],
       createdDate: DateTime.parse(map['created_date']),
       updatedDate: DateTime.parse(map['updated_date']),
       totalAmount: map['total_amount'],

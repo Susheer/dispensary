@@ -1,8 +1,7 @@
 import 'package:dispensary/providers/medicine_provider.dart';
-import 'package:dispensary/providers/patient_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/medicine_model.dart';
-import 'package:provider/provider.dart'; // Import your Medicine model
+import 'package:provider/provider.dart';
 
 class NewMedicineScreen extends StatefulWidget {
   @override
@@ -75,7 +74,7 @@ class _NewMedicineScreenState extends State<NewMedicineScreen> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Fill all details'),
+                        content: Text('Fill all the details'),
                       ),
                     );
                   }
