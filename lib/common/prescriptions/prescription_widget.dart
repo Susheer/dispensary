@@ -1,3 +1,4 @@
+import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:flutter/material.dart';
 import 'prescription_header.dart';
@@ -56,20 +57,89 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
               updatedDate: widget.updatedDate,
               totalAmount: widget.totalAmount,
               paidAmount: widget.paidAmount,
-              onTap: () {
-                setState(() {
-                  isBodyVisible = !isBodyVisible;
-                });
-              },
+              onTap: () {},
             ),
             if (isBodyVisible)
               PrescriptionBody(
+                medicalDignosis: widget.diagnosis,
                 prescriptionLines:
                     widget.lines, // Pass the prescriptionLines data
               ),
+            const Separator(),
+            buildActionButtonsRow(context),
           ],
         ),
       ),
     );
+  }
+
+  Widget buildActionButtonsRow(BuildContext context) {
+    return Container(
+      // decoration:
+      //     BoxDecoration(border: Border.all(color: Colors.blueGrey, width: 1)),
+      constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width, maxHeight: 40),
+      child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+        if (isBodyVisible == true)
+          IconButton(
+            icon: const Icon(Icons.arrow_circle_up),
+            tooltip: "Hide medications",
+            onPressed: toggleMedicationButton,
+          ),
+        if (isBodyVisible == false)
+          IconButton(
+            icon: const Icon(Icons.arrow_circle_down),
+            tooltip: "Show Medications",
+            onPressed: toggleMedicationButton,
+          ),
+        IconButton(
+          icon: const Icon(Icons.share_rounded),
+          tooltip: "Share",
+          onPressed: () {
+            showAlert(message: 'Share this prescription.');
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit_document),
+          tooltip: "Edit Medication",
+          onPressed: () {
+            showAlert(message: 'Edit Medication');
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.account_balance_wallet),
+          tooltip: "Edit Balance",
+          onPressed: () {
+            showAlert(message: 'Edit Balance');
+          },
+        )
+      ]),
+    );
+  }
+
+  void showAlert({String message = ""}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alert'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void toggleMedicationButton() {
+    setState(() {
+      isBodyVisible = !isBodyVisible;
+    });
   }
 }
