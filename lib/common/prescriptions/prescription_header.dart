@@ -37,8 +37,6 @@ class PrescriptionHeader extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration:
-            BoxDecoration(border: Border.all(color: Colors.yellow, width: 1)),
         constraints:
             BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
         padding: const EdgeInsets.all(10),
