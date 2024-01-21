@@ -43,8 +43,6 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
     if (widget.isEditingPatient == true) {
       _allergiesController.text = widget.patient.allergies.join(',');
     }
-
-    // Add similar logic for other form fields
   }
 
   @override

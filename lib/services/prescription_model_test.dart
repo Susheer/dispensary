@@ -29,9 +29,8 @@ List<Prescription> generateUniquePrescriptions() {
       sysPrescriptionId: i,
       prescriptionLines: prescriptionLines,
       patientId: 123, // Replace with a valid patient ID
-      details: 'Follow-up',
       diagnosis: 'Fever',
-      problem: 'Headache',
+      chiefComplaint: 'Headache',
       createdDate: DateTime.now(),
       updatedDate: DateTime.now(),
       totalAmount: 50.0,

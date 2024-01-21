@@ -44,6 +44,35 @@ class _PatientScreenState extends State<PatientScreen> {
     });
   }
 
+  Function()? addPrescriptionListener() {
+    if (patient != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddPrescriptionScreen(patient: patient!),
+        ),
+      );
+    }
+  }
+
+  Function()? viewPrescriptionListener() {
+    if (widget.patientId != null) {
+      if (patient != null && patient?.id != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                PrescriptionScreen(patientId: patient!.id, patient: patient!),
+          ),
+        );
+      }
+    }
+  }
+
+  Function()? scheduleFollowUpListener() {}
+
+  Function()? updateAccountListener() {}
+
   void onPatientUpdate(Patient response) async {
     if (patient != null) {
       bool isUpdated =
@@ -84,18 +113,8 @@ class _PatientScreenState extends State<PatientScreen> {
     Provider.of<PatientProvider>(context, listen: false).deleteMe(id);
   }
 
-  void saveUpdatedDetails() {
-    print('saveUpdatedDetails invoked');
-    // Implement logic to save updated details to the database
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Use the patientId to fetch more details from the database
-    // Implement a function to fetch patient details by ID in your DatabaseService
-
-    // For now, let's assume we have a Patient object
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -103,7 +122,7 @@ class _PatientScreenState extends State<PatientScreen> {
         actions: [
           IconButton(
             tooltip: "Delete forever",
-            icon: const Icon(Icons.delete_forever), // Example action icon
+            icon: const Icon(Icons.delete_forever),
             onPressed: () {
               deleteMe(widget.patientId);
               Navigator.pop(context);
@@ -125,7 +144,7 @@ class _PatientScreenState extends State<PatientScreen> {
                   Text('Mobile: ${patient?.mobileNumber}'),
                   Text('Gender: ${patient?.gender}'),
                   Text('Address: ${patient?.address}'),
-                  Separator(),
+                  const Separator(),
                   const Text(
                     'Allergies',
                     style: TextStyle(
@@ -133,14 +152,15 @@ class _PatientScreenState extends State<PatientScreen> {
                       fontSize: 14.0, // You can adjust the font size as needed
                     ),
                   ),
+                  const SizedBox(
+                    height: 8,
+                  ),
                   BadgeContainer(
                     badges: patient?.allergies ?? [],
                   )
-                  // Add more patient details as needed
                 ],
                 enableEdit: true,
                 onEditPressed: () {
-                  print('Edit patient');
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
@@ -157,20 +177,16 @@ class _PatientScreenState extends State<PatientScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
-              // Section 2: Guardian Details
               buildSection(
                 title: 'Guardian Details',
                 content: [
-                  // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                  Text('Guardian Name: ${patient?.guardianName}'),
-                  Text('Guardian Mobile: ${patient?.guardianMobileNumber}'),
-                  Text('Guardian Gender: ${patient?.guardianGender}'),
-                  Text('Guardian Address: ${patient?.guardianAddress}'),
+                  Text('Name: ${patient?.guardianName}'),
+                  Text('Mobile: ${patient?.guardianMobileNumber}'),
+                  Text('Gender: ${patient?.guardianGender}'),
+                  Text('Address: ${patient?.guardianAddress}'),
                 ],
                 enableEdit: true,
                 onEditPressed: () {
-                  print('Edit Guardian Details');
                   if (patient != null) {
                     showModalBottomSheet(
                       context: context,
@@ -188,25 +204,14 @@ class _PatientScreenState extends State<PatientScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Section 2: Guardian Details
-              // buildSection(
-              //     title: 'Last Visit',
-              //     content: [
-              //       // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-              //       const Text('Problem Reported: Fever and Body Ache'),
-              //       const Text('Dignosis: Viral Fever'),
-              //       Separator(),
-              //       const Text(
-              //         'Medicines',
-              //         style: TextStyle(
-              //           fontWeight: FontWeight.bold,
-              //           fontSize:
-              //               14.0, // You can adjust the font size as needed
-              //         ),
-              //       ),
-              //       buildMedicineList("Hello", widget.medicines),
-              //     ],
-              //     enableEdit: false),
+              buildSection(
+                  title: 'Last Visit',
+                  content: [
+                    // Add guardian details UI here (e.g., name, mobile, gender radio, address)
+                    const Text('Chief Complaint: Fever and Body Ache'),
+                    const Text('Dignosis: Viral Fever'),
+                  ],
+                  enableEdit: false),
               const SizedBox(height: 20),
 
               // Section 3: Account Details
@@ -217,119 +222,14 @@ class _PatientScreenState extends State<PatientScreen> {
                   const Text('Next Follow Up: 02/10/2024'),
                 ],
                 enableEdit: true,
-                onEditPressed: () {
-                  print('Edit Account Details');
-                  setState(() {
-                    patient?.guardianName = "testing";
-                  });
-                },
+                onEditPressed: () {},
               ),
+              const Separator(),
+              buildActionButtonsRow(context),
               // Section 4: Action Buttons
-              buildSection(
-                title: 'Action Buttons',
-                content: [
-                  buildButton('My Prescription', () async {
-                    if (widget.patientId != null) {
-                      if (patient != null && patient?.id != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PrescriptionScreen(
-                                patientId: patient!.id, patient: patient!),
-                          ),
-                        );
-                      }
-                    }
-                  }),
-                  buildButton('Add Prescription', () {
-                    if (patient != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              AddPrescriptionScreen(patient: patient!),
-                        ),
-                      );
-                    }
-                  }),
-                  buildButton('Schedule Follow Up', () {
-                    // Add your logic for "Schedule Follow Up" button
-                  }),
-                  buildButton('Account Details', () {
-                    // Add your logic for "Account Details" button
-                  }),
-                ],
-                enableEdit: false,
-              ),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Card(
-          elevation: 5.0,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildActionButton(
-                  icon: Icons.local_pharmacy,
-                  onPressed: () {
-                    // Add your logic for the button's onPressed event
-                  },
-                  tooltip: 'View My Prescriptions',
-                ),
-                buildActionButton(
-                  icon: Icons.add_box,
-                  onPressed: () {
-                    if (patient != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              AddPrescriptionScreen(patient: patient!),
-                        ),
-                      );
-                    }
-                    // Add your logic for the button's onPressed event
-                  },
-                  tooltip: 'Add a New Prescription',
-                ),
-                buildActionButton(
-                  icon: Icons.account_balance_wallet,
-                  onPressed: () {
-                    // Add your logic for the button's onPressed event
-                  },
-                  tooltip: 'View Account Details',
-                ),
-                buildActionButton(
-                  icon: Icons.event,
-                  onPressed: () {
-                    // Add your logic for the button's onPressed event
-                  },
-                  tooltip: 'Schedule Follow Up',
-                ),
-                // Add more buttons using buildActionButton as needed
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildActionButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    required String tooltip,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: IconButton(
-        icon: Icon(icon),
-        onPressed: onPressed,
       ),
     );
   }
@@ -375,7 +275,7 @@ class _PatientScreenState extends State<PatientScreen> {
               ),
               if (enableEdit)
                 IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: onEditPressed,
                 ),
             ],
@@ -398,6 +298,35 @@ class _PatientScreenState extends State<PatientScreen> {
         await Provider.of<PrescriptionProvider>(context, listen: false)
             .getPrescriptionsByPatientIdWithDetails(pId);
     return pList;
+  }
+
+  Widget buildActionButtonsRow(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width, maxHeight: 40),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        IconButton(
+          icon: const Icon(Icons.add_box),
+          tooltip: "Add Prescription",
+          onPressed: addPrescriptionListener,
+        ),
+        IconButton(
+          icon: const Icon(Icons.view_agenda),
+          tooltip: "My Prescription",
+          onPressed: viewPrescriptionListener,
+        ),
+        IconButton(
+          icon: const Icon(Icons.schedule),
+          tooltip: "Schedule Follow Up",
+          onPressed: scheduleFollowUpListener,
+        ),
+        IconButton(
+          icon: const Icon(Icons.account_balance_wallet),
+          tooltip: "Account",
+          onPressed: updateAccountListener,
+        ),
+      ]),
+    );
   }
 }
 
@@ -422,6 +351,5 @@ List<Medicine> generateDummyMedicines() {
         description: 'Anti-inflammatory',
         createdDate: DateTime.timestamp(),
         updatedDate: DateTime.timestamp()),
-    // Add more dummy medicines as needed
   ];
 }

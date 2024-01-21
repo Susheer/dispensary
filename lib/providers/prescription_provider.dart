@@ -136,7 +136,6 @@ class PrescriptionProvider extends ChangeNotifier {
     await storePrescriptionAndLines(fakePrescription);
     dbCount++;
     notifyListeners();
-    //getPrescriptionsByPatientIdWithDetails(patientId, offset: 0, pageSize: 25);
   }
 
   Future<void> initPrescriptionList(int patientId) async {

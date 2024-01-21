@@ -86,9 +86,13 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                                 );
                               }
                             }
+                            if (index < patients.length) {
+                              Patient patient = patients[index];
 
-                            Patient patient = patients[index];
-                            return PatientDetailsWidget(patient: patient);
+                              return PatientDetailsWidget(patient: patient);
+                            } else {
+                              return const Text('Ohh, Please refresh list');
+                            }
                           },
                         ),
                       )
