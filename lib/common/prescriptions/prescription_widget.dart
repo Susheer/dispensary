@@ -41,13 +41,8 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2.0),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      margin: const EdgeInsets.all(4),
       child: Card(
-        margin: const EdgeInsets.all(8),
         child: Column(
           children: [
             PrescriptionHeader(
