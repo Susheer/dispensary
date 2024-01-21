@@ -63,6 +63,7 @@ class PrescriptionProvider extends ChangeNotifier {
         await _databaseService.db.query(
       'prescriptions',
       where: 'patient_id = ?',
+      orderBy: "created_date DESC",
       offset: pageNum * pageSize,
       limit: pageSize,
       whereArgs: [patientId],

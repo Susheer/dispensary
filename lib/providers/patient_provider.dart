@@ -2,6 +2,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:dispensary/models/account_model.dart';
+import 'package:dispensary/models/prescription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/services/database_service.dart';
@@ -222,5 +224,40 @@ class PatientProvider extends ChangeNotifier {
 
   int get patientsCount => _patientsCount;
   List<Patient> get searchResults => _searchResults;
-  // Add more functions as needed, e.g., searchPatients, editPatient, etc.
+
+  Future<Account?> getAccount(int patientId) async {
+    debugPrint("getAccount invoked");
+    String sql = '''
+    SELECT SUM(total_amount) AS total_amount,
+    SUM(paid_amount) AS total_paid_amount,
+    (SUM(total_amount) - SUM(paid_amount)) AS total_pending_amount
+    FROM prescriptions
+    WHERE
+    patient_id = $patientId;
+    ''';
+
+    final List<Map<String, dynamic>> result =
+        await _databaseService.db.rawQuery(sql);
+    Account? account;
+    Map<String, dynamic>? obj = null;
+    if (result.isEmpty) {
+      return null;
+    }
+    obj = result[0];
+    if (obj == null ||
+        obj['total_amount'] == null ||
+        obj['total_paid_amount'] == null ||
+        obj['total_pending_amount'] == null) {
+      return null;
+    }
+
+    debugPrint("Inside not empty tset");
+    debugPrint(obj.toString());
+    account = Account.fromMap(result.elementAt(0));
+    return account;
+  }
+
+  Future<Prescription?> getLastprescription(int patientId) async {
+    return null;
+  }
 }

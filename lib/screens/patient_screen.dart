@@ -2,6 +2,7 @@ import 'package:dispensary/common/account_screen.dart';
 import 'package:dispensary/common/badge.dart';
 import 'package:dispensary/common/edit_details_bottom_sheet.dart';
 import 'package:dispensary/common/medicine_card.dart';
+import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
@@ -16,23 +17,19 @@ import 'package:provider/provider.dart';
 
 class PatientScreen extends StatefulWidget {
   final int patientId;
-  List<Medicine> medicines = [];
 
-  PatientScreen({required this.patientId}) {
-    medicines = generateDummyMedicines();
-  }
+  PatientScreen({required this.patientId});
   @override
   State<PatientScreen> createState() => _PatientScreenState();
 }
 
 class _PatientScreenState extends State<PatientScreen> {
   Patient? patient;
-  Account account =
-      Account(pendingBalance: 2, totalPaid: 11, totalSinceJoining: 22);
-
+  Prescription? prescription;
+  Account? account;
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
+    debugPrint("didChangeDependencies invoked");
     Provider.of<PatientProvider>(context)
         .fetchPatientById(widget.patientId)
         .then((value) {
@@ -42,6 +39,38 @@ class _PatientScreenState extends State<PatientScreen> {
         });
       }
     });
+
+    Provider.of<PatientProvider>(context)
+        .getAccount(widget.patientId)
+        .then((accountObj) {
+      if (accountObj != null) {
+        setState(() {
+          account = accountObj;
+        });
+      }
+    });
+
+    Provider.of<PatientProvider>(context)
+        .getLastprescription(widget.patientId)
+        .then((prescriptionObj) {
+      if (prescriptionObj != null) {
+        setState(() {
+          prescription = prescriptionObj;
+        });
+      }
+    });
+
+    Provider.of<PrescriptionProvider>(context)
+        .getPrescriptionsByPatientIdWithDetails(widget.patientId,
+            pageNum: 0, pageSize: 1)
+        .then((prescriptionObj) {
+      if (prescriptionObj[0] != null) {
+        setState(() {
+          prescription = prescriptionObj[0]!;
+        });
+      }
+    });
+    super.didChangeDependencies();
   }
 
   Function()? addPrescriptionListener() {
@@ -115,6 +144,8 @@ class _PatientScreenState extends State<PatientScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("Build invoked, patient screen");
+    Provider.of<PatientProvider>(context).getLastprescription(widget.patientId);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -122,7 +153,7 @@ class _PatientScreenState extends State<PatientScreen> {
         actions: [
           IconButton(
             tooltip: "Delete forever",
-            icon: const Icon(Icons.delete_forever),
+            icon: const Icon(Icons.delete),
             onPressed: () {
               deleteMe(widget.patientId);
               Navigator.pop(context);
@@ -203,30 +234,37 @@ class _PatientScreenState extends State<PatientScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
-              buildSection(
-                  title: 'Last Visit',
-                  content: [
-                    // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                    const Text('Chief Complaint: Fever and Body Ache'),
-                    const Text('Dignosis: Viral Fever'),
-                  ],
-                  enableEdit: false),
+              if (prescription != null)
+                buildSection(
+                    title: 'Latest Prescription',
+                    content: [
+                      PrescriptionWidget(
+                          sysPrescriptionId: prescription!.sysPrescriptionId,
+                          patientId: prescription!.patientId,
+                          diagnosis: prescription!.diagnosis,
+                          chiefComplaint: prescription!.chiefComplaint,
+                          patientName: patient!.name,
+                          createdDate: prescription!.createdDate,
+                          updatedDate: prescription!.updatedDate,
+                          totalAmount: prescription!.totalAmount,
+                          paidAmount: prescription!.paidAmount,
+                          lines: prescription!.prescriptionLines)
+                    ],
+                    enableEdit: false),
               const SizedBox(height: 20),
 
               // Section 3: Account Details
-              buildSection(
-                title: 'Account Details',
-                content: [
-                  AccountScreen(account: account),
-                  const Text('Next Follow Up: 02/10/2024'),
-                ],
-                enableEdit: true,
-                onEditPressed: () {},
-              ),
+              if (account != null)
+                buildSection(
+                  title: 'Payments',
+                  content: [
+                    AccountScreen(account: account!),
+                  ],
+                  enableEdit: false,
+                  onEditPressed: () {},
+                ),
               const Separator(),
               buildActionButtonsRow(context),
-              // Section 4: Action Buttons
             ],
           ),
         ),
@@ -253,12 +291,12 @@ class _PatientScreenState extends State<PatientScreen> {
     VoidCallback? onEditPressed,
   }) {
     return Container(
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width,
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(6.0),
       ),
-      margin: const EdgeInsets.all(5.0),
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +313,9 @@ class _PatientScreenState extends State<PatientScreen> {
               ),
               if (enableEdit)
                 IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit_note),
+                  iconSize: 24,
+                  tooltip: "Edit",
                   onPressed: onEditPressed,
                 ),
             ],
