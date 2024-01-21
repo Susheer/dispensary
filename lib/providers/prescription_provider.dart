@@ -1,14 +1,20 @@
+import 'dart:async';
+
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/services/database_service.dart';
+import 'package:dispensary/services/fake_prescription_generator.dart';
 import 'package:flutter/material.dart';
 
 class PrescriptionProvider extends ChangeNotifier {
   final DatabaseService _databaseService;
+  List<Prescription> _prescriptionList = [];
+  int dbCount = 0;
   PrescriptionProvider(this._databaseService);
+  List<Prescription> get getPrescriptionList => _prescriptionList;
 
-  // Prescription CRUD methods
   Future<void> storePrescriptionAndLines(Prescription prescription) async {
     // Start the transaction
     await _databaseService.db.transaction((txn) async {
@@ -50,11 +56,15 @@ class PrescriptionProvider extends ChangeNotifier {
   }
 
   Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(
-      int patientId) async {
+      int patientId,
+      {int pageNum = 0,
+      int pageSize = AppConfig.PrescriptionSize}) async {
     final List<Map<String, dynamic>> prescriptionsData =
         await _databaseService.db.query(
       'prescriptions',
       where: 'patient_id = ?',
+      offset: pageNum * pageSize,
+      limit: pageSize,
       whereArgs: [patientId],
     );
 
@@ -63,8 +73,11 @@ class PrescriptionProvider extends ChangeNotifier {
       Prescription prescription = Prescription.fromMap(prescriptionData);
       int sysPrescriptionId = prescription.sysPrescriptionId;
       final List<Map<String, dynamic>> prescriptionLinesData =
-          await _databaseService.db.query('prescription_line',
-              where: 'prescription_id = ?', whereArgs: [sysPrescriptionId]);
+          await _databaseService.db.query(
+        'prescription_line',
+        where: 'prescription_id = ?',
+        whereArgs: [sysPrescriptionId],
+      );
       List<int> sysIdOfBadLines = [];
       for (final Map<String, dynamic> lineData in prescriptionLinesData) {
         final Medicine? medicine =
@@ -102,50 +115,43 @@ class PrescriptionProvider extends ChangeNotifier {
       return Medicine.fromMap(results.first);
     }
   }
-  // Future<int> insertPrescription(Prescription prescription) async {
 
-  //   return await _databaseService.insert('prescriptions', prescription.toMap());
-  // }
+  Future<int> countPrescriptionsByPatientId(int patientId) async {
+    final List<Map<String, dynamic>> result = await _databaseService.db.query(
+      'prescriptions',
+      columns: ['COUNT(*) as count'],
+      where: 'patient_id = ?',
+      whereArgs: [patientId],
+    );
 
-  // Future<List<Prescription>> getAllPrescriptions() async {
-  //   final List<Map<String, dynamic>> maps =
-  //       await _databaseService.query('prescriptions');
-  //   return List.generate(maps.length, (i) => Prescription.fromMap(maps[i]));
-  // }
+    final count = result.firstWhere((map) => true)['count'] as int?;
+    dbCount = count ?? 0;
+    notifyListeners();
+    return dbCount;
+  }
 
-  // Future<int> updatePrescription(Prescription prescription) async {
-  //   return await _databaseService.update('prescriptions', prescription.toMap(),
-  //       where: 'sys_prescription_id = ?',
-  //       whereArgs: [prescription.sysPrescriptionId]);
-  // }
+  Future<void> addFakePrescriptions(int patientId) async {
+    Prescription fakePrescription =
+        FakePrescriptionGenerator.generateFakePrescription(patientId);
+    await storePrescriptionAndLines(fakePrescription);
+    dbCount++;
+    notifyListeners();
+    //getPrescriptionsByPatientIdWithDetails(patientId, offset: 0, pageSize: 25);
+  }
 
-  // Future<int> deletePrescription(int prescriptionId) async {
-  //   return await _databaseService.delete('prescriptions',
-  //       where: 'sys_prescription_id = ?', whereArgs: [prescriptionId]);
-  // }
+  Future<void> initPrescriptionList(int patientId) async {
+    List<Prescription> list =
+        await getPrescriptionsByPatientIdWithDetails(patientId);
+    _prescriptionList = list;
+    notifyListeners();
+  }
 
-  // PrescriptionLine CRUD methods within PrescriptionProvider
-
-  // Future<int> insertPrescriptionLine(PrescriptionLine prescriptionLine) async {
-  //   return await _databaseService.insert(
-  //       'prescription_lines', prescriptionLine.toMap);
-  // }
-
-  // Future<List<PrescriptionLine>> getAllPrescriptionLines() async {
-  //   final List<Map<String, dynamic>> maps =
-  //       await _databaseService.query('prescription_lines');
-  //   return List.generate(maps.length, (i) => PrescriptionLine.fromMap(maps[i]));
-  // }
-
-  // Future<int> updatePrescriptionLine(PrescriptionLine prescriptionLine) async {
-  //   return await _databaseService.update(
-  //       'prescription_lines', prescriptionLine.toMap(),
-  //       where: 'sys_prescription_line_id = ?',
-  //       whereArgs: [prescriptionLine.sysPrescriptionLineId]);
-  // }
-
-  // Future<int> deletePrescriptionLine(int prescriptionLineId) async {
-  //   return await _databaseService.delete('prescription_lines',
-  //       where: 'sys_prescription_line_id = ?', whereArgs: [prescriptionLineId]);
-  // }
+  Future<void> loadNextPage(int patientId, int pageNumber) async {
+    List<Prescription> list = await getPrescriptionsByPatientIdWithDetails(
+        patientId,
+        pageNum: pageNumber,
+        pageSize: AppConfig.PrescriptionSize);
+    _prescriptionList.addAll(list);
+    notifyListeners();
+  }
 }

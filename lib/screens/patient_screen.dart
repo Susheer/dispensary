@@ -10,6 +10,7 @@ import 'package:dispensary/models/prescription_model.dart';
 import 'package:dispensary/providers/patient_provider.dart';
 import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:dispensary/screens/add_prescription_screen.dart';
+import 'package:dispensary/screens/prescription_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -188,24 +189,24 @@ class _PatientScreenState extends State<PatientScreen> {
               const SizedBox(height: 20),
 
               // Section 2: Guardian Details
-              buildSection(
-                  title: 'Last Visit',
-                  content: [
-                    // Add guardian details UI here (e.g., name, mobile, gender radio, address)
-                    const Text('Problem Reported: Fever and Body Ache'),
-                    const Text('Dignosis: Viral Fever'),
-                    Separator(),
-                    const Text(
-                      'Medicines',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize:
-                            14.0, // You can adjust the font size as needed
-                      ),
-                    ),
-                    buildMedicineList("Hello", widget.medicines),
-                  ],
-                  enableEdit: false),
+              // buildSection(
+              //     title: 'Last Visit',
+              //     content: [
+              //       // Add guardian details UI here (e.g., name, mobile, gender radio, address)
+              //       const Text('Problem Reported: Fever and Body Ache'),
+              //       const Text('Dignosis: Viral Fever'),
+              //       Separator(),
+              //       const Text(
+              //         'Medicines',
+              //         style: TextStyle(
+              //           fontWeight: FontWeight.bold,
+              //           fontSize:
+              //               14.0, // You can adjust the font size as needed
+              //         ),
+              //       ),
+              //       buildMedicineList("Hello", widget.medicines),
+              //     ],
+              //     enableEdit: false),
               const SizedBox(height: 20),
 
               // Section 3: Account Details
@@ -228,12 +229,28 @@ class _PatientScreenState extends State<PatientScreen> {
                 title: 'Action Buttons',
                 content: [
                   buildButton('My Prescription', () async {
-                    if (widget.patientId != null)
-                      await getMyPrescriptions(widget.patientId);
-                    // Add your logic for "My Prescription" button
+                    if (widget.patientId != null) {
+                      if (patient != null && patient?.id != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PrescriptionScreen(
+                                patientId: patient!.id, patient: patient!),
+                          ),
+                        );
+                      }
+                    }
                   }),
                   buildButton('Add Prescription', () {
-                    // Add your logic for "Add Prescription" button
+                    if (patient != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddPrescriptionScreen(patient: patient!),
+                        ),
+                      );
+                    }
                   }),
                   buildButton('Schedule Follow Up', () {
                     // Add your logic for "Schedule Follow Up" button
