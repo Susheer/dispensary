@@ -134,11 +134,19 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.pushNamed(context, '/search');
+            }
+            if (index == 2) {
+              Navigator.pushNamed(context, '/allPatients');
+            }
+          },
           showUnselectedLabels: true,
           fixedColor: Colors.black, // Set the color for the selected item
           unselectedItemColor:
               Colors.black, // Set the color for unselected items
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
