@@ -1,5 +1,6 @@
 // main.dart
 import 'package:dispensary/appConfig.dart';
+import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
@@ -40,6 +41,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => MedicineProvider(databaseService),
         ),
+        ChangeNotifierProvider(
+          create: (context) => LandingScreenProvider(),
+        ),
         // Add more providers as needed
       ],
       child: MaterialApp(
@@ -53,8 +57,8 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/dashboard': (context) => LandingScreen(),
-          '/': (context) => DashboardScreen(),
+          '/dashboard': (context) => DashboardScreen(),
+          '/': (context) => LandingScreen(),
           '/registration': (context) => RegistrationScreen(),
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),

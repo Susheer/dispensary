@@ -36,71 +36,60 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
         List<Patient> patients = patientProvider.patients;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Patient List'),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '${patients.length}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AllPatientsScreen()),
-                  );
-                },
-              ),
-              // Add more IconButton widgets for additional actions as needed
-            ],
-          ),
-          body: SafeArea(
-            child: Column(
-              children: [
-                // Display the number of records
+            body: Column(
+          children: [
+            patients.isNotEmpty
+                ? Expanded(
+                    child: ListView.builder(
+                      itemCount: ((patients.length + 1) <
+                              patientProvider.patientsCount)
+                          ? patients.length + 1
+                          : patientProvider
+                              .patientsCount, // Add 1 for loading indicator
+                      itemBuilder: (context, index) {
+                        if (index == patients.length) {
+                          // Reached the end, load more
+                          if (isLoading == false) {
+                            _loadMore();
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                        }
+                        if (index < patients.length) {
+                          Patient patient = patients[index];
 
-                // Display the list of patients
-                patients.isNotEmpty
-                    ? Expanded(
-                        child: ListView.builder(
-                          itemCount: ((patients.length + 1) <
-                                  patientProvider.patientsCount)
-                              ? patients.length + 1
-                              : patientProvider
-                                  .patientsCount, // Add 1 for loading indicator
-                          itemBuilder: (context, index) {
-                            if (index == patients.length) {
-                              // Reached the end, load more
-                              if (isLoading == false) {
-                                _loadMore();
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                            }
-                            if (index < patients.length) {
-                              Patient patient = patients[index];
+                          return PatientDetailsWidget(patient: patient);
+                        } else {
+                          return const Text('Ohh, Please refresh list');
+                        }
+                      },
+                    ),
+                  )
+                : NotFoundMessage(message: "No patients available")
+          ],
+        ));
+      },
+    );
+  }
 
-                              return PatientDetailsWidget(patient: patient);
-                            } else {
-                              return const Text('Ohh, Please refresh list');
-                            }
-                          },
-                        ),
-                      )
-                    : NotFoundMessage(message: "No patients available")
-              ],
-            ),
-          ),
-          // Responsive card with action buttons
+  Future<void> _loadMore() async {
+    if (isLoading != true) {
+      isLoading = true;
+      await Provider.of<PatientProvider>(context, listen: false)
+          .fetchNextPage(currentPage * pageSize, pageSize);
+      currentPage++;
+      isLoading = false;
+    }
+  }
+}
+
+
+/*
+
+Put this to setting screens 
+
+// Responsive card with action buttons
           bottomNavigationBar: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
@@ -131,18 +120,4 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Future<void> _loadMore() async {
-    if (isLoading != true) {
-      isLoading = true;
-      await Provider.of<PatientProvider>(context, listen: false)
-          .fetchNextPage(currentPage * pageSize, pageSize);
-      currentPage++;
-      isLoading = false;
-    }
-  }
-}
+*/

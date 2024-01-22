@@ -76,9 +76,6 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // Display the number of records
-
-                // Display the list of patients
                 medicines.isNotEmpty
                     ? Expanded(
                         child: ListView.builder(
@@ -149,17 +146,6 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
                                   ),
                                 ],
                               ),
-                              onTap: () {
-                                // Handle the entire ListTile click here if needed
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) =>
-                                //         EditMedicineScreen(medicines[index]),
-                                //   ),
-                                // );
-                                print('ListTile Clicked');
-                              },
                             );
                           },
                         ),
@@ -168,37 +154,6 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
                         child: Text('No medicines found'),
                       )
               ],
-            ),
-          ),
-          // Responsive card with action buttons
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 5.0,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.person_add),
-                      tooltip: 'Add Dummy medicines',
-                      onPressed: () {
-                        Provider.of<MedicineProvider>(context, listen: false)
-                            .insertsDummyMedicines();
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      tooltip: "Claer table",
-                      onPressed: () {
-                        Provider.of<MedicineProvider>(context, listen: false)
-                            .deleteAllMedicines();
-                      },
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
         );

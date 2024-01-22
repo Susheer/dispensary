@@ -1,4 +1,6 @@
+import 'package:dispensary/providers/landing_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   ButtonStyle btnStyle = ElevatedButton.styleFrom(
@@ -11,152 +13,151 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Container(
-            margin: const EdgeInsets.only(top: 10),
-            child: Row(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 16,
+            ),
+            const Text(
+              'Hi Sudheer, Welcome back!',
+              style: TextStyle(fontSize: 19),
+            ),
+            const SizedBox(
+              height: 18,
+            ),
+            buildSection(
+                title: "Today's Statistics",
+                content: [
+                  const CircleWidget(
+                    radius: 50,
+                    value: "40",
+                    text: 'New Patients',
+                    icon: Icons.app_registration,
+                    backgroundColor: Colors.black12,
+                  ),
+                  const CircleWidget(
+                    radius: 50,
+                    icon: Icons.receipt_long,
+                    text: 'Follow Up',
+                    backgroundColor: Colors.black12,
+                    value: "5",
+                  ),
+                  const CircleWidget(
+                    radius: 50,
+                    icon: Icons.schedule,
+                    text: 'Scheduled Today',
+                    backgroundColor: Colors.black12,
+                    value: "100",
+                  ),
+                ],
+                context: context),
+            const SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const SizedBox(
-                  height: 100,
-                ),
-                Image.asset('assets/images/logo.png', height: 40, width: 40),
-                const SizedBox(width: 10),
-                const Text(
-                  'Sai Clinic',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                ),
+                _buildStatCard('Pending Amount', '30', Icons.currency_rupee),
+                _buildStatCard('Total Appointments', '30', Icons.person_2),
               ],
             ),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {},
+            const SizedBox(
+              height: 22,
             ),
-            IconButton(
-              icon: const Icon(Icons.account_balance_wallet),
-              onPressed: () {
-                // Implement notification button functionality
-              },
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 16,
-              ),
-              const Text(
-                'Hi Sudheer, Welcome back!',
-                style: TextStyle(fontSize: 19),
-              ),
-              const SizedBox(
-                height: 18,
-              ),
-              buildSection(
-                  title: "Today's Statistics",
-                  content: [
-                    const CircleWidget(
-                      radius: 50,
-                      value: "40",
-                      text: 'New Patients',
-                      icon: Icons.app_registration,
-                      backgroundColor: Colors.black12,
-                    ),
-                    const CircleWidget(
-                      radius: 50,
-                      icon: Icons.receipt_long,
-                      text: 'Follow Up',
-                      backgroundColor: Colors.black12,
-                      value: "5",
-                    ),
-                    const CircleWidget(
-                      radius: 50,
-                      icon: Icons.schedule,
-                      text: 'Scheduled Today',
-                      backgroundColor: Colors.black12,
-                      value: "100",
-                    ),
-                  ],
-                  context: context),
-              const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+            // Collection Information
+            const Text('Appointment Management',
+                style: TextStyle(fontSize: 20)),
+
+            const SizedBox(height: 14),
+
+            Container(
+              constraints:
+                  BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildStatCard('Pending Amount', '30', Icons.currency_rupee),
-                  _buildStatCard('Total Appointments', '30', Icons.person_2),
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      // Implement the logic to send reminders
+                    },
+                    child: const Text("Send Reminder for Tomorrow"),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      // Implement the logic to send reminders
+                    },
+                    child: Text('Pending Payments Tomorrow'),
+                  ),
                 ],
               ),
-              const SizedBox(
-                height: 22,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Patient management
+            const SizedBox(
+              height: 22,
+            ),
+            // Collection Information
+            const Text('Patient Care', style: TextStyle(fontSize: 20)),
+
+            const SizedBox(height: 14),
+
+            Container(
+              constraints:
+                  BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 2;
+                    },
+                    child: const Text("View All Patients"),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 1;
+                      // Implement the logic to send reminders
+                    },
+                    child: const Text('Search Patient'),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 4;
+                      // Implement the logic to send reminders
+                    },
+                    child: const Text('Add Patient'),
+                  ),
+                ],
               ),
-              // Collection Information
-              const Text('Appointment Management',
-                  style: TextStyle(fontSize: 20)),
-
-              const SizedBox(height: 14),
-
-              Container(
-                constraints:
-                    BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: btnStyle,
-                      onPressed: () {
-                        // Implement the logic to send reminders
-                      },
-                      child: const Text("Send Reminder for Tomorrow"),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ElevatedButton(
-                      style: btnStyle,
-                      onPressed: () {
-                        // Implement the logic to send reminders
-                      },
-                      child: Text('Pending Payments Tomorrow'),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Bottom Navigation
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          showUnselectedLabels: true,
-          fixedColor: Colors.black, // Set the color for the selected item
-          unselectedItemColor:
-              Colors.black, // Set the color for unselected items
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Patient List',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
+
+            const SizedBox(height: 16),
           ],
-        ));
+        ),
+      ),
+    );
   }
 
   Widget buildSection({

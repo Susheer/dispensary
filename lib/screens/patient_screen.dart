@@ -145,7 +145,7 @@ class _PatientScreenState extends State<PatientScreen> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Build invoked, patient screen");
-    Provider.of<PatientProvider>(context).getLastprescription(widget.patientId);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(

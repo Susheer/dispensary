@@ -11,28 +11,24 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Search Patients'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+    return Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
             TextField(
               controller: mobileController,
-              decoration: InputDecoration(labelText: 'Mobile Number'),
+              decoration: const InputDecoration(labelText: 'Mobile Number'),
             ),
             TextField(
               controller: genderController,
-              decoration: InputDecoration(labelText: 'Gender'),
+              decoration: const InputDecoration(labelText: 'Gender'),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 // Invoke search function from the PatientProvider
@@ -43,9 +39,9 @@ class SearchScreen extends StatelessWidget {
                   gender: Patient.parseGender(genderController.text),
                 );
               },
-              child: Text('Search'),
+              child: const Text('Search'),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Expanded(
               child: Consumer<PatientProvider>(
                 builder: (context, patientProvider, child) {
@@ -65,8 +61,6 @@ class SearchScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
+        ));
   }
 }
