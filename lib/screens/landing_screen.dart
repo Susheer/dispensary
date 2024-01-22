@@ -1,7 +1,9 @@
 // landing_screen.dart
 import 'package:dispensary/providers/landing_provider.dart';
+import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
+import 'package:dispensary/screens/registration_screen.dart';
 import 'package:dispensary/screens/search_screen.dart';
 import 'package:dispensary/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +15,14 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
-  int _currentIndex = 0;
-
   // Define the screens you want to navigate to
   final List<Widget> _screens = [
     DashboardScreen(),
     SearchScreen(),
     AllPatientsScreen(),
-    SettingsScreen()
+    SettingsScreen(),
+    RegistrationScreen(), // 4
+    AllMedicineScreen() // 5
   ];
   @override
   Widget build(BuildContext context) {
@@ -52,12 +54,13 @@ class _LandingScreenState extends State<LandingScreen> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.account_balance_wallet),
+                tooltip: "Pharmecy Management",
+                icon: const Icon(Icons.medical_services),
                 onPressed: () {
+                  landingProvider.index = 5;
                   // Implement notification button functionality
                 },
               ),
-              Text("Index${landingProvider.index}")
             ],
           ),
           body: _screens[landingProvider.index],
@@ -67,13 +70,14 @@ class _LandingScreenState extends State<LandingScreen> {
               const int patientIndex = 2;
               const int settingsIndex = 3;
               const int dashboardIndex = 0;
+              const int registerIndex = 4;
               setState(() {
                 debugPrint("Index $index");
                 if (2 == index) {
                   landingProvider.index = settingsIndex;
                 }
                 if (1 == index) {
-                  landingProvider.index = patientIndex;
+                  landingProvider.index = registerIndex;
                 }
                 if (0 == index) {
                   landingProvider.index = dashboardIndex;
@@ -90,8 +94,8 @@ class _LandingScreenState extends State<LandingScreen> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.list),
-                label: 'Patient List',
+                icon: Icon(Icons.add),
+                label: 'Add Patient',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),

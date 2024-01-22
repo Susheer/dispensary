@@ -389,42 +389,38 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     _initializeSteps();
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Register Patient'),
-        ),
-        body: Form(
-          key: _formKey,
-          child: Theme(
-            data: ThemeData(
-                colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-            child: Stepper(
-                type: StepperType.vertical,
-                currentStep: _currentStep,
-                onStepTapped: (step) {
-                  setState(() {
-                    _currentStep = step;
-                  });
-                },
-                onStepContinue: () {
-                  if (_currentStep < _steps.length - 1) {
-                    setState(() {
-                      _currentStep += 1;
-                    });
-                  } else {
-                    // Last step, submit the form
-                    _submitForm();
-                  }
-                },
-                onStepCancel: () {
-                  if (_currentStep > 0) {
-                    setState(() {
-                      _currentStep -= 1;
-                    });
-                  }
-                },
-                steps: _steps),
-          ),
-        ));
+    return Form(
+      key: _formKey,
+      child: Theme(
+        data: ThemeData(
+            colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+        child: Stepper(
+            type: StepperType.vertical,
+            currentStep: _currentStep,
+            onStepTapped: (step) {
+              setState(() {
+                _currentStep = step;
+              });
+            },
+            onStepContinue: () {
+              if (_currentStep < _steps.length - 1) {
+                setState(() {
+                  _currentStep += 1;
+                });
+              } else {
+                // Last step, submit the form
+                _submitForm();
+              }
+            },
+            onStepCancel: () {
+              if (_currentStep > 0) {
+                setState(() {
+                  _currentStep -= 1;
+                });
+              }
+            },
+            steps: _steps),
+      ),
+    );
   }
 }

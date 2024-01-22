@@ -1,4 +1,6 @@
+import 'package:dispensary/providers/landing_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   ButtonStyle btnStyle = ElevatedButton.styleFrom(
@@ -118,7 +120,8 @@ class DashboardScreen extends StatelessWidget {
                   ElevatedButton(
                     style: btnStyle,
                     onPressed: () {
-                      // Implement the logic to send reminders
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 2;
                     },
                     child: const Text("View All Patients"),
                   ),
@@ -128,9 +131,23 @@ class DashboardScreen extends StatelessWidget {
                   ElevatedButton(
                     style: btnStyle,
                     onPressed: () {
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 1;
                       // Implement the logic to send reminders
                     },
                     child: const Text('Search Patient'),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    style: btnStyle,
+                    onPressed: () {
+                      Provider.of<LandingScreenProvider>(context, listen: false)
+                          .index = 4;
+                      // Implement the logic to send reminders
+                    },
+                    child: const Text('Add Patient'),
                   ),
                 ],
               ),
