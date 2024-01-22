@@ -1,5 +1,7 @@
 // landing_screen.dart
 import 'package:dispensary/providers/landing_provider.dart';
+import 'package:dispensary/providers/medicine_provider.dart';
+import 'package:dispensary/providers/patient_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
@@ -113,15 +115,45 @@ class _LandingScreenState extends State<LandingScreen> {
                 child: const Text('Drawer Header'),
               ),
               ListTile(
-                title: const Text('Fake Button 1'),
+                title: const Text('Delete database'),
                 onTap: () {
-                  // landingScreenProvider.index = 2;
+                  Provider.of<LandingScreenProvider>(context, listen: false)
+                      .deleteDatabaseAndClear();
                   Navigator.pop(context); // Close the drawer
                 },
               ),
               ListTile(
-                title: const Text('Fake Button 2'),
+                title: const Text('Add Fake medicines'),
                 onTap: () {
+                  Provider.of<MedicineProvider>(context, listen: false)
+                      .insertsDummyMedicines();
+                  // landingScreenProvider.index = 3;
+                  Navigator.pop(context); // Close the drawer
+                },
+              ),
+              ListTile(
+                title: const Text('Clear Medicine Table'),
+                onTap: () {
+                  Provider.of<MedicineProvider>(context, listen: false)
+                      .deleteAllMedicines();
+                  // landingScreenProvider.index = 3;
+                  Navigator.pop(context); // Close the drawer
+                },
+              ),
+              ListTile(
+                title: const Text('Add Fake Patients'),
+                onTap: () {
+                  Provider.of<PatientProvider>(context, listen: false)
+                      .registerDummyPatient();
+                  // landingScreenProvider.index = 3;
+                  Navigator.pop(context); // Close the drawer
+                },
+              ),
+              ListTile(
+                title: const Text('Clear Patients'),
+                onTap: () {
+                  Provider.of<PatientProvider>(context, listen: false)
+                      .deleteAllPatients();
                   // landingScreenProvider.index = 3;
                   Navigator.pop(context); // Close the drawer
                 },
@@ -134,3 +166,5 @@ class _LandingScreenState extends State<LandingScreen> {
     });
   }
 }
+// testing
+// testi g2

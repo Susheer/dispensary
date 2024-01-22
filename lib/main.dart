@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           create: (context) => MedicineProvider(databaseService),
         ),
         ChangeNotifierProvider(
-          create: (context) => LandingScreenProvider(),
+          create: (context) => LandingScreenProvider(databaseService),
         ),
         // Add more providers as needed
       ],
