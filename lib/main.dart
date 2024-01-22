@@ -53,8 +53,8 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/dashboard': (context) => LandingScreen(),
-          '/': (context) => DashboardScreen(),
+          '/dashboard': (context) => DashboardScreen(),
+          '/': (context) => LandingScreen(),
           '/registration': (context) => RegistrationScreen(),
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
