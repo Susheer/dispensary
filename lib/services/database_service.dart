@@ -14,6 +14,7 @@ class DatabaseService {
     var documentsDirectory = await getDatabasesPath();
     String dbPath = join(
         documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
+    debugPrint("------DB PAth $dbPath------");
 
     // Open the database
     _database = await openDatabase(
@@ -188,5 +189,27 @@ class DatabaseService {
     // If patient not found, return null
     return null;
   }
-// Add methods for CRUD operations
+
+  // Function to delete the database and clear its contents
+  Future<void> deleteDatabaseAndClear() async {
+    debugPrint("deleteDatabaseAndClear: Invoked");
+    debugPrint("deleteDatabaseAndClear: Start");
+    var documentsDirectory = await getDatabasesPath();
+    String databasePath = join(
+        documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
+    debugPrint("deleteDatabaseAndClear: path $documentsDirectory");
+    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
+    debugPrint("closing db");
+    // Close the database before deleting
+    if (_database.isOpen) {
+      await _database.close();
+    }
+    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
+    debugPrint("------Deleting Db------");
+    // Delete the database file
+    await deleteDatabase(databasePath);
+    // Reinitialize the database if needed
+    debugPrint("------Re creating Db------");
+    await initializeDatabase();
+  }
 }
