@@ -35,7 +35,10 @@ class DatabaseService {
             guardianMobileNumber TEXT,
             guardianGender TEXT,
             guardianAddress TEXT,
-            guardianRelation TEXT
+            guardianRelation TEXT,
+            created_date TEXT,
+            updated_date TEXT,
+            scheduled_date TEXT
           )
         ''');
         db.execute('''
@@ -91,6 +94,9 @@ class DatabaseService {
     required String guardianGender,
     required String guardianAddress,
     required String guardianRelation,
+    required String updatedDate,
+    required String createdDate,
+    required String? scheduledDate,
   }) async {
     await _database.insert('patients', {
       'name': _wrapWithQuotes(name),
@@ -103,6 +109,9 @@ class DatabaseService {
       'guardianGender': _wrapWithQuotes(guardianGender),
       'guardianAddress': _wrapWithQuotes(guardianAddress),
       'guardianRelation': _wrapWithQuotes(guardianRelation),
+      'created_date': _wrapWithQuotes(createdDate),
+      'updated_date': _wrapWithQuotes(updatedDate),
+      'scheduled_date': _wrapWithQuotes(scheduledDate ?? ""),
     });
   }
 
