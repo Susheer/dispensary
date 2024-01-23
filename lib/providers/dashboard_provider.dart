@@ -20,9 +20,7 @@ class DashboardScreenProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteDatabaseAndClear() async {
-    debugPrint(" _databaseService.deleteDatabaseAndClear: Invoked");
-    await _databaseService.deleteDatabaseAndClear();
-    debugPrint(" _databaseService.deleteDatabaseAndClear: Completed");
-  }
+  Future<void> updatedPatients() async {}
+  Future<void> createdPatients() async {}
+  Future<void> scheduledPatients() async {}
 }
