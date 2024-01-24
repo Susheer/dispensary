@@ -27,7 +27,7 @@ class DashboardScreenProvider with ChangeNotifier {
 
   Future<List<Patient>> getPatientsCreatedToday() async {
     String query =
-        "SELECT * FROM patients WHERE DATE(created_date) = DATE('now')";
+        "SELECT * FROM patients WHERE DATE(created_date) = date('now', 'localtime')";
     List<Map<String, dynamic>> result =
         await _databaseService.db.rawQuery(query);
 
