@@ -37,6 +37,9 @@ class PatientProvider extends ChangeNotifier {
     String? guardianGender,
     String? guardianAddress,
     String? relation,
+    required DateTime createdDate,
+    required DateTime updatedDate,
+    DateTime? scheduledDate,
   }) async {
     Gender? gen;
     GuardianRelation? rel;
@@ -59,7 +62,10 @@ class PatientProvider extends ChangeNotifier {
         guardianMobileNumber: guardianMobileNumber,
         guardianGender: gen,
         guardianAddress: guardianAddress,
-        relation: rel);
+        relation: rel,
+        createdDate: createdDate,
+        updatedDate: updatedDate,
+        scheduledDate: scheduledDate);
 
     _patients.add(newPatient);
     notifyListeners();
@@ -75,7 +81,10 @@ class PatientProvider extends ChangeNotifier {
         guardianMobileNumber: guardianMobileNumber ?? "",
         guardianGender: guardianGender ?? "",
         guardianAddress: guardianAddress ?? "",
-        guardianRelation: relation ?? "");
+        guardianRelation: relation ?? "",
+        createdDate: newPatient.createdDate.toIso8601String(),
+        updatedDate: newPatient.updatedDate.toIso8601String(),
+        scheduledDate: newPatient.scheduledDate?.toIso8601String() ?? "");
   }
 
   Future<int> getPatientsCount() {
@@ -112,19 +121,21 @@ class PatientProvider extends ChangeNotifier {
     const int numberOfPatients = 50;
     for (int i = 1; i <= numberOfPatients; i++) {
       await _databaseService.savePatient(
-        name: 'Patient $i',
-        mobileNumber: '+1${Random().nextInt(1000000000)}',
-        gender: Random().nextBool() ? 'Male' : 'Female',
-        address: 'Address $i',
-        allergies: 'Peanuts, Pollen, Dust Mites, Shellfish, Latex'.split(','),
-        guardianName: 'Guardian Name $i',
-        guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
-        guardianGender: Random().nextBool() ? 'Male' : 'Female',
-        guardianAddress: 'Guardian Address $i',
-        guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
-      );
+          name: 'Patient $i',
+          mobileNumber: '+1${Random().nextInt(1000000000)}',
+          gender: Random().nextBool() ? 'Male' : 'Female',
+          address: 'Address $i',
+          allergies: 'Peanuts, Pollen, Dust Mites, Shellfish, Latex'.split(','),
+          guardianName: 'Guardian Name $i',
+          guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
+          guardianGender: Random().nextBool() ? 'Male' : 'Female',
+          guardianAddress: 'Guardian Address $i',
+          guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
+          createdDate: DateTime.now().toIso8601String(),
+          updatedDate: DateTime.now().toIso8601String(),
+          scheduledDate: null);
       initializePatients();
-      print("Patient $i inserted");
+      debugPrint("Patient $i inserted");
     }
   }
 
@@ -145,6 +156,7 @@ class PatientProvider extends ChangeNotifier {
       'guardianAddress': p.guardianAddress ?? "",
       'guardianRelation':
           Patient.parseRelationToString(p.relation ?? GuardianRelation.Other),
+      'updated_date': p.updatedDate.toIso8601String()
     };
 
     int totalRowAffected =
@@ -161,7 +173,8 @@ class PatientProvider extends ChangeNotifier {
       'mobileNumber': p.mobileNumber ?? "",
       'gender': Patient.parseGenderToString(p.gender),
       'address': p.address ?? "",
-      'allergies': p.allergies.join(',')
+      'allergies': p.allergies.join(','),
+      'updated_date': p.updatedDate.toIso8601String()
     };
 
     int totalRowAffected =
@@ -210,7 +223,10 @@ class PatientProvider extends ChangeNotifier {
           address: 'Address ${startCount + index}',
           mobileNumber: '123456789${startCount + index}',
           gender: index % 2 == 0 ? Gender.Male : Gender.Female,
-          allergies: ['a1', 'a2']),
+          allergies: ['a1', 'a2'],
+          createdDate: DateTime.now(),
+          updatedDate: DateTime.now(),
+          scheduledDate: null),
     );
   }
 

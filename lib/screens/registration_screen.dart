@@ -1,5 +1,7 @@
 // registration_screen.dart
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/providers/dashboard_provider.dart';
+import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -338,7 +340,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               guardianMobileNumber: guardianMobileNumber,
               guardianAddress: guardianAddress,
               guardianGender: Patient.parseGenderToString(guardianGender),
-              relation: Patient.parseRelationToString(relation));
+              relation: Patient.parseRelationToString(relation),
+              createdDate: DateTime.now(),
+              updatedDate: DateTime.now(),
+              scheduledDate: null);
+      await Provider.of<DashboardScreenProvider>(context, listen: false)
+          .getPatientsCreatedToday();
       _navigateToReview();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -357,8 +364,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         guardianGender = Gender.Other;
         relation = GuardianRelation.Other;
       });
-      await Future.delayed(Duration(seconds: 1));
-      Navigator.pop(context);
+      gotoHomePage();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -366,6 +372,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
       );
     }
+  }
+
+  void gotoHomePage() {
+    Provider.of<LandingScreenProvider>(context, listen: false).index = 0;
+  }
+
+  void showAlert({String message = ""}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alert'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                gotoHomePage();
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _navigateToReview() {

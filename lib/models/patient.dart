@@ -18,6 +18,9 @@ class Patient {
   late Gender? guardianGender;
   late String? guardianAddress;
   late GuardianRelation? relation;
+  late DateTime createdDate;
+  late DateTime updatedDate;
+  DateTime? scheduledDate;
 
   Patient({
     required this.id,
@@ -31,6 +34,9 @@ class Patient {
     this.guardianGender,
     this.guardianAddress,
     this.relation,
+    this.scheduledDate,
+    required this.createdDate,
+    required this.updatedDate,
   });
 
   factory Patient.fromMap(Map<String, dynamic> map) {
@@ -45,6 +51,12 @@ class Patient {
     if (guardianGender != null && guardianGender.trim().isNotEmpty) {
       gen = parseGender(guardianGender);
     }
+    DateTime? sDate;
+    if (map['scheduled_date'] == "" || map['scheduled_date'] == null) {
+      sDate = null;
+    } else {
+      sDate = DateTime.parse(map['scheduled_date']);
+    }
     return Patient(
       id: map['id'],
       name: map['name'],
@@ -57,6 +69,9 @@ class Patient {
       guardianGender: gen,
       guardianAddress: map['guardianAddress'],
       relation: rel,
+      createdDate: DateTime.parse(map['created_date']),
+      updatedDate: DateTime.parse(map['updated_date']),
+      scheduledDate: sDate,
     );
   }
 
