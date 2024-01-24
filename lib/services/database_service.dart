@@ -138,8 +138,8 @@ class DatabaseService {
       throw Exception(
           'Database not initialized. Call initializeDatabase first.');
     }
-    List<Map<String, dynamic>> result =
-        await _database.query('patients', limit: pageSize, offset: offset);
+    List<Map<String, dynamic>> result = await _database.query('patients',
+        orderBy: "updated_date DESC", limit: pageSize, offset: offset);
     return result.map((map) => Patient.fromMap(map)).toList();
   }
 

@@ -156,6 +156,7 @@ class PatientProvider extends ChangeNotifier {
       'guardianAddress': p.guardianAddress ?? "",
       'guardianRelation':
           Patient.parseRelationToString(p.relation ?? GuardianRelation.Other),
+      'updated_date': p.updatedDate.toIso8601String()
     };
 
     int totalRowAffected =
@@ -172,7 +173,8 @@ class PatientProvider extends ChangeNotifier {
       'mobileNumber': p.mobileNumber ?? "",
       'gender': Patient.parseGenderToString(p.gender),
       'address': p.address ?? "",
-      'allergies': p.allergies.join(',')
+      'allergies': p.allergies.join(','),
+      'updated_date': p.updatedDate.toIso8601String()
     };
 
     int totalRowAffected =
