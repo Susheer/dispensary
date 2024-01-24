@@ -233,6 +233,11 @@ class _EditDetailsBottomSheetState extends State<EditDetailsBottomSheet> {
           widget.patient.relation ?? GuardianRelation.Other);
       obj['guardianGender'] = Patient.parseGenderToString(_selectedGender);
     }
+    obj['updated_date'] = DateTime.now().toIso8601String();
+    obj['created_date'] = widget.patient.createdDate.toIso8601String();
+    obj['scheduled_date'] =
+        widget.patient.scheduledDate?.toIso8601String() ?? "";
+
     newP = Patient.fromMap(obj);
     widget.onSavePressed(newP);
     // Close the bottom sheet

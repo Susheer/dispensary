@@ -51,6 +51,12 @@ class Patient {
     if (guardianGender != null && guardianGender.trim().isNotEmpty) {
       gen = parseGender(guardianGender);
     }
+    DateTime? sDate;
+    if (map['scheduled_date'] == "" || map['scheduled_date'] == null) {
+      sDate = null;
+    } else {
+      sDate = DateTime.parse(map['scheduled_date']);
+    }
     return Patient(
       id: map['id'],
       name: map['name'],
@@ -65,7 +71,7 @@ class Patient {
       relation: rel,
       createdDate: DateTime.parse(map['created_date']),
       updatedDate: DateTime.parse(map['updated_date']),
-      scheduledDate: DateTime.parse(map['scheduled_date']),
+      scheduledDate: sDate,
     );
   }
 

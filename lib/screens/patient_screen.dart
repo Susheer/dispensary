@@ -64,7 +64,7 @@ class _PatientScreenState extends State<PatientScreen> {
         .getPrescriptionsByPatientIdWithDetails(widget.patientId,
             pageNum: 0, pageSize: 1)
         .then((prescriptionObj) {
-      if (prescriptionObj[0] != null) {
+      if (prescriptionObj.isNotEmpty && prescriptionObj[0] != null) {
         setState(() {
           prescription = prescriptionObj[0]!;
         });
