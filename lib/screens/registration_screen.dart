@@ -1,5 +1,6 @@
 // registration_screen.dart
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
 import 'package:flutter/material.dart';
@@ -343,6 +344,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               createdDate: DateTime.now(),
               updatedDate: DateTime.now(),
               scheduledDate: null);
+      await Provider.of<DashboardScreenProvider>(context, listen: false)
+          .getPatientsCreatedToday();
       _navigateToReview();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

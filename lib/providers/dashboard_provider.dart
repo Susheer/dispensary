@@ -1,3 +1,4 @@
+import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/foundation.dart';
 
@@ -20,7 +21,23 @@ class DashboardScreenProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatedPatients() async {}
-  Future<void> createdPatients() async {}
+  Future<void> updatedPatients() async {
+    await this._databaseService.db.query("");
+  }
+
+  Future<List<Patient>> getPatientsCreatedToday() async {
+    String query =
+        "SELECT * FROM patients WHERE DATE(created_date) = DATE('now')";
+    List<Map<String, dynamic>> result =
+        await _databaseService.db.rawQuery(query);
+
+    List<Patient> patients = result.map((map) => Patient.fromMap(map)).toList();
+    if (_newPatients != patients.length) {
+      _newPatients = patients.length;
+    }
+    notifyListeners();
+    return patients;
+  }
+
   Future<void> scheduledPatients() async {}
 }
