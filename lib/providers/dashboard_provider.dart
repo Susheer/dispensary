@@ -39,5 +39,20 @@ class DashboardScreenProvider with ChangeNotifier {
     return patients;
   }
 
+  Future<List<Patient>> getFollowUpPatientsToday() async {
+    String query =
+        ''' SELECT * FROM patients WHERE date(updated_date,'localtime') == date('now', 'localtime') AND date(created_date,'localtime') != date('now', 'localtime') 
+        ''';
+    List<Map<String, dynamic>> result =
+    await _databaseService.db.rawQuery(query);
+
+    List<Patient> patients = result.map((map) => Patient.fromMap(map)).toList();
+    if (patients.length>=0) {
+      followUpatients = patients.length;
+    }
+    debugPrint("Follow up length ${patients.length}");
+    return patients;
+  }
+
   Future<void> scheduledPatients() async {}
 }

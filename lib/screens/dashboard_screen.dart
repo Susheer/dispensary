@@ -17,11 +17,14 @@ class DashboardScreen extends StatelessWidget {
     debugPrint("Invoking build: dashboard screen");
     Provider.of<DashboardScreenProvider>(context, listen: false)
         .getPatientsCreatedToday();
+    Provider.of<DashboardScreenProvider>(context, listen: false)
+        .getFollowUpPatientsToday();
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Consumer<DashboardScreenProvider>(
             builder: (context, dashboardProvider, child) {
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -48,9 +51,9 @@ class DashboardScreen extends StatelessWidget {
                     CircleWidget(
                       radius: 50,
                       icon: Icons.receipt_long,
-                      text: 'Follow Up',
+                      text: 'Follow Uppp',
                       backgroundColor: Colors.black12,
-                      value: "5",
+                      value: dashboardProvider.followUpatients.toString(),
                     ),
                     CircleWidget(
                       radius: 50,

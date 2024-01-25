@@ -66,7 +66,21 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                       },
                     ),
                   )
-                : NotFoundMessage(message: "No patients available")
+                :  Center(
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height*30/100),
+                      Icon(
+                        Icons.notes,
+                        size: 50,
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Text("No Patients found"),
+                    ],
+                  ))
           ],
         ));
       },
