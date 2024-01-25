@@ -131,8 +131,8 @@ class PatientProvider extends ChangeNotifier {
           guardianGender: Random().nextBool() ? 'Male' : 'Female',
           guardianAddress: 'Guardian Address $i',
           guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
-          createdDate: DateTime.now().toIso8601String(),
-          updatedDate: DateTime.now().toIso8601String(),
+          createdDate: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+          updatedDate: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
           scheduledDate: null);
       initializePatients();
       debugPrint("Patient $i inserted");
