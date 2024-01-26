@@ -47,6 +47,13 @@ class PrescriptionProvider extends ChangeNotifier {
             await txn.insert('prescription_line', line);
           }
         }
+        // below update is to keep track of follow up counts
+        await txn.update(
+          'patients',
+          {'updated_date': DateTime.now().toIso8601String()},
+          where: 'id=?',
+          whereArgs: [prescription.patientId],
+        );
       } catch (error) {
         // If an error occurs, the transaction will be rolled back
         print('Error storing prescription and lines: $error');

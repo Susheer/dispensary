@@ -118,25 +118,38 @@ class PatientProvider extends ChangeNotifier {
 
   Future<void> registerDummyPatient() async {
     print("registerDummyPatient invoked");
-    const int numberOfPatients = 50;
+    const int numberOfPatients = 5;
+    int start = 0;
+    List<Map<String, dynamic>> list = await _databaseService.db
+        .query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
+    if (list.isNotEmpty && list[0].containsKey('id')) {
+      if (list[0]['id'] != null && list[0]['id'] != "" && list[0]['id'] >= 0) {
+        start = list[0]['id'];
+      }
+    }
     for (int i = 1; i <= numberOfPatients; i++) {
       await _databaseService.savePatient(
-          name: 'Patient $i',
+          name: 'Patient-${i + start}',
           mobileNumber: '+1${Random().nextInt(1000000000)}',
           gender: Random().nextBool() ? 'Male' : 'Female',
-          address: 'Address $i',
+          address: 'Address-${i + start}',
           allergies: 'Peanuts, Pollen, Dust Mites, Shellfish, Latex'.split(','),
-          guardianName: 'Guardian Name $i',
+          guardianName: 'Guardian Name ${i + start}',
           guardianMobileNumber: '+1${Random().nextInt(1000000000)}',
           guardianGender: Random().nextBool() ? 'Male' : 'Female',
-          guardianAddress: 'Guardian Address $i',
+          guardianAddress: 'Guardian Address-${i + start}',
           guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
-          createdDate: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
-          updatedDate: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
-          scheduledDate: null);
-      initializePatients();
-      debugPrint("Patient $i inserted");
+          createdDate: DateTime.now()
+              .subtract(const Duration(days: 30))
+              .toIso8601String(),
+          updatedDate: DateTime.now()
+              .subtract(const Duration(days: 10))
+              .toIso8601String(),
+          scheduledDate:
+              DateTime.now().add(const Duration(days: 1)).toIso8601String());
+      debugPrint("Patient ${i + start} inserted");
     }
+    initializePatients();
   }
 
   Future<void> deleteAllPatients() async {
