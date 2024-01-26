@@ -286,7 +286,11 @@ class PatientProvider extends ChangeNotifier {
     return account;
   }
 
-  Future<Prescription?> getLastprescription(int patientId) async {
-    return null;
+  Future<void> updateScheduledDate(int id, String newDate) async {
+    Map<String, String> obj = {
+      'scheduled_date': newDate,
+      'updated_date': DateTime.now().toIso8601String(),
+    };
+    await _databaseService.updatePatientByPatientId(id: id, obj: obj);
   }
 }

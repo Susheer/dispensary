@@ -1,9 +1,11 @@
 import 'package:dispensary/common/account_screen.dart';
 import 'package:dispensary/common/badge.dart';
 import 'package:dispensary/common/edit_details_bottom_sheet.dart';
+import 'package:dispensary/common/future_date_picker.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/common/seperator.dart';
+import 'package:dispensary/common/typography.dart';
 import 'package:dispensary/models/account_model.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/medicine_model.dart';
@@ -13,6 +15,7 @@ import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:dispensary/screens/add_prescription_screen.dart';
 import 'package:dispensary/screens/prescription_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PatientScreen extends StatefulWidget {
@@ -50,16 +53,6 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
 
-    Provider.of<PatientProvider>(context)
-        .getLastprescription(widget.patientId)
-        .then((prescriptionObj) {
-      if (prescriptionObj != null) {
-        setState(() {
-          prescription = prescriptionObj;
-        });
-      }
-    });
-
     Provider.of<PrescriptionProvider>(context)
         .getPrescriptionsByPatientIdWithDetails(widget.patientId,
             pageNum: 0, pageSize: 1)
@@ -71,6 +64,42 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
     super.didChangeDependencies();
+  }
+
+  void updateNextVisit(DateTime newDate) async {
+    await Provider.of<PatientProvider>(context, listen: false)
+        .updateScheduledDate(widget.patientId, newDate.toIso8601String());
+
+    Provider.of<PatientProvider>(context, listen: false)
+        .fetchPatientById(widget.patientId)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          patient = value;
+        });
+      }
+    });
+
+    Provider.of<PatientProvider>(context, listen: false)
+        .getAccount(widget.patientId)
+        .then((accountObj) {
+      if (accountObj != null) {
+        setState(() {
+          account = accountObj;
+        });
+      }
+    });
+
+    Provider.of<PrescriptionProvider>(context, listen: false)
+        .getPrescriptionsByPatientIdWithDetails(widget.patientId,
+            pageNum: 0, pageSize: 1)
+        .then((prescriptionObj) {
+      if (prescriptionObj.isNotEmpty && prescriptionObj[0] != null) {
+        setState(() {
+          prescription = prescriptionObj[0]!;
+        });
+      }
+    });
   }
 
   Function()? addPrescriptionListener() {
@@ -145,7 +174,10 @@ class _PatientScreenState extends State<PatientScreen> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Build invoked, patient screen");
-
+    String scheduledDate = "";
+    if (patient?.scheduledDate != null) {
+      scheduledDate = DateFormat('dd/MM/yyyy').format(patient!.scheduledDate!);
+    }
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -263,6 +295,29 @@ class _PatientScreenState extends State<PatientScreen> {
                   enableEdit: false,
                   onEditPressed: () {},
                 ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                child: Typography1(
+                  label: 'Next Visit',
+                  value: scheduledDate,
+                  textStyle: const TextStyle(fontSize: 17),
+                  labelStyle: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                constraints:
+                    BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                child: FutureDatePicker(
+                  defaultDate: patient?.scheduledDate ?? DateTime.now(),
+                  label: 'Schedule Next Visit',
+                  onDateSelected: (p0) {
+                    updateNextVisit(p0);
+                    debugPrint("Selected Date ${p0.toIso8601String()}");
+                  },
+                ),
+              ),
               const Separator(),
               buildActionButtonsRow(context),
             ],
