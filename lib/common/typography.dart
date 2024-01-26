@@ -15,10 +15,6 @@ class Typography1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.red, width: 2.0),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       child: Row(
         mainAxisSize: MainAxisSize.min,
