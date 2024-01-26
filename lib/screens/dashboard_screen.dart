@@ -15,18 +15,21 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint("Invoking build: dashboard screen");
-    Provider.of<DashboardScreenProvider>(context, listen: false)
-        .getPatientsCreatedToday();
-    Provider.of<DashboardScreenProvider>(context, listen: false)
-        .getFollowUpPatientsToday();
+    DashboardScreenProvider dashboardScreenProvider =
+        Provider.of<DashboardScreenProvider>(context, listen: false);
+    dashboardScreenProvider.getPatientsCreatedToday();
+    dashboardScreenProvider.getFollowUpPatientsToday();
+    dashboardScreenProvider
+        .calculateTotalPendingAmountForScheduledPatientsOnTommrow();
+    dashboardScreenProvider.scheduledPatientsToday();
+    dashboardScreenProvider.scheduledPatientsTomorrow();
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Consumer<DashboardScreenProvider>(
             builder: (context, dashboardProvider, child) {
-
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(
                 height: 16,
@@ -60,27 +63,39 @@ class DashboardScreen extends StatelessWidget {
                       icon: Icons.schedule,
                       text: 'Scheduled Today',
                       backgroundColor: Colors.black12,
-                      value: "100",
+                      value: dashboardScreenProvider.scheduledToday.toString(),
                     ),
                   ],
                   context: context),
-              const SizedBox(height: 18),
+              const SizedBox(
+                height: 25,
+              ),
+              // Collection Information
+              const Text("Scheduled For Tomorrow",
+                  style: TextStyle(fontSize: 20)),
+              const SizedBox(
+                height: 6,
+              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildStatCard('Pending Amount', '30', Icons.currency_rupee),
-                  _buildStatCard('Total Appointments', '30', Icons.person_2),
+                  _buildStatCard(
+                      'Pending Bal',
+                      dashboardScreenProvider.pendingAmount.toString(),
+                      Icons.currency_rupee,
+                      (MediaQuery.of(context).size.width / 2) - 20,
+                      context),
+                  _buildStatCard(
+                      'Total Appointments',
+                      dashboardScreenProvider.scheduledTomorrow.toString(),
+                      Icons.person_2,
+                      (MediaQuery.of(context).size.width / 2) - 20,
+                      context),
                 ],
               ),
               const SizedBox(
-                height: 22,
+                height: 8,
               ),
-              // Collection Information
-              const Text('Appointment Management',
-                  style: TextStyle(fontSize: 20)),
-
-              const SizedBox(height: 14),
-
               Container(
                 constraints:
                     BoxConstraints(minWidth: MediaQuery.of(context).size.width),
@@ -98,18 +113,9 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    ElevatedButton(
-                      style: btnStyle,
-                      onPressed: () {
-                        // Implement the logic to send reminders
-                      },
-                      child: Text('Pending Payments Tomorrow'),
-                    ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 16),
 
               // Patient management
               const SizedBox(
@@ -214,22 +220,23 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData iconName) {
+  Widget _buildStatCard(String title, String value, IconData iconName,
+      double maxWidth, BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 160),
+      constraints: BoxConstraints(maxWidth: maxWidth),
       child: Card(
-        surfaceTintColor: const Color(0xff6750a4),
         elevation: 1,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
                   style: const TextStyle(
                       fontSize: 15, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 13),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     iconName,
@@ -239,11 +246,17 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(
                     width: 20,
                   ),
-                  Text(value,
-                      style: const TextStyle(
-                          fontSize: 23,
-                          leadingDistribution:
-                              TextLeadingDistribution.proportional))
+                  Expanded(
+                    child: Baseline(
+                      baseline: 0.0,
+                      baselineType: TextBaseline.alphabetic,
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                            overflow: TextOverflow.clip, fontSize: 20),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
