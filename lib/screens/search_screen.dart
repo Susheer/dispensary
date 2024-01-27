@@ -24,47 +24,64 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: mobileController,
-              decoration: const InputDecoration(labelText: 'Mobile Number'),
-            ),
-            TextField(
-              controller: genderController,
-              decoration: const InputDecoration(labelText: 'Gender'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  minimumSize:
-                      Size(MediaQuery.of(context).size.width - 40, 40)),
-              onPressed: () async {
-                String g = "";
-                if (genderController.text != null &&
-                    genderController.text != "") {
-                  g = Patient.parseGenderToString(
-                      Patient.parseGender(genderController.text));
-                }
-                Provider.of<PatientProvider>(context, listen: false)
-                    .searchPatients(
-                  name: nameController.text,
-                  mobileNumber: mobileController.text,
-                  gender: g,
-                )
-                    .then((result) {
-                  setState(() {
-                    searchResult = result;
-                  });
-                });
-              },
-              child: const Text('Search Patients'),
+            Container(
+              padding: const EdgeInsets.only(
+                  top: 17, bottom: 35, left: 25, right: 25),
+              width: MediaQuery.of(context).size.width - 12,
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  TextField(
+                    controller: mobileController,
+                    decoration:
+                        const InputDecoration(labelText: 'Mobile Number'),
+                  ),
+                  TextField(
+                    controller: genderController,
+                    decoration: const InputDecoration(labelText: 'Gender'),
+                  ),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        minimumSize:
+                            Size(MediaQuery.of(context).size.width - 40, 40)),
+                    onPressed: () async {
+                      String g = "";
+                      if (genderController.text != null &&
+                          genderController.text != "") {
+                        g = Patient.parseGenderToString(
+                            Patient.parseGender(genderController.text));
+                      }
+                      Provider.of<PatientProvider>(context, listen: false)
+                          .searchPatients(
+                        name: nameController.text,
+                        mobileNumber: mobileController.text,
+                        gender: g,
+                      )
+                          .then((result) {
+                        setState(() {
+                          searchResult = result;
+                        });
+                      });
+                    },
+                    child: const Text('Search Patients'),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16.0),
             Expanded(
