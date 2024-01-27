@@ -296,15 +296,32 @@ class _PatientScreenState extends State<PatientScreen> {
                   enableEdit: false,
                   onEditPressed: () {},
                 ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                child: Typography1(
-                  label: 'Next Visit',
-                  value: scheduledDate,
-                  textStyle: const TextStyle(fontSize: 17),
-                  labelStyle: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.bold),
-                ),
+              buildSection(
+                title: 'Visit Timelines',
+                content: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Typography1(
+                    label: 'First Visit',
+                    value:
+                        DateFormat('dd/MM/yyyy').format(patient!.createdDate!),
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Typography1(
+                    label: 'Last Visit',
+                    value:
+                        DateFormat('dd/MM/yyyy').format(patient!.updatedDate!),
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Typography1(
+                    label: 'Next Visit',
+                    value: scheduledDate,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+                enableEdit: false,
+                onEditPressed: () {},
               ),
             ],
           ),
