@@ -1,4 +1,7 @@
 // search_screen.dart
+import 'package:dispensary/common/seperator.dart';
+import 'package:dispensary/common/typography.dart';
+import 'package:dispensary/screens/patient_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
@@ -61,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   });
                 });
               },
-              child: const Text('Search'),
+              child: const Text('Search Patients'),
             ),
             const SizedBox(height: 16.0),
             Expanded(
@@ -69,14 +72,62 @@ class _SearchScreenState extends State<SearchScreen> {
               itemCount: searchResult.length,
               itemBuilder: (context, index) {
                 Patient patient = searchResult[index];
-                return ListTile(
-                  title: Text(patient.name),
-                  subtitle: Text(
-                      'Mobile: ${patient.mobileNumber}, Gender: ${patient.gender}'),
-                );
+                return SearchedPatient(patient: patient);
               },
             )),
           ],
         ));
+  }
+}
+
+class SearchedPatient extends StatelessWidget {
+  const SearchedPatient({
+    super.key,
+    required this.patient,
+  });
+
+  final Patient patient;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PatientScreen(patientId: patient.id),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width - 12,
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width,
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          padding:
+              const EdgeInsets.only(top: 17, bottom: 35, left: 25, right: 25),
+          child: Column(
+            children: [
+              Typography2(label: 'Name', value: patient.name),
+              RowWithLabelAndValueSet(
+                  label1: 'Gender ',
+                  label2: 'Mob ',
+                  value1: Patient.parseGenderToString(patient.gender),
+                  value2: patient.mobileNumber),
+              const Separator(),
+              Typography2(
+                  label: 'Gurdian Name ', value: patient.guardianName ?? ""),
+              Typography2(label: 'Address ', value: patient.address ?? ""),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
