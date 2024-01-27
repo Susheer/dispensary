@@ -201,7 +201,9 @@ class _PatientScreenState extends State<PatientScreen> {
                 content: [
                   Text('Name: ${patient?.name}'),
                   Text('Mobile: ${patient?.mobileNumber}'),
-                  Text('Gender: ${patient?.gender}'),
+                  if (patient?.gender != null)
+                    Text(
+                        'Gender: ${Patient.parseGenderToString(patient!.gender)}'),
                   Text('Address: ${patient?.address}'),
                   const Separator(),
                   const Text(
@@ -241,7 +243,10 @@ class _PatientScreenState extends State<PatientScreen> {
                 content: [
                   Text('Name: ${patient?.guardianName}'),
                   Text('Mobile: ${patient?.guardianMobileNumber}'),
-                  Text('Gender: ${patient?.guardianGender}'),
+                  if (patient?.guardianGender != null)
+                    Text(
+                        'Gender: ${Patient.parseGenderToString(patient!.guardianGender!)}'),
+                  if (patient?.guardianGender == null) const Text('Gender:'),
                   Text('Address: ${patient?.guardianAddress}'),
                 ],
                 enableEdit: true,

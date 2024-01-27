@@ -1,9 +1,6 @@
 // patient_provider.dart
-import 'dart:io';
 import 'dart:math';
-
 import 'package:dispensary/models/account_model.dart';
-import 'package:dispensary/models/prescription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/services/database_service.dart';
@@ -91,19 +88,44 @@ class PatientProvider extends ChangeNotifier {
     return _databaseService.getPatientsCount();
   }
 
-  Future<void> searchPatients({
-    required String name,
-    required String mobileNumber,
-    required Gender gender,
+  Future<List<Patient>> searchPatients({
+    String name = "",
+    String mobileNumber = "",
+    String? gender = "",
   }) async {
-    // Search patients in the database based on the provided criteria
-    _searchResults = _patients
-        .where((patient) =>
-            patient.name.toLowerCase().contains(name.toLowerCase()) &&
-            patient.mobileNumber.contains(mobileNumber) &&
-            patient.gender == gender)
-        .toList();
-    notifyListeners();
+    const String tabelName = "patients";
+    List<String> whereClause = [];
+    String query = "SELECT * FROM $tabelName";
+    if (name != "") {
+      whereClause.add("UPPER(name) LIKE UPPER('%$name%')");
+    }
+
+    if (gender != "") {
+      if (whereClause.isNotEmpty) {
+        whereClause.add(" AND UPPER(gender) == UPPER('$gender')");
+      } else {
+        whereClause.add(" UPPER(gender) == UPPER('$gender')");
+      }
+    }
+
+    if (mobileNumber != "") {
+      if (whereClause.isNotEmpty) {
+        whereClause
+            .add(" AND UPPER(mobileNumber) LIKE UPPER('%$mobileNumber%')");
+      } else {
+        whereClause.add(" UPPER(mobileNumber) LIKE UPPER('%$mobileNumber%')");
+      }
+    }
+    if (whereClause.isNotEmpty) {
+      query += " WHERE ${whereClause.join()}";
+    }
+
+    query += " limit 10";
+    debugPrint("Query- $query");
+    final List<Map<String, dynamic>> result =
+        await _databaseService.db.rawQuery(query);
+    List<Patient> list = result.map((obj) => Patient.fromMap(obj)).toList();
+    return list;
   }
 
   Future<void> fetchNextPage(int startIndex, int pageSize) async {
