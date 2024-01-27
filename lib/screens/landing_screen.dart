@@ -49,7 +49,7 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.notifications),
+              icon: const Icon(Icons.manage_search),
               onPressed: () {
                 landingProvider.index = 1;
               },

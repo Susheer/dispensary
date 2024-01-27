@@ -18,6 +18,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController mobileController = TextEditingController();
 
   final TextEditingController genderController = TextEditingController();
+  bool isSearchBarExpanded = false;
 
   List<Patient> searchResult = [];
 
@@ -65,57 +66,7 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.only(
-                  top: 17, bottom: 35, left: 25, right: 25),
-              width: MediaQuery.of(context).size.width - 12,
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                  ),
-                  TextField(
-                    controller: mobileController,
-                    decoration:
-                        const InputDecoration(labelText: 'Mobile Number'),
-                  ),
-                  TextField(
-                    controller: genderController,
-                    decoration: const InputDecoration(labelText: 'Gender'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(
-                                MediaQuery.of(context).size.width * 30 / 100,
-                                40)),
-                        onPressed: onSearch,
-                        child: const Text('Search'),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(
-                                MediaQuery.of(context).size.width * 30 / 100,
-                                40)),
-                        onPressed: onClear,
-                        child: const Text('Clear'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            expandedSearchContainer(context),
             const SizedBox(height: 16.0),
             Expanded(
                 child: ListView.builder(
@@ -127,6 +78,71 @@ class _SearchScreenState extends State<SearchScreen> {
             )),
           ],
         ));
+  }
+
+  Container expandedSearchContainer(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      width: MediaQuery.of(context).size.width,
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(6.0),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+                labelText: 'Patient Name', icon: Icon(Icons.person)),
+          ),
+          if (isSearchBarExpanded == true)
+            TextField(
+              controller: mobileController,
+              decoration: const InputDecoration(
+                  labelText: 'Mobile Number', icon: Icon(Icons.phone_iphone)),
+            ),
+          if (isSearchBarExpanded == true)
+            TextField(
+              controller: genderController,
+              decoration: const InputDecoration(
+                  labelText: 'Gender', icon: Icon(Icons.person)),
+            ),
+          const SizedBox(height: 16.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize:
+                        Size(MediaQuery.of(context).size.width * 30 / 100, 40)),
+                onPressed: onSearch,
+                child: const Text('Search'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize:
+                        Size(MediaQuery.of(context).size.width * 30 / 100, 40)),
+                onPressed: onClear,
+                child: const Text('Clear'),
+              ),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isSearchBarExpanded = !isSearchBarExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    isSearchBarExpanded ? Icons.expand_less : Icons.expand_more,
+                    size: 20,
+                  )),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
