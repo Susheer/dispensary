@@ -1,7 +1,6 @@
 import 'package:dispensary/common/account_screen.dart';
 import 'package:dispensary/common/badge.dart';
 import 'package:dispensary/common/edit_details_bottom_sheet.dart';
-import 'package:dispensary/common/future_date_picker.dart';
 import 'package:dispensary/common/medicine_card.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/common/seperator.dart';
@@ -30,6 +29,7 @@ class _PatientScreenState extends State<PatientScreen> {
   Patient? patient;
   Prescription? prescription;
   Account? account;
+  int _selectedIndex = 0;
   @override
   void didChangeDependencies() {
     debugPrint("didChangeDependencies invoked");
@@ -126,10 +126,6 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     }
   }
-
-  Function()? scheduleFollowUpListener() {}
-
-  Function()? updateAccountListener() {}
 
   void onPatientUpdate(Patient response) async {
     if (patient != null) {
@@ -305,24 +301,50 @@ class _PatientScreenState extends State<PatientScreen> {
                       fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                constraints:
-                    BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                child: FutureDatePicker(
-                  defaultDate: patient?.scheduledDate ?? DateTime.now(),
-                  label: 'Schedule Next Visit',
-                  onDateSelected: (p0) {
-                    updateNextVisit(p0);
-                    debugPrint("Selected Date ${p0.toIso8601String()}");
-                  },
-                ),
-              ),
-              const Separator(),
-              buildActionButtonsRow(context),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        unselectedItemColor: Theme.of(context).primaryColor,
+        onTap: (val) async {
+          if (val == 0) {
+            addPrescriptionListener();
+          }
+          if (val == 1) {
+            viewPrescriptionListener();
+          }
+          if (val == 2) {
+            await showDatePicker(
+              context: context,
+              initialDate: patient?.scheduledDate ?? DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101),
+            ).then((selected) {
+              if (selected != null) {
+                updateNextVisit(selected);
+              }
+            });
+          }
+          setState(() {
+            _selectedIndex = val;
+          });
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box),
+            label: 'Prescribe',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.view_list),
+            label: 'Prescriptions',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Follow-Up',
+          ),
+        ],
       ),
     );
   }
@@ -394,57 +416,4 @@ class _PatientScreenState extends State<PatientScreen> {
             .getPrescriptionsByPatientIdWithDetails(pId);
     return pList;
   }
-
-  Widget buildActionButtonsRow(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width, maxHeight: 40),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        IconButton(
-          icon: const Icon(Icons.add_box),
-          tooltip: "Add Prescription",
-          onPressed: addPrescriptionListener,
-        ),
-        IconButton(
-          icon: const Icon(Icons.view_agenda),
-          tooltip: "My Prescription",
-          onPressed: viewPrescriptionListener,
-        ),
-        IconButton(
-          icon: const Icon(Icons.schedule),
-          tooltip: "Schedule Follow Up",
-          onPressed: scheduleFollowUpListener,
-        ),
-        IconButton(
-          icon: const Icon(Icons.account_balance_wallet),
-          tooltip: "Account",
-          onPressed: updateAccountListener,
-        ),
-      ]),
-    );
-  }
-}
-
-// some fake methods
-List<Medicine> generateDummyMedicines() {
-  return [
-    Medicine(
-        sysMedicineId: 1,
-        name: 'Aspirin',
-        description: 'Pain reliever',
-        createdDate: DateTime.timestamp(),
-        updatedDate: DateTime.timestamp()),
-    Medicine(
-        sysMedicineId: 2,
-        name: 'Amoxicillin',
-        description: 'Antibiotic',
-        createdDate: DateTime.timestamp(),
-        updatedDate: DateTime.timestamp()),
-    Medicine(
-        sysMedicineId: 3,
-        name: 'Ibuprofen',
-        description: 'Anti-inflammatory',
-        createdDate: DateTime.timestamp(),
-        updatedDate: DateTime.timestamp()),
-  ];
 }
