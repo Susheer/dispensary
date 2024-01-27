@@ -307,7 +307,8 @@ class _PatientScreenState extends State<PatientScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        unselectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.black,
+        fixedColor: Colors.black,
         onTap: (val) async {
           if (val == 0) {
             addPrescriptionListener();
