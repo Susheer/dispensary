@@ -85,10 +85,10 @@ class _LandingScreenState extends State<LandingScreen> {
               }
             });
           },
-          showUnselectedLabels: true,
-          fixedColor: Colors.black, // Set the color for the selected item
-          unselectedItemColor:
-              Colors.black, // Set the color for unselected items
+          fixedColor: Colors.black,
+          unselectedItemColor: Colors.black,
+
+          // Set the color for unselected items
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
