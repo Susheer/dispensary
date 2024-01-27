@@ -21,6 +21,43 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<Patient> searchResult = [];
 
+  Future<void> onSearch() async {
+    String g = "";
+    if (genderController.text != null && genderController.text != "") {
+      g = Patient.parseGenderToString(
+          Patient.parseGender(genderController.text));
+    }
+    Provider.of<PatientProvider>(context, listen: false)
+        .searchPatients(
+      name: nameController.text,
+      mobileNumber: mobileController.text,
+      gender: g,
+    )
+        .then((result) {
+      setState(() {
+        searchResult = result;
+      });
+    });
+  }
+
+  Future<void> onClear() async {
+    setState(() {
+      mobileController.clear();
+      genderController.clear();
+      nameController.clear();
+      searchResult = [];
+    });
+  }
+
+  @override
+  void dispose() {
+    nameController?.dispose();
+    mobileController?.dispose();
+    genderController?.dispose();
+    searchResult = [];
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -55,30 +92,26 @@ class _SearchScreenState extends State<SearchScreen> {
                     decoration: const InputDecoration(labelText: 'Gender'),
                   ),
                   const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        minimumSize:
-                            Size(MediaQuery.of(context).size.width - 40, 40)),
-                    onPressed: () async {
-                      String g = "";
-                      if (genderController.text != null &&
-                          genderController.text != "") {
-                        g = Patient.parseGenderToString(
-                            Patient.parseGender(genderController.text));
-                      }
-                      Provider.of<PatientProvider>(context, listen: false)
-                          .searchPatients(
-                        name: nameController.text,
-                        mobileNumber: mobileController.text,
-                        gender: g,
-                      )
-                          .then((result) {
-                        setState(() {
-                          searchResult = result;
-                        });
-                      });
-                    },
-                    child: const Text('Search Patients'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(
+                                MediaQuery.of(context).size.width * 30 / 100,
+                                40)),
+                        onPressed: onSearch,
+                        child: const Text('Search'),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(
+                                MediaQuery.of(context).size.width * 30 / 100,
+                                40)),
+                        onPressed: onClear,
+                        child: const Text('Clear'),
+                      ),
+                    ],
                   ),
                 ],
               ),
