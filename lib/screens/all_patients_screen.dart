@@ -66,19 +66,21 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
                       },
                     ),
                   )
-                :  Center(
+                : Center(
                     child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height*30/100),
-                      Icon(
+                      SizedBox(
+                          height:
+                              MediaQuery.of(context).size.height * 30 / 100),
+                      const Icon(
                         Icons.notes,
                         size: 50,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 16,
                       ),
-                      Text("No Patients found"),
+                      const Text("No Patients found"),
                     ],
                   ))
           ],
