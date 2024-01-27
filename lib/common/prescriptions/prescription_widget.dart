@@ -1,5 +1,6 @@
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
+import 'package:dispensary/services/prescription_pdf.dart';
 import 'package:flutter/material.dart';
 import 'prescription_header.dart';
 import 'prescription_body.dart';
@@ -96,7 +97,12 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
           ),
           tooltip: "Share",
           onPressed: () {
-            showAlert(message: 'Share this prescription.');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PDFPrescription(),
+              ),
+            );
           },
         ),
         IconButton(
