@@ -1,4 +1,3 @@
-import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/common/typography.dart';
 import 'package:dispensary/utils.dart/prescriptionUtil.dart';
 import 'package:flutter/material.dart';

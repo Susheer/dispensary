@@ -14,6 +14,7 @@ import 'package:dispensary/providers/prescription_provider.dart';
 import 'package:dispensary/screens/add_prescription_screen.dart';
 import 'package:dispensary/screens/prescription_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -269,7 +270,20 @@ class _PatientScreenState extends State<PatientScreen> {
               const SizedBox(height: 20),
               if (prescription != null)
                 buildSection(
-                    title: 'Latest Prescription',
+                    title: 'Recent Prescription',
+                    isLinkButton: true,
+                    linkButton: TextButton(
+                      onPressed: () {
+                        viewPrescriptionListener();
+                      },
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(
+                          // Customize text color
+                          fontSize: 14, // Customize font size
+                        ),
+                      ),
+                    ),
                     content: [
                       PrescriptionWidget(
                           sysPrescriptionId: prescription!.sysPrescriptionId,
@@ -296,24 +310,29 @@ class _PatientScreenState extends State<PatientScreen> {
                   enableEdit: false,
                   onEditPressed: () {},
                 ),
+              const SizedBox(
+                height: 20,
+              ),
               buildSection(
                 title: 'Visit Timelines',
                 content: [
                   const SizedBox(
                     height: 10,
                   ),
-                  Typography1(
-                    label: 'First Visit',
-                    value:
-                        DateFormat('dd/MM/yyyy').format(patient!.createdDate!),
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Typography1(
-                    label: 'Last Visit',
-                    value:
-                        DateFormat('dd/MM/yyyy').format(patient!.updatedDate!),
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  if (patient != null && patient!.createdDate != null)
+                    RowWithLabelAndValueSet(
+                        label1: 'First Visit',
+                        value1: DateFormat('dd/MM/yyyy')
+                            .format(patient!.createdDate!),
+                        label2: '- ',
+                        value2: timeago.format(patient!.createdDate!)),
+                  if (patient != null && patient!.updatedDate != null)
+                    RowWithLabelAndValueSet(
+                        label1: 'Last Visit',
+                        value1: DateFormat('dd/MM/yyyy')
+                            .format(patient!.updatedDate!),
+                        label2: '- ',
+                        value2: timeago.format(patient!.updatedDate!)),
                   Typography1(
                     label: 'Next Visit',
                     value: scheduledDate,
@@ -388,6 +407,8 @@ class _PatientScreenState extends State<PatientScreen> {
     required String title,
     required List<Widget> content,
     bool enableEdit = false,
+    bool isLinkButton = false,
+    Widget? linkButton = null,
     VoidCallback? onEditPressed,
   }) {
     return Container(
@@ -418,6 +439,7 @@ class _PatientScreenState extends State<PatientScreen> {
                   tooltip: "Edit",
                   onPressed: onEditPressed,
                 ),
+              if (isLinkButton == true && linkButton != null) linkButton
             ],
           ),
           ...content,
