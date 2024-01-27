@@ -14,19 +14,16 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController nameController = TextEditingController();
-
   final TextEditingController mobileController = TextEditingController();
 
-  final TextEditingController genderController = TextEditingController();
   bool isSearchBarExpanded = false;
-
+  String selectedGender = 'Select Gender';
   List<Patient> searchResult = [];
 
   Future<void> onSearch() async {
     String g = "";
-    if (genderController.text != null && genderController.text != "") {
-      g = Patient.parseGenderToString(
-          Patient.parseGender(genderController.text));
+    if (selectedGender != "Select Gender") {
+      g = Patient.parseGenderToString(Patient.parseGender(selectedGender));
     }
     Provider.of<PatientProvider>(context, listen: false)
         .searchPatients(
@@ -44,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> onClear() async {
     setState(() {
       mobileController.clear();
-      genderController.clear();
+      selectedGender = 'Select Gender';
       nameController.clear();
       searchResult = [];
     });
@@ -54,7 +51,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     nameController?.dispose();
     mobileController?.dispose();
-    genderController?.dispose();
     searchResult = [];
     super.dispose();
   }
@@ -80,9 +76,53 @@ class _SearchScreenState extends State<SearchScreen> {
         ));
   }
 
+  Widget patientGenderWidget() {
+    return Row(
+      children: [
+        const Icon(
+          Icons.female,
+          size: 29,
+        ),
+        const SizedBox(
+          width: 9,
+        ),
+        Expanded(
+          child: DropdownButton<String>(
+            value: selectedGender,
+            hint: const Text('Select Gender'),
+            onChanged: (value) {
+              setState(() {
+                selectedGender = value!;
+              });
+            },
+            items: <String>[
+              'Select Gender', // Default option
+              'Male',
+              'Female',
+              'Other',
+            ].map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Container(
+                  constraints: BoxConstraints(
+                      minWidth: MediaQuery.of(context).size.width * 65 / 100),
+                  child: Row(
+                    children: [
+                      Text(value), // Text
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    ); // Gender Radio Buttons
+  }
+
   Container expandedSearchContainer(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       width: MediaQuery.of(context).size.width,
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
@@ -104,13 +144,9 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: const InputDecoration(
                   labelText: 'Mobile Number', icon: Icon(Icons.phone_iphone)),
             ),
-          if (isSearchBarExpanded == true)
-            TextField(
-              controller: genderController,
-              decoration: const InputDecoration(
-                  labelText: 'Gender', icon: Icon(Icons.person)),
-            ),
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 12.0),
+          if (isSearchBarExpanded == true) patientGenderWidget(),
+          const SizedBox(height: 10.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -140,6 +176,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   )),
             ],
           ),
+          const SizedBox(height: 5),
         ],
       ),
     );
