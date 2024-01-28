@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PDFPrescription {
   String nameOfDocter = AppConfig.nameOfDocter;
@@ -43,6 +44,13 @@ class PDFPrescription {
     final pdf = generatePDF();
     final location = await pickLocationToSavePDF();
     if (location != null) await savePDF(pdf, location, ctx);
+  }
+
+  Future<void> share(BuildContext ctx) async {
+    debugPrint("share invoked");
+    final pdf = generatePDF();
+    final location = await tempLocation();
+    if (location != null) await sharePDF(pdf, location, ctx);
   }
 
   pw.Row _pwBuildHeader() {
@@ -195,11 +203,17 @@ class PDFPrescription {
   }
 
   Future<String?> pickLocationToSavePDF() async {
-    // Directory? directory = await getExternalStorageDirectory();
     Directory? download = await getDownloadsDirectory();
-    //Directory? document = await getApplicationDocumentsDirectory();
     if (download != null) {
       return download.path;
+    }
+    return null;
+  }
+
+  Future<String?> tempLocation() async {
+    Directory? tempDir = await getTemporaryDirectory();
+    if (tempDir != null) {
+      return tempDir.path;
     }
     return null;
   }
@@ -210,14 +224,22 @@ class PDFPrescription {
     final bytes = await pdf.save();
     File file = File(filePath);
     file.writeAsBytes(bytes);
-    showSnackbar(ctx);
+    showSnackbar(ctx, 'File downloaded');
     debugPrint('PDF saved successfully at: $filePath');
   }
 
-  void showSnackbar(BuildContext ctx) {
+  Future<void> sharePDF(pw.Document pdf, String directoryPath, BuildContext ctx) async {
+    String filePath = '$directoryPath/prescription-${nameOfPatient}.pdf'.toLowerCase();
+    final bytes = await pdf.save();
+    File file = File(filePath);
+    file.writeAsBytes(bytes);
+    Share.share(file.path, subject: '$nameOfClinic | Prescription-$nameOfPatient');
+  }
+
+  void showSnackbar(BuildContext ctx, String msg) {
     ScaffoldMessenger.of(ctx).showSnackBar(
-      const SnackBar(
-        content: Text('File downloaded'),
+      SnackBar(
+        content: Text(msg),
       ),
     );
   }

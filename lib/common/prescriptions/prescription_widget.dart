@@ -111,18 +111,25 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
             sharePrescription();
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.account_balance_wallet, size: 17),
-          tooltip: "Edit Balance",
-          onPressed: () {
-            showAlert(message: 'Edit Balance');
-          },
-        )
+        // IconButton(
+        //   icon: const Icon(Icons.account_balance_wallet, size: 17),
+        //   tooltip: "Edit Balance",
+        //   onPressed: () {
+        //     showAlert(message: 'Edit Balance');
+        //   },
+        // )
       ]),
     );
   }
 
-  void sharePrescription() async {}
+  void sharePrescription() async {
+    Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
+    if (pp != null) {
+      PDFPrescription doc =
+          PDFPrescription(presLine: widget.lines, addressOfPatient: pp.address, age: '', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
+      await doc.share(context);
+    }
+  }
 
   Future<void> downloadPrescription(BuildContext context) async {
     Patient? pp = await Provider.of<PatientProvider>(context, listen: false)
