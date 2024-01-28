@@ -1,17 +1,16 @@
 import 'dart:io';
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
-import 'package:dispensary/models/prescription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 
 class PDFPrescription {
-  String nameOfDocter = "Dr. Varun, MBBS, MD";
-  String nameOfClinic = "Dr. D. Y. Patil Vidyapeeth, Pune";
-  String addressLine1 = "(Deemed to be University)";
+  String nameOfDocter = "Dr. Raj vishwakarma, MBBS, MD";
+  String nameOfClinic = "Sai clinick maharastrha 12232";
+  String addressLine1 = "";
   String addressLine2 = "Sant Tukaram Nagar";
   String addressLine3 = "Pimpri, Pune 411018";
   String regNO = "Regd. No. 03302441";
@@ -35,7 +34,13 @@ class PDFPrescription {
       required this.age,
       required this.addressOfPatient,
       required this.dateOfConsultation}) {
-    pdf = pw.Document();
+    pdf = pw.Document(
+        version: PdfVersion.pdf_1_5,
+        author: AppConfig.prescriptionPDFAuther,
+        creator: AppConfig.creator,
+        producer: 'SAI CLINIC APP',
+        title: 'Prescription-$nameOfPatient',
+        subject: 'This Prescription is not valid without seal.');
   }
 
   Future<void> downloadPrescription(BuildContext ctx) async {
@@ -76,7 +81,7 @@ class PDFPrescription {
   pw.Widget _pwBuildTableRow(
       String medicineName, String doses, String strength, String notes) {
     return pw.Padding(
-      padding: pw.EdgeInsets.symmetric(vertical: 4.0),
+      padding: const pw.EdgeInsets.symmetric(vertical: 4.0),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
@@ -233,12 +238,17 @@ class PDFPrescription {
         '$directoryPath/p-${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}.pdf';
     // Save the PDF document to the chosen location
     final bytes = await pdf.save();
-    File(filePath).writeAsBytes(bytes);
+    File file = File(filePath);
+    file.writeAsBytes(bytes);
+    showSnackbar(ctx);
+    debugPrint('PDF saved successfully at: $filePath');
+  }
+
+  void showSnackbar(BuildContext ctx) {
     ScaffoldMessenger.of(ctx).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('File downloaded'),
       ),
     );
-    debugPrint('PDF saved successfully at: $filePath');
   }
 }
