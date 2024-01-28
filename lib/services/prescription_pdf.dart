@@ -38,11 +38,11 @@ class PDFPrescription {
     pdf = pw.Document();
   }
 
-  Future<void> downloadPrescription() async {
+  Future<void> downloadPrescription(BuildContext ctx) async {
     debugPrint("downloadPrescription invoked");
     final pdf = generatePDF();
     final location = await pickLocationToSavePDF();
-    if (location != null) await savePDF(pdf, location);
+    if (location != null) await savePDF(pdf, location, ctx);
   }
 
   pw.Row _pwBuildHeader() {
@@ -218,19 +218,27 @@ class PDFPrescription {
   }
 
   Future<String?> pickLocationToSavePDF() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-    return selectedDirectory;
+    // Directory? directory = await getExternalStorageDirectory();
+    Directory? download = await getDownloadsDirectory();
+    //Directory? document = await getApplicationDocumentsDirectory();
+    if (download != null) {
+      return download.path;
+    }
+    return null;
   }
 
-  Future<void> savePDF(pw.Document pdf, String directoryPath) async {
-    // Prompt user to select directory
-    //Directory? directory = await getExternalStorageDirectory();
-    // Construct file path for the PDF
+  Future<void> savePDF(
+      pw.Document pdf, String directoryPath, BuildContext ctx) async {
     String filePath =
         '$directoryPath/p-${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}.pdf';
     // Save the PDF document to the chosen location
     final bytes = await pdf.save();
     File(filePath).writeAsBytes(bytes);
+    ScaffoldMessenger.of(ctx).showSnackBar(
+      SnackBar(
+        content: Text('File downloaded'),
+      ),
+    );
     debugPrint('PDF saved successfully at: $filePath');
   }
 }

@@ -105,7 +105,7 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
                 dateOfConsultation:
                     DateFormat('dd/MM/yyyy').format(widget.createdDate),
                 nameOfPatient: widget.patientName);
-            await doc.downloadPrescription();
+            await doc.downloadPrescription(context);
           },
         ),
         IconButton(
