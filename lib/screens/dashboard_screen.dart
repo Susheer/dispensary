@@ -81,7 +81,7 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   _buildStatCard(
                       'Pending Bal',
-                      dashboardScreenProvider.pendingAmount.toString(),
+                      dashboardScreenProvider.pendingAmount.toStringAsFixed(1),
                       Icons.currency_rupee,
                       (MediaQuery.of(context).size.width / 2) - 20,
                       context),

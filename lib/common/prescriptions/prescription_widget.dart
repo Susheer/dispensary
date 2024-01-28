@@ -1,6 +1,11 @@
 import 'package:dispensary/common/seperator.dart';
+import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
+import 'package:dispensary/providers/patient_provider.dart';
+import 'package:dispensary/services/prescription_pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'prescription_header.dart';
 import 'prescription_body.dart';
 
@@ -91,19 +96,19 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
           ),
         IconButton(
           icon: const Icon(
-            Icons.share_rounded,
+            Icons.download_for_offline,
             size: 16,
           ),
-          tooltip: "Share",
+          tooltip: "Download",
           onPressed: () {
-            showAlert(message: 'Share this prescription.');
+            downloadPrescription(context);
           },
         ),
         IconButton(
-          icon: const Icon(Icons.edit_document, size: 17),
-          tooltip: "Edit Medication",
+          icon: const Icon(Icons.share_rounded, size: 17),
+          tooltip: "Share",
           onPressed: () {
-            showAlert(message: 'Edit Medication');
+            sharePrescription();
           },
         ),
         IconButton(
@@ -115,6 +120,23 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
         )
       ]),
     );
+  }
+
+  void sharePrescription() async {}
+
+  Future<void> downloadPrescription(BuildContext context) async {
+    Patient? pp = await Provider.of<PatientProvider>(context, listen: false)
+        .fetchPatientById(widget.patientId);
+    if (pp != null) {
+      PDFPrescription doc = PDFPrescription(
+          presLine: widget.lines,
+          addressOfPatient: pp.address,
+          age: '----',
+          dateOfConsultation:
+              DateFormat('dd/MM/yyyy').format(widget.createdDate),
+          nameOfPatient: widget.patientName);
+      await doc.downloadPrescription(context);
+    }
   }
 
   void showAlert({String message = ""}) {
