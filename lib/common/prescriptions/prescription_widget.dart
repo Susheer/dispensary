@@ -2,6 +2,7 @@ import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/services/prescription_pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'prescription_header.dart';
 import 'prescription_body.dart';
 
@@ -96,13 +97,15 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
             size: 16,
           ),
           tooltip: "Share",
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PDFPrescription(),
-              ),
-            );
+          onPressed: () async {
+            PDFPrescription doc = PDFPrescription(
+                presLine: widget.lines,
+                addressOfPatient: "patient addgh jjj",
+                age: '22',
+                dateOfConsultation:
+                    DateFormat('dd/MM/yyyy').format(widget.createdDate),
+                nameOfPatient: widget.patientName);
+            await doc.downloadPrescription();
           },
         ),
         IconButton(
