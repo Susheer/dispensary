@@ -16,6 +16,11 @@ class PDFPrescription {
   String addressLine2 = AppConfig.addressLine2;
   String addressLine3 = AppConfig.addressLine3;
   String regNO = AppConfig.regNO;
+  String degree = AppConfig.degree;
+  String position = AppConfig.position;
+  String clinicMobile = AppConfig.clinicMobile;
+  
+  
 
   String nameOfPatient;
   String age;
@@ -110,83 +115,94 @@ class PDFPrescription {
     return pw.Column(
       children: [
         pw.Container(
+          //decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
           padding: const pw.EdgeInsets.all(10),
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // Header
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-
                       pw.Container(
-                          child: pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo20FontSize)),
-                      decoration: pw.BoxDecoration(border:pw.Border.all(color: PdfColors.red, width: 1))),
-                      pw.Text(nameOfClinic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo15FontSize)),
-                      pw.Text(addressLine1, style: pw.TextStyle(fontSize: typo15FontSize)),
-                      pw.Text(addressLine2, style: pw.TextStyle(fontSize: 12)),
-                      pw.Text(addressLine3, style: pw.TextStyle(fontSize: 12)),
-                      pw.Text(regNO, style: pw.TextStyle(fontSize: 12)),
+                        // decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
+                        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+                          pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo30FontSize)),
+                          pw.Row(
+                            mainAxisSize: pw.MainAxisSize.min,
+                            children: [pw.Text('$degree ', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.Text(regNO, textAlign: pw.TextAlign.right)],
+                          )
+                        ]),
+                      ),
                     ],
                   ),
                 ],
               ),
+              pw.SizedBox(height: 6),
+              pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
+                pw.Text(position, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo15FontSize)),
+              ]),
+              Seperator(),
+              pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+                //left side data
+                pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                  pw.Text(nameOfClinic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(addressLine1),
+                  pw.Text(addressLine2),
+                  pw.Text(clinicMobile),
+                ]),
+                // right side data
+                pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                  pw.Text('Time: Mon to Sat'),
+                  pw.Text('Mor. 10.00 to 1:30,  Eve. 60:00 to 10:30'),
+                  pw.Text('Sunday Morning only', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                ]),
+              ]),
+              Seperator(),
               // Divider
-              pw.SizedBox(height: 40),
-              // Body
-              // Patient details
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
+              pw.SizedBox(height: 6),
+
+              pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [pw.Text('Date: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.Text(dateOfConsultation)]),
+
+              pw.Row(
                 children: [
-                  pw.Row(
-                    children: [
-                      pw.Row(
+                  pw.Text('Patient Name: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(nameOfPatient),
+                ],
+              ),
+              pw.Row(
                         children: [
-                          pw.Text('Name of Patient: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                          pw.Text(nameOfPatient),
-                        ],
-                      ),
-                      pw.SizedBox(
-                        width: 20,
-                      ),
-                      pw.Row(
-                        children: [
-                          pw.Text('Age: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Patient Age: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                           pw.Text(age),
                         ],
-                      ),
-                    ],
-                  ),
-                  // second line
-                  pw.Row(
-                    children: [
-                      pw.Row(
-                        children: [
-                          pw.Text('Address of Patient: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.Row(
+                children: [
+                  pw.Text('Address: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                           pw.Text(addressOfPatient),
                         ],
                       ),
-                      pw.SizedBox(
-                        width: 20,
-                      ),
-                      pw.Row(
-                        children: [
-                          pw.Text('Date of consultation: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                          pw.Text(dateOfConsultation),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
-              ),
+              
+            
               // Divider
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 30),
+              pw.Container(
+                  //decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
+                  child: pw.Column(
+                mainAxisSize: pw.MainAxisSize.max,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [_pwBuildHeader(), ...presLine.map((line) => _pwBuildTableRow(line.medicine.name, line.doses, line.strength, line.notes)).toList()],
+              ))
+              
               // Medication table
-              _pwBuildHeader(),
-              ...presLine.map((line) => _pwBuildTableRow(line.medicine.name, line.doses, line.strength, line.notes)).toList()
+             
             ],
           ),
         ),
@@ -263,7 +279,6 @@ class PDFPrescription {
       if (file.existsSync()) {
         file.deleteSync(recursive: true);
       }
-      
     }
   }
 
@@ -273,5 +288,9 @@ class PDFPrescription {
         content: Text(msg),
       ),
     );
+  }
+
+  pw.Container Seperator({double height = 1.0, PdfColor color = PdfColors.black}) {
+    return pw.Container(height: height, color: color, margin: const pw.EdgeInsets.symmetric(vertical: 2));
   }
 }

@@ -15,4 +15,8 @@ class AppConfig {
   static String addressLine2 = dotenv.env['clinic_address_line2'] ?? "";
   static String addressLine3 = dotenv.env['clinic_address_line3'] ?? "";
   static String regNO = dotenv.env['reg_no'] ?? "";
+  static String degree = dotenv.env['degree'] ?? "";
+  static String position = dotenv.env['position'] ?? "";
+ 
+  
 }
