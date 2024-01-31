@@ -32,6 +32,7 @@ class PDFPrescription {
 
   PDFPrescription({required this.presLine, required this.nameOfPatient, required this.age, required this.addressOfPatient, required this.dateOfConsultation}) {
     pdf = pw.Document(
+        pageMode: PdfPageMode.fullscreen,
         version: PdfVersion.pdf_1_5,
         author: AppConfig.prescriptionPDFAuther,
         creator: AppConfig.creator,
@@ -50,7 +51,7 @@ class PDFPrescription {
   Future<void> share(BuildContext ctx) async {
     debugPrint("share invoked");
     final pdf = generatePDF();
-    final location = await tempLocation();
+    final location = await appLocation();
     if (location != null) await sharePDF(pdf, location, ctx);
   }
 
@@ -120,7 +121,10 @@ class PDFPrescription {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo20FontSize)),
+
+                      pw.Container(
+                          child: pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo20FontSize)),
+                      decoration: pw.BoxDecoration(border:pw.Border.all(color: PdfColors.red, width: 1))),
                       pw.Text(nameOfClinic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo15FontSize)),
                       pw.Text(addressLine1, style: pw.TextStyle(fontSize: typo15FontSize)),
                       pw.Text(addressLine2, style: pw.TextStyle(fontSize: 12)),
@@ -227,10 +231,10 @@ class PDFPrescription {
     return null;
   }
 
-  Future<String?> tempLocation() async {
-    Directory? tempDir = await getTemporaryDirectory();
-    if (tempDir != null) {
-      return tempDir.path;
+  Future<String?> appLocation() async {
+    Directory? appDir = await getApplicationDocumentsDirectory();
+    if (appDir != null) {
+      return appDir.path;
     }
     return null;
   }
@@ -250,10 +254,16 @@ class PDFPrescription {
     final bytes = await pdf.save();
     final file = await File(filePath).create(recursive: true);
     await file.writeAsBytes(bytes);
-    final _file = XFile(filePath);
+    XFile ff = XFile(filePath);
     if (file.existsSync() == true) {
-      debugPrint("This is inside");
-      await Share.shareXFiles([_file], text: 'Test file', subject: '$nameOfClinic | Prescription-$nameOfPatient');
+      debugPrint("----------This is inside----------");
+      ShareResult result = await Share.shareXFiles([ff], subject: '$nameOfClinic | Prescription-$nameOfPatient');
+      debugPrint("-------<<<<<<<---After Share result -->>>>>>>>--------");
+      debugPrint("Share result.status ${result.status}");
+      if (file.existsSync()) {
+        file.deleteSync(recursive: true);
+      }
+      
     }
   }
 

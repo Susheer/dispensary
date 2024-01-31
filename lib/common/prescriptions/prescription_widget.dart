@@ -124,7 +124,6 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
               final snackBar = getSnackbar(msg: 'canUseStorage:$canUseStorage Permission.storage.status: ${Permission.storage.status}', color: Colors.red);
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
             }
-          
           },
         ),
       ]),
@@ -132,11 +131,16 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
   }
 
   void sharePrescription() async {
-    Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
-    if (pp != null) {
-      PDFPrescription doc =
-          PDFPrescription(presLine: widget.lines, addressOfPatient: pp.address, age: '', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
-      await doc.share(context);
+    try {
+      Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
+      if (pp != null) {
+        PDFPrescription doc =
+            PDFPrescription(presLine: widget.lines, addressOfPatient: pp.address, age: '', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
+        await doc.share(context);
+      }
+    } catch (e) {
+      final snackbar = getSnackbar(msg: e.toString(), color: Colors.red);
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
     }
   }
 
