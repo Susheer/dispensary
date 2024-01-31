@@ -7,6 +7,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PDFPrescription {
   String nameOfDocter = AppConfig.nameOfDocter;
@@ -190,7 +191,6 @@ class PDFPrescription {
   }
 
   pw.Document generatePDF() {
-    // Add a page to the PDF
     if (pdf != null) {
       pdf!.addPage(pw.Page(build: (pw.Context context) {
         return createPageContent();
@@ -203,8 +203,25 @@ class PDFPrescription {
   }
 
   Future<String?> pickLocationToSavePDF() async {
-    Directory? download = await getDownloadsDirectory();
+    Directory? download;
+    if (Platform.isAndroid == true) {
+      debugPrint("88888888888 Platform.isAndroid:${Platform.isAndroid} 88888888888");
+      download = Directory('/storage/emulated/0/Download');
+      if (!await download.exists()) {
+        download = await getDownloadsDirectory();
+      }
+    } else if (Platform.isWindows == true) {
+      debugPrint("88888888888 Platform.isWindows:${Platform.isWindows} 88888888888");
+      download = await getDownloadsDirectory();
+    } else if (Platform.isIOS) {
+      debugPrint("88888888888 Platform.isIOS:${Platform.isIOS} 88888888888");
+      download = await getExternalStorageDirectory();
+    }
+
     if (download != null) {
+      debugPrint("-----------------------------------");
+      debugPrint("Download path ${download.path}");
+      debugPrint("-----------------------------------");
       return download.path;
     }
     return null;
@@ -220,20 +237,24 @@ class PDFPrescription {
 
   Future<void> savePDF(pw.Document pdf, String directoryPath, BuildContext ctx) async {
     String filePath = '$directoryPath/p-${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}.pdf';
-    // Save the PDF document to the chosen location
     final bytes = await pdf.save();
-    File file = File(filePath);
-    file.writeAsBytes(bytes);
-    showSnackbar(ctx, 'File downloaded');
+    File file = await File(filePath);
+    file.createSync(recursive: true);
+    await file.writeAsBytes(bytes);
+    showSnackbar(ctx, 'Downloaded: ${filePath}');
     debugPrint('PDF saved successfully at: $filePath');
   }
 
   Future<void> sharePDF(pw.Document pdf, String directoryPath, BuildContext ctx) async {
-    String filePath = '$directoryPath/prescription-${nameOfPatient}.pdf'.toLowerCase();
+    String filePath = '$directoryPath/prescription-${DateTime.now().toIso8601String()}.pdf'.toLowerCase();
     final bytes = await pdf.save();
-    File file = File(filePath);
-    file.writeAsBytes(bytes);
-    Share.share(file.path, subject: '$nameOfClinic | Prescription-$nameOfPatient');
+    final file = await File(filePath).create(recursive: true);
+    await file.writeAsBytes(bytes);
+    final _file = XFile(filePath);
+    if (file.existsSync() == true) {
+      debugPrint("This is inside");
+      await Share.shareXFiles([_file], text: 'Test file', subject: '$nameOfClinic | Prescription-$nameOfPatient');
+    }
   }
 
   void showSnackbar(BuildContext ctx, String msg) {
