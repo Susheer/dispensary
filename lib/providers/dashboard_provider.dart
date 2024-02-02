@@ -126,7 +126,7 @@ class DashboardScreenProvider with ChangeNotifier {
 
   Future<void> scheduledPatientsTomorrow() async {
     String query =
-        ''' SELECT * FROM patients WHERE date(scheduled_date) == date('now','+1 day')
+        ''' SELECT * FROM patients WHERE date(scheduled_date) == date('now','+1 day', 'localtime')
         ''';
     List<Map<String, dynamic>> result =
         await _databaseService.db.rawQuery(query);

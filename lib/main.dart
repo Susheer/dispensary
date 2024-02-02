@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
           snackBarTheme:
               const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
         ),
-        initialRoute: '/auth',
+        initialRoute: '/',
         routes: {
           '/dashboard': (context) => DashboardScreen(),
           '/': (context) => LandingScreen(),
