@@ -1,22 +1,116 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 class AuthenticateScreen extends StatefulWidget {
-  const AuthenticateScreen({super.key});
-
+  late GoogleSignIn googleSignIn;
+  AuthenticateScreen({super.key}) {
+    googleSignIn = GoogleSignIn.standard(scopes: scopes);
+  }
+  List<String> scopes = <String>[
+    drive.DriveApi.driveAppdataScope,
+    drive.DriveApi.driveFileScope,
+  ];
   @override
   State<AuthenticateScreen> createState() => _AuthenticateScreenState();
 }
 
 class _AuthenticateScreenState extends State<AuthenticateScreen> {
+  GoogleSignInAccount? _currentUser;
+  String _contactText = "";
+  bool _isAuthorized = false; // has granted permissions?
+
   bool _loginStatus = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    debugPrint("initState - invoked");
+    widget.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
+      bool isAuthorized = account != null;
+
+      setState(() {
+        _currentUser = account;
+        _isAuthorized = isAuthorized;
+      });
+      if (isAuthorized) {
+        debugPrint("isAuthorized: True");
+        unawaited(_handleGetContact(account!));
+      }
+    });
+  }
+
+  Widget _buildBody() {
+    final GoogleSignInAccount? user = _currentUser;
+    if (user != null) {
+      debugPrint("_buildBody inoved- The user is Authenticated");
+      // The user is Authenticated
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          ListTile(
+            leading: GoogleUserCircleAvatar(
+              identity: user,
+            ),
+            title: Text(user.displayName ?? ''),
+            subtitle: Text(user.email),
+          ),
+          const Text('Signed in successfully.'),
+          if (_isAuthorized) ...<Widget>[
+            // The user has Authorized all required scopes
+            Text(_contactText),
+            ElevatedButton(
+              child: const Text('REFRESH'),
+              onPressed: () => _handleGetContact(user),
+            ),
+          ],
+          if (!_isAuthorized) ...<Widget>[
+            // The user has NOT Authorized all required scopes.
+            // (Mobile users may never see this button!)
+            const Text('Additional permissions needed to read your contacts.'),
+            ElevatedButton(
+              onPressed: _handleAuthorizeScopes,
+              child: const Text('REQUEST PERMISSIONS'),
+            ),
+          ],
+          ElevatedButton(
+            onPressed: _handleSignOut,
+            child: const Text('SIGN OUT'),
+          ),
+        ],
+      );
+    } else {
+      // The user is NOT Authenticated
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          const Text('You are not currently signed in.'),
+          // This method is used to separate mobile from web code with conditional exports.
+          // See: src/sign_in_button.dart
+          ElevatedButton(
+            child: Text('Sign in button'),
+            onPressed: _handleSignIn,
+          ),
+        ],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    debugPrint("build inoved");
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           title: Text("Google Drive Test"),
         ),
-        body: _createBody(context),
+        body: _buildBody(),
       ),
     );
   }
@@ -66,7 +160,28 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
     );
   }
 
-  _signIn() {}
+  Future<void> _signIn() async {
+    final googleUser = await widget.googleSignIn.signIn();
+
+    try {
+      if (googleUser != null) {
+        //final googleAuth = await googleUser.authentication;
+        // final credential = GoogleAuthProvider.credential(
+        //   accessToken: googleAuth.accessToken,
+        //   idToken: googleAuth.idToken,
+        // );
+        // final UserCredential loginUser = await FirebaseAuth.instance.signInWithCredential(credential);
+
+        // assert(loginUser.user?.uid == FirebaseAuth.instance.currentUser?.uid);
+        // print("Sign in");
+        // setState(() {
+        //   _loginStatus = true;
+        // });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   _signOut() {}
 
@@ -74,4 +189,35 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
 
   _uploadToNormal() {}
   _showList() {}
+  Future<void> _handleSignIn() async {
+    debugPrint("_handleSignIn- invoked");
+    try {
+      await widget.googleSignIn.signIn();
+      debugPrint("_handleSignIn- completed");
+    } catch (error) {
+      debugPrint("_handleSignIn- error");
+      print(error);
+    }
+  }
+
+  // Calls the People API REST endpoint for the signed-in user to retrieve information.
+  Future<void> _handleGetContact(GoogleSignInAccount user) async {
+    setState(() {
+      _contactText = 'Loading contact info...';
+    });
+  }
+
+  Future<void> _handleSignOut() => widget.googleSignIn.disconnect();
+  Future<void> _handleAuthorizeScopes() async {
+    final bool isAuthorized = await widget.googleSignIn.requestScopes(widget.scopes);
+    // #enddocregion RequestScopes
+    setState(() {
+      _isAuthorized = isAuthorized;
+    });
+    // #docregion RequestScopes
+    if (isAuthorized) {
+      unawaited(_handleGetContact(_currentUser!));
+    }
+    // #enddocregion RequestScopes
+  }
 }

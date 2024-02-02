@@ -1,4 +1,4 @@
-package com.example.dispensary
+package com.example.dispensary.dispensary
 
 import io.flutter.embedding.android.FlutterActivity
 
