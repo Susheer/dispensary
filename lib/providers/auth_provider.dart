@@ -31,13 +31,13 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> handleSignIn() async {
-    print("------ handleSignIn Invoked ---------");
+  Future<void> signIn() async {
+    print("------ signIn Invoked ---------");
     try {
       await _googleSignIn.signIn();
-      print("------ handleSignIn Completed ---------");
+      print("------ signIn Completed ---------");
     } catch (error) {
-      print("------ handleSignIn Error ---------");
+      print("------ signIn Error ---------");
       print(error);
     }
   }
@@ -47,4 +47,5 @@ class AuthProvider with ChangeNotifier {
     await _databaseService.deleteDatabaseAndClear();
     debugPrint(" _databaseService.deleteDatabaseAndClear: Completed");
   }
+  Future<void> signOut() => _googleSignIn.disconnect();
 }
