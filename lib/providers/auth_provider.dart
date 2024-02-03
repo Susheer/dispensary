@@ -1,19 +1,45 @@
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:google_sign_in/google_sign_in.dart';
 
-class LandingScreenProvider with ChangeNotifier {
+class AuthProvider with ChangeNotifier {
   final DatabaseService _databaseService;
-  LandingScreenProvider(this._databaseService);
-  int _index = 0;
+  late GoogleSignIn _googleSignIn;
+  GoogleSignInAccount? _currentUser;
+  bool _isAuthorized = false;
+  List<String> scopes = <String>[
+    drive.DriveApi.driveAppdataScope,
+    drive.DriveApi.driveFileScope,
+  ];
 
-  // Getter for the index property
-  int get index => _index;
+  AuthProvider(this._databaseService){
+    _googleSignIn = GoogleSignIn.standard(scopes: scopes);
+  }
 
-  // Setter for the index property
-  set index(int newIndex) {
-    _index = newIndex;
-    // Notify listeners that the value has changed
+  GoogleSignInAccount? get currentUser => _currentUser;
+  set currentUser(GoogleSignInAccount? indentity){
+    _currentUser = indentity;
     notifyListeners();
+  }
+
+  GoogleSignIn get googleSignIn => _googleSignIn;
+
+  bool get isAuthorised => _isAuthorized;
+  set isAuthorised(bool state){
+    _isAuthorized = state;
+    notifyListeners();
+  }
+
+  Future<void> handleSignIn() async {
+    print("------ handleSignIn Invoked ---------");
+    try {
+      await _googleSignIn.signIn();
+      print("------ handleSignIn Completed ---------");
+    } catch (error) {
+      print("------ handleSignIn Error ---------");
+      print(error);
+    }
   }
 
   Future<void> deleteDatabaseAndClear() async {
