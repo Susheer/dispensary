@@ -1,5 +1,7 @@
 // landing_screen.dart
 import 'package:dispensary/appConfig.dart';
+import 'package:dispensary/common/user_greet.dart';
+import 'package:dispensary/common/user_profile_widget.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/providers/patient_provider.dart';
@@ -32,9 +34,16 @@ class _LandingScreenState extends State<LandingScreen> {
     return Consumer<LandingScreenProvider>(builder: (context, landingProvider, child) {
       return Scaffold(
         appBar: AppBar(
-          titleTextStyle: const TextStyle(color: Colors.white),
-          backgroundColor: const Color(0xff6750a4),
-          title: TitleWidget(),
+          title: Container(
+            child: Row(
+              children: [
+                Text(
+                  AppConfig.nameOfClinic,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
           actions: [
             IconButton(
               tooltip: "Pharmecy Management",
@@ -44,16 +53,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 // Implement notification button functionality
               },
             ),
-            IconButton(
-              icon: const Icon(
-                color: Colors.white,
-                Icons.account_circle,
-                size: 35,
-              ),
-              onPressed: () {
-                landingProvider.index = 1;
-              },
-            ),
+            const UserProfileWidget(),
             const SizedBox(
               width: 5,
             )
@@ -104,14 +104,18 @@ class _LandingScreenState extends State<LandingScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              const DrawerHeader(
+              DrawerHeader(
+
                 decoration: BoxDecoration(
-                  color: Color(0xff6750a4),
+                  color: const Color(0xff6750a4), border: Border.all(color: Colors.red, width: 1)
                 ),
-                child: Text(
-                  'SAI CLINIC',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const UserName(),
+                  ],
+                ), 
               ),
               ListTile(
                 title: const Text('Delete database'),
@@ -161,24 +165,4 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 }
 
-class TitleWidget extends StatelessWidget {
-  const TitleWidget({
-    super.key,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          Text(
-            AppConfig.nameOfClinic,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-}
-// testing
-// testi g2

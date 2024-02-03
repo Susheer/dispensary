@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: AppConfig.appName,
         theme: ThemeData(
-          appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
+          appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(color: Colors.white), backgroundColor: Color(0xff6750a4), iconTheme: IconThemeData(color: Colors.white)),
           colorSchemeSeed: const Color(0xff6750a4),
           useMaterial3: true,
           snackBarTheme:

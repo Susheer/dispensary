@@ -1,3 +1,4 @@
+import 'package:dispensary/common/user_greet.dart';
 import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:flutter/material.dart';
@@ -34,10 +35,7 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(
                 height: 16,
               ),
-              const Text(
-                'Hi Sudheer, Welcome back!',
-                style: TextStyle(fontSize: 19),
-              ),
+              const UserGreet(),
               const SizedBox(
                 height: 18,
               ),
