@@ -1,3 +1,4 @@
+import 'package:dispensary/common/user_greet.dart';
 import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:flutter/material.dart';
@@ -25,18 +26,19 @@ class DashboardScreen extends StatelessWidget {
     dashboardScreenProvider.scheduledPatientsTomorrow();
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(10.0),
         child: Consumer<DashboardScreenProvider>(
             builder: (context, dashboardProvider, child) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              
               const SizedBox(
                 height: 16,
               ),
-              const Text(
-                'Hi Sudheer, Welcome back!',
-                style: TextStyle(fontSize: 19),
+              const Padding(
+                padding: EdgeInsets.only(left: 4),
+                child: UserGreet(),
               ),
               const SizedBox(
                 height: 18,
