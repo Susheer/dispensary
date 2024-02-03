@@ -52,21 +52,13 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> signIn() async {
-    print("------ signIn Invoked ---------");
     try {
       await _googleSignIn.signIn();
       return true;
     } catch (error) {
-      print("------ signIn Error ---------");
       print(error);
       return false;
     }
-  }
-
-  Future<void> deleteDatabaseAndClear() async {
-    debugPrint(" _databaseService.deleteDatabaseAndClear: Invoked");
-    await _databaseService.deleteDatabaseAndClear();
-    debugPrint(" _databaseService.deleteDatabaseAndClear: Completed");
   }
 
   Future<void> signOut() => _googleSignIn.disconnect();

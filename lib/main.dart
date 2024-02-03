@@ -6,7 +6,6 @@ import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
-import 'package:dispensary/screens/authenticate_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -73,7 +72,6 @@ class MyApp extends StatelessWidget {
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
           '/allMedicine': (context) => AllMedicineScreen(),
-          '/auth': (context) => AuthenticateScreen(),
         },
       ),
     );

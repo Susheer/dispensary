@@ -2,9 +2,11 @@ import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_line_model.dart';
 import 'package:dispensary/providers/patient_provider.dart';
+import 'package:dispensary/services/app_permissions.dart';
 import 'package:dispensary/services/prescription_pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'prescription_header.dart';
 import 'prescription_body.dart';
@@ -64,8 +66,7 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
             if (isBodyVisible)
               PrescriptionBody(
                 medicalDignosis: widget.diagnosis,
-                prescriptionLines:
-                    widget.lines, // Pass the prescriptionLines data
+                prescriptionLines: widget.lines, // Pass the prescriptionLines data
               ),
             const Separator(),
             buildActionButtonsRow(context),
@@ -79,8 +80,7 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
     return Container(
       // decoration:
       //     BoxDecoration(border: Border.all(color: Colors.blueGrey, width: 1)),
-      constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width, maxHeight: 40),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 40),
       child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
         if (isBodyVisible == true)
           IconButton(
@@ -100,48 +100,55 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
             size: 16,
           ),
           tooltip: "Download",
-          onPressed: () {
-            downloadPrescription(context);
+          onPressed: () async {
+            bool canUseStorage = await AppPermission.canUseStorage();
+            if (canUseStorage == true) {
+              await downloadPrescription(context);
+            } else {
+              final snackBar = getSnackbar(msg: 'canUseStorage:$canUseStorage Permission.storage.status: ${Permission.storage.status}', color: Colors.red);
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              debugPrint("----------------DENIED DENIED DENIED-------------------");
+              debugPrint("Permission denied");
+              debugPrint("----------------DENIED DENIED DENIED-------------------");
+            }
           },
         ),
         IconButton(
           icon: const Icon(Icons.share_rounded, size: 17),
           tooltip: "Share",
-          onPressed: () {
-            sharePrescription();
+          onPressed: () async {
+            bool canUseStorage = await AppPermission.canUseStorage();
+            if (canUseStorage == true) {
+              sharePrescription();
+            } else {
+              final snackBar = getSnackbar(msg: 'canUseStorage:$canUseStorage Permission.storage.status: ${Permission.storage.status}', color: Colors.red);
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
           },
         ),
-        // IconButton(
-        //   icon: const Icon(Icons.account_balance_wallet, size: 17),
-        //   tooltip: "Edit Balance",
-        //   onPressed: () {
-        //     showAlert(message: 'Edit Balance');
-        //   },
-        // )
       ]),
     );
   }
 
   void sharePrescription() async {
-    Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
-    if (pp != null) {
-      PDFPrescription doc =
-          PDFPrescription(presLine: widget.lines, addressOfPatient: pp.address, age: '', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
-      await doc.share(context);
+    try {
+      Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
+      if (pp != null) {
+        PDFPrescription doc =
+            PDFPrescription(presLine: widget.lines, addressOfPatient: pp.address, age: '', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
+        await doc.share(context);
+      }
+    } catch (e) {
+      final snackbar = getSnackbar(msg: e.toString(), color: Colors.red);
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
     }
   }
 
   Future<void> downloadPrescription(BuildContext context) async {
-    Patient? pp = await Provider.of<PatientProvider>(context, listen: false)
-        .fetchPatientById(widget.patientId);
+    Patient? pp = await Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId);
     if (pp != null) {
       PDFPrescription doc = PDFPrescription(
-          presLine: widget.lines,
-          addressOfPatient: pp.address,
-          age: '----',
-          dateOfConsultation:
-              DateFormat('dd/MM/yyyy').format(widget.createdDate),
-          nameOfPatient: widget.patientName);
+          presLine: widget.lines, addressOfPatient: pp.address, age: '----', dateOfConsultation: DateFormat('dd/MM/yyyy').format(widget.createdDate), nameOfPatient: widget.patientName);
       await doc.downloadPrescription(context);
     }
   }
@@ -163,6 +170,13 @@ class _PrescriptionWidgetState extends State<PrescriptionWidget> {
           ],
         );
       },
+    );
+  }
+
+  SnackBar getSnackbar({Color color = Colors.white, String msg = ""}) {
+    return SnackBar(
+      content: Text(msg),
+      backgroundColor: color, // Background color
     );
   }
 

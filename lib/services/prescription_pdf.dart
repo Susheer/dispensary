@@ -15,6 +15,11 @@ class PDFPrescription {
   String addressLine2 = AppConfig.addressLine2;
   String addressLine3 = AppConfig.addressLine3;
   String regNO = AppConfig.regNO;
+  String degree = AppConfig.degree;
+  String position = AppConfig.position;
+  String clinicMobile = AppConfig.clinicMobile;
+  
+  
 
   String nameOfPatient;
   String age;
@@ -31,6 +36,7 @@ class PDFPrescription {
 
   PDFPrescription({required this.presLine, required this.nameOfPatient, required this.age, required this.addressOfPatient, required this.dateOfConsultation}) {
     pdf = pw.Document(
+        pageMode: PdfPageMode.fullscreen,
         version: PdfVersion.pdf_1_5,
         author: AppConfig.prescriptionPDFAuther,
         creator: AppConfig.creator,
@@ -49,7 +55,7 @@ class PDFPrescription {
   Future<void> share(BuildContext ctx) async {
     debugPrint("share invoked");
     final pdf = generatePDF();
-    final location = await tempLocation();
+    final location = await appLocation();
     if (location != null) await sharePDF(pdf, location, ctx);
   }
 
@@ -108,80 +114,94 @@ class PDFPrescription {
     return pw.Column(
       children: [
         pw.Container(
+          //decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
           padding: const pw.EdgeInsets.all(10),
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // Header
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo20FontSize)),
-                      pw.Text(nameOfClinic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo15FontSize)),
-                      pw.Text(addressLine1, style: pw.TextStyle(fontSize: typo15FontSize)),
-                      pw.Text(addressLine2, style: pw.TextStyle(fontSize: 12)),
-                      pw.Text(addressLine3, style: pw.TextStyle(fontSize: 12)),
-                      pw.Text(regNO, style: pw.TextStyle(fontSize: 12)),
+                      pw.Container(
+                        // decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
+                        child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+                          pw.Text(nameOfDocter, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo30FontSize)),
+                          pw.Row(
+                            mainAxisSize: pw.MainAxisSize.min,
+                            children: [pw.Text('$degree ', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.Text(regNO, textAlign: pw.TextAlign.right)],
+                          )
+                        ]),
+                      ),
                     ],
                   ),
                 ],
               ),
+              pw.SizedBox(height: 6),
+              pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
+                pw.Text(position, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: typo15FontSize)),
+              ]),
+              Seperator(),
+              pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+                //left side data
+                pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                  pw.Text(nameOfClinic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(addressLine1),
+                  pw.Text(addressLine2),
+                  pw.Text(clinicMobile),
+                ]),
+                // right side data
+                pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                  pw.Text('Time: Mon to Sat'),
+                  pw.Text('Mor. 10.00 to 1:30,  Eve. 60:00 to 10:30'),
+                  pw.Text('Sunday Morning only', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                ]),
+              ]),
+              Seperator(),
               // Divider
-              pw.SizedBox(height: 40),
-              // Body
-              // Patient details
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
+              pw.SizedBox(height: 6),
+
+              pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [pw.Text('Date: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.Text(dateOfConsultation)]),
+
+              pw.Row(
                 children: [
-                  pw.Row(
-                    children: [
-                      pw.Row(
+                  pw.Text('Patient Name: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(nameOfPatient),
+                ],
+              ),
+              pw.Row(
                         children: [
-                          pw.Text('Name of Patient: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                          pw.Text(nameOfPatient),
-                        ],
-                      ),
-                      pw.SizedBox(
-                        width: 20,
-                      ),
-                      pw.Row(
-                        children: [
-                          pw.Text('Age: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Patient Age: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                           pw.Text(age),
                         ],
-                      ),
-                    ],
-                  ),
-                  // second line
-                  pw.Row(
-                    children: [
-                      pw.Row(
-                        children: [
-                          pw.Text('Address of Patient: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.Row(
+                children: [
+                  pw.Text('Address: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                           pw.Text(addressOfPatient),
                         ],
                       ),
-                      pw.SizedBox(
-                        width: 20,
-                      ),
-                      pw.Row(
-                        children: [
-                          pw.Text('Date of consultation: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                          pw.Text(dateOfConsultation),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
-              ),
+              
+            
               // Divider
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 30),
+              pw.Container(
+                  //decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.red, width: 1)),
+                  child: pw.Column(
+                mainAxisSize: pw.MainAxisSize.max,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [_pwBuildHeader(), ...presLine.map((line) => _pwBuildTableRow(line.medicine.name, line.doses, line.strength, line.notes)).toList()],
+              ))
+              
               // Medication table
-              _pwBuildHeader(),
-              ...presLine.map((line) => _pwBuildTableRow(line.medicine.name, line.doses, line.strength, line.notes)).toList()
+             
             ],
           ),
         ),
@@ -190,7 +210,6 @@ class PDFPrescription {
   }
 
   pw.Document generatePDF() {
-    // Add a page to the PDF
     if (pdf != null) {
       pdf!.addPage(pw.Page(build: (pw.Context context) {
         return createPageContent();
@@ -203,37 +222,63 @@ class PDFPrescription {
   }
 
   Future<String?> pickLocationToSavePDF() async {
-    Directory? download = await getDownloadsDirectory();
+    Directory? download;
+    if (Platform.isAndroid == true) {
+      debugPrint("88888888888 Platform.isAndroid:${Platform.isAndroid} 88888888888");
+      download = Directory('/storage/emulated/0/Download');
+      if (!await download.exists()) {
+        download = await getDownloadsDirectory();
+      }
+    } else if (Platform.isWindows == true) {
+      debugPrint("88888888888 Platform.isWindows:${Platform.isWindows} 88888888888");
+      download = await getDownloadsDirectory();
+    } else if (Platform.isIOS) {
+      debugPrint("88888888888 Platform.isIOS:${Platform.isIOS} 88888888888");
+      download = await getExternalStorageDirectory();
+    }
+
     if (download != null) {
+      debugPrint("-----------------------------------");
+      debugPrint("Download path ${download.path}");
+      debugPrint("-----------------------------------");
       return download.path;
     }
     return null;
   }
 
-  Future<String?> tempLocation() async {
-    Directory? tempDir = await getTemporaryDirectory();
-    if (tempDir != null) {
-      return tempDir.path;
+  Future<String?> appLocation() async {
+    Directory? appDir = await getApplicationDocumentsDirectory();
+    if (appDir != null) {
+      return appDir.path;
     }
     return null;
   }
 
   Future<void> savePDF(pw.Document pdf, String directoryPath, BuildContext ctx) async {
     String filePath = '$directoryPath/p-${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}.pdf';
-    // Save the PDF document to the chosen location
     final bytes = await pdf.save();
-    File file = File(filePath);
-    file.writeAsBytes(bytes);
-    showSnackbar(ctx, 'File downloaded');
+    File file = await File(filePath);
+    file.createSync(recursive: true);
+    await file.writeAsBytes(bytes);
+    showSnackbar(ctx, 'Downloaded: ${filePath}');
     debugPrint('PDF saved successfully at: $filePath');
   }
 
   Future<void> sharePDF(pw.Document pdf, String directoryPath, BuildContext ctx) async {
-    String filePath = '$directoryPath/prescription-${nameOfPatient}.pdf'.toLowerCase();
+    String filePath = '$directoryPath/prescription-${DateTime.now().toIso8601String()}.pdf'.toLowerCase();
     final bytes = await pdf.save();
-    File file = File(filePath);
-    file.writeAsBytes(bytes);
-    Share.share(file.path, subject: '$nameOfClinic | Prescription-$nameOfPatient');
+    final file = await File(filePath).create(recursive: true);
+    await file.writeAsBytes(bytes);
+    XFile ff = XFile(filePath);
+    if (file.existsSync() == true) {
+      debugPrint("----------This is inside----------");
+      ShareResult result = await Share.shareXFiles([ff], subject: '$nameOfClinic | Prescription-$nameOfPatient');
+      debugPrint("-------<<<<<<<---After Share result -->>>>>>>>--------");
+      debugPrint("Share result.status ${result.status}");
+      if (file.existsSync()) {
+        file.deleteSync(recursive: true);
+      }
+    }
   }
 
   void showSnackbar(BuildContext ctx, String msg) {
@@ -242,5 +287,9 @@ class PDFPrescription {
         content: Text(msg),
       ),
     );
+  }
+
+  pw.Container Seperator({double height = 1.0, PdfColor color = PdfColors.black}) {
+    return pw.Container(height: height, color: color, margin: const pw.EdgeInsets.symmetric(vertical: 2));
   }
 }
