@@ -40,26 +40,10 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Medicine List'),
+            title: Text('Available medicine: ${medicines.length}'),
             actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '${medicines.length}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  medicineProvider.loadAllMedicines();
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
+              
+              TextButton.icon(
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -68,7 +52,16 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
                     ),
                   );
                 },
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                ),
+                icon: const Icon(
+                  Icons.post_add,
+                  size: 18,
+                ), // Icon widget
+                label: const Text('Add New'), // Text widget
               ),
+             
 
               // Add more IconButton widgets for additional actions as needed
             ],
@@ -76,6 +69,11 @@ class _AllMedicineScreenState extends State<AllMedicineScreen> {
           body: SafeArea(
             child: Column(
               children: [
+                Container(
+                  color: ThemeData().primaryColor,
+                  constraints:
+                      BoxConstraints(minHeight: 10, minWidth: MediaQuery.of(context).size.width),
+                ),
                 medicines.isNotEmpty
                     ? Expanded(
                         child: ListView.builder(

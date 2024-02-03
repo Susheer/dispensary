@@ -1,3 +1,6 @@
+import 'dart:ffi';
+import 'dart:ui';
+
 import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +16,13 @@ class UserGreet extends StatelessWidget {
     GoogleSignInAccount? user = authProvider.currentUser;
     if (user != null) {
       return Text(
-        'Welcome, ${authProvider.currentUser!.displayName}!',
+        "We're glad you're back ${authProvider.currentUser!.displayName!?.split(" ")[0]}!",
         style: const TextStyle(fontSize: 19),
       );
     } else {
       return const Text(
-        'Hi, User',
-        style: TextStyle(fontSize: 19),
+        "Hello! Feel free to look around.",
+        style: TextStyle(fontSize: 19, fontWeight: FontWeight.w400),
       );
     }
   }
@@ -41,7 +44,7 @@ class UserName extends StatelessWidget {
           identity: user,
         ),
         const SizedBox(
-          height: 7,
+          height: 4,
         ),
         Text(
           '${authProvider.currentUser!.displayName}',
@@ -64,15 +67,28 @@ class UserName extends StatelessWidget {
           icon: const Icon(
             color: Colors.white,
             Icons.account_circle,
-            size: 35,
+            size: 40,
           ),
           onPressed: () async {
             await authProvider.signIn();
           },
         ),
+        const SizedBox(
+          height: 4,
+        ),
         const Text(
-          'Guest',
-          style: TextStyle(fontSize: 19),
+          'Visitor',
+          style: TextStyle(
+            fontSize: 19,
+            color: Colors.white,
+          ),
+        ),
+        Text(
+          AppConfig.nameOfClinic,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
         )
       ]);
     }

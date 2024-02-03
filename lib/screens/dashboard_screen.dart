@@ -26,16 +26,20 @@ class DashboardScreen extends StatelessWidget {
     dashboardScreenProvider.scheduledPatientsTomorrow();
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(10.0),
         child: Consumer<DashboardScreenProvider>(
             builder: (context, dashboardProvider, child) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              
               const SizedBox(
                 height: 16,
               ),
-              const UserGreet(),
+              const Padding(
+                padding: EdgeInsets.only(left: 4),
+                child: UserGreet(),
+              ),
               const SizedBox(
                 height: 18,
               ),
