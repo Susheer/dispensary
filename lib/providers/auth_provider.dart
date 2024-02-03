@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
@@ -7,18 +9,36 @@ class AuthProvider with ChangeNotifier {
   final DatabaseService _databaseService;
   late GoogleSignIn _googleSignIn;
   GoogleSignInAccount? _currentUser;
+  late StreamSubscription<GoogleSignInAccount?> streamSubscription;
   bool _isAuthorized = false;
   List<String> scopes = <String>[
     drive.DriveApi.driveAppdataScope,
     drive.DriveApi.driveFileScope,
   ];
 
-  AuthProvider(this._databaseService){
+  AuthProvider(this._databaseService) {
+    debugPrint("AuthProvider: Constructer - invoked");
     _googleSignIn = GoogleSignIn.standard(scopes: scopes);
+    streamSubscription = _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
+      debugPrint("onCurrentUserChanged invoked");
+      bool isAuthorized = account != null;
+      _currentUser = account;
+      _isAuthorized = isAuthorized;
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (streamSubscription != null) {
+      streamSubscription.cancel();
+    }
+    debugPrint("Disposing authProvider");
   }
 
   GoogleSignInAccount? get currentUser => _currentUser;
-  set currentUser(GoogleSignInAccount? indentity){
+  set currentUser(GoogleSignInAccount? indentity) {
     _currentUser = indentity;
     notifyListeners();
   }
@@ -26,19 +46,20 @@ class AuthProvider with ChangeNotifier {
   GoogleSignIn get googleSignIn => _googleSignIn;
 
   bool get isAuthorised => _isAuthorized;
-  set isAuthorised(bool state){
+  set isAuthorised(bool state) {
     _isAuthorized = state;
     notifyListeners();
   }
 
-  Future<void> signIn() async {
+  Future<bool> signIn() async {
     print("------ signIn Invoked ---------");
     try {
       await _googleSignIn.signIn();
-      print("------ signIn Completed ---------");
+      return true;
     } catch (error) {
       print("------ signIn Error ---------");
       print(error);
+      return false;
     }
   }
 
@@ -47,5 +68,6 @@ class AuthProvider with ChangeNotifier {
     await _databaseService.deleteDatabaseAndClear();
     debugPrint(" _databaseService.deleteDatabaseAndClear: Completed");
   }
+
   Future<void> signOut() => _googleSignIn.disconnect();
 }

@@ -59,12 +59,13 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: AppConfig.appName,
         theme: ThemeData(
+          appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
           colorSchemeSeed: const Color(0xff6750a4),
           useMaterial3: true,
           snackBarTheme:
               const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
         ),
-        initialRoute: '/auth',
+        initialRoute: '/',
         routes: {
           '/dashboard': (context) => DashboardScreen(),
           '/': (context) => LandingScreen(),

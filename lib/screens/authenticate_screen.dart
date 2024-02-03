@@ -17,7 +17,6 @@ class AuthenticateScreen extends StatelessWidget {
         body: SingleChildScrollView(child: _buildBody()));
   }
 
-
   Widget _buildBody() {
     return Consumer<AuthProvider>(builder: (context, authProvider, child) {
       GoogleSignInAccount? user = authProvider.currentUser;
@@ -60,14 +59,19 @@ class AuthenticateScreen extends StatelessWidget {
             // See: src/sign_in_button.dart
             ElevatedButton(
               child: const Text('Sign in button'),
-              onPressed: authProvider.signIn,
+                onPressed: () async {
+                  bool flag = await authProvider.signIn();
+                  if (flag == true) {
+                    Navigator.pushReplacementNamed(context, '/');
+                  }
+                }
             ),
           ],
         );
       }
     });
   }
-  
+
   List<Widget> get appbarActions {
     return const [
       Icon(Icons.login, color: Colors.white, size: 26),
@@ -80,119 +84,7 @@ class AuthenticateScreen extends StatelessWidget {
       )
     ];
   }
-
 }
-
-
-//
-//
-// class AuthenticateScreen extends StatefulWidget {
-//
-//   AuthenticateScreen({super.key});
-//   @override
-//   State<AuthenticateScreen> createState() => _AuthenticateScreenState();
-// }
-//
-// class _AuthenticateScreenState extends State<AuthenticateScreen> {
-//   GoogleSignInAccount? _currentUser;
-//   String _contactText = "";
-//   bool _isAuthorized = false; // has granted permissions?
-//
-//   bool _loginStatus = false;
-//
-//   @override
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
-//     debugPrint("initState - invoked");
-//     widget.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
-//       bool isAuthorized = account != null;
-//
-//       setState(() {
-//         _currentUser = account;
-//         _isAuthorized = isAuthorized;
-//       });
-//       if (isAuthorized) {
-//         debugPrint("isAuthorized: True");
-//         unawaited(_handleGetContact(account!));
-//       }
-//     });
-//   }
-//
-
-
-//   Widget _createBody(BuildContext context) {
-//     final signIn = ElevatedButton(
-//       onPressed: () {
-//         _signIn();
-//       },
-//       child: Text("Sing in"),
-//     );
-//     final signOut = ElevatedButton(
-//       onPressed: () {
-//         _signOut();
-//       },
-//       child: Text("Sing out"),
-//     );
-//     final uploadToHidden = ElevatedButton(
-//       onPressed: () {
-//         _uploadToHidden();
-//       },
-//       child: Text("Upload to app folder (hidden)"),
-//     );
-//     final uploadToNormal = ElevatedButton(
-//       onPressed: () {
-//         _uploadToNormal();
-//       },
-//       child: Text("Upload to normal folder"),
-//     );
-//     final showList = ElevatedButton(
-//       onPressed: () {
-//         _showList();
-//       },
-//       child: Text("Show the data list"),
-//     );
-//
-//     return Column(
-//       children: [
-//         Center(child: Text("Sign in status: ${_loginStatus ? "In" : "Out"}")),
-//         Center(child: signIn),
-//         Center(child: signOut),
-//         Divider(),
-//         Center(child: uploadToHidden),
-//         Center(child: uploadToNormal),
-//         Center(child: showList),
-//       ],
-//     );
-//   }
-//
-//   Future<void> _signIn() async {
-//     final googleUser = await widget.googleSignIn.signIn();
-//
-//     try {
-//       if (googleUser != null) {
-//         //final googleAuth = await googleUser.authentication;
-//         // final credential = GoogleAuthProvider.credential(
-//         //   accessToken: googleAuth.accessToken,
-//         //   idToken: googleAuth.idToken,
-//         // );
-//         // final UserCredential loginUser = await FirebaseAuth.instance.signInWithCredential(credential);
-//
-//         // assert(loginUser.user?.uid == FirebaseAuth.instance.currentUser?.uid);
-//         // print("Sign in");
-//         // setState(() {
-//         //   _loginStatus = true;
-//         // });
-//       }
-//     } catch (e) {
-//       print(e);
-//     }
-//   }
-//
-// }
-
-
-
 
 class TitelWidget extends StatelessWidget {
   const TitelWidget({
@@ -201,12 +93,17 @@ class TitelWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AuthProvider authPro = Provider.of<AuthProvider>(context, listen: false);
+    bool flag = authPro.isAuthorised;
+    String titleText = "Welcome guest!";
+    if (authPro != null && authPro.currentUser != null) {
+      titleText = 'Hi, ${authPro.currentUser!.displayName!}';
+    }
     return Container(
         constraints: const BoxConstraints(minWidth: 80),
-        decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 1)),
-        child: const Text(
-          "Auth Screen",
-          style: TextStyle(color: Colors.white),
+        child: Text(
+          titleText,
+          style: const TextStyle(color: Colors.white),
         ));
   }
 }
