@@ -1,5 +1,6 @@
 // main.dart
 import 'package:dispensary/appConfig.dart';
+import 'package:dispensary/providers/auth_provider.dart';
 import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
@@ -48,12 +49,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => DashboardScreenProvider(databaseService),
         ),
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider(databaseService),
+        ),
         // Add more providers as needed
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: AppConfig.appName,
         theme: ThemeData(
+          appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(color: Colors.white), backgroundColor: Color(0xff6750a4), iconTheme: IconThemeData(color: Colors.white)),
           colorSchemeSeed: const Color(0xff6750a4),
           useMaterial3: true,
           snackBarTheme:
@@ -66,7 +71,7 @@ class MyApp extends StatelessWidget {
           '/registration': (context) => RegistrationScreen(),
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
-          '/allMedicine': (context) => AllMedicineScreen()
+          '/allMedicine': (context) => AllMedicineScreen(),
         },
       ),
     );
