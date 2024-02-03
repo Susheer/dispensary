@@ -1,5 +1,6 @@
 // main.dart
 import 'package:dispensary/appConfig.dart';
+import 'package:dispensary/providers/auth_provider.dart';
 import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
 import 'package:dispensary/providers/medicine_provider.dart';
@@ -48,6 +49,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => DashboardScreenProvider(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider(databaseService),
         ),
         // Add more providers as needed
       ],
