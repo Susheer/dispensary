@@ -34,16 +34,7 @@ class _LandingScreenState extends State<LandingScreen> {
         appBar: AppBar(
           titleTextStyle: const TextStyle(color: Colors.white),
           backgroundColor: const Color(0xff6750a4),
-          title: Container(
-            child: Row(
-              children: [
-                Text(
-                  AppConfig.nameOfClinic,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
+          title: TitleWidget(),
           actions: [
             IconButton(
               tooltip: "Pharmecy Management",
@@ -167,6 +158,26 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
       );
     });
+  }
+}
+
+class TitleWidget extends StatelessWidget {
+  const TitleWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          Text(
+            AppConfig.nameOfClinic,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 }
 // testing
