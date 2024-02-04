@@ -56,7 +56,7 @@ class DashboardScreen extends StatelessWidget {
                     CircleWidget(
                       radius: 50,
                       icon: Icons.receipt_long,
-                      text: 'Follow Uppp',
+                      text: 'Fllow-up',
                       backgroundColor: Colors.black12,
                       value: dashboardProvider.followUpatients.toString(),
                     ),
