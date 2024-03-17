@@ -1,10 +1,13 @@
 // search_screen.dart
+import 'dart:math';
+
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/common/typography.dart';
 import 'package:dispensary/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class ManageBackup extends StatefulWidget {
   static const String path = "/manage-backup";
@@ -129,6 +132,12 @@ class BackupResult extends StatelessWidget {
 
   final drive.File file;
 
+  String getFileSizeString({required int bytes, int decimals = 0}) {
+    const suffixes = ["b", "kb", "mb", "gb", "tb"];
+    if (bytes == 0) return '0${suffixes[0]}';
+    var i = (log(bytes) / log(1024)).floor();
+    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
+  }
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -149,10 +158,13 @@ class BackupResult extends StatelessWidget {
             children: [
               Typography2(label: 'Name', value: file.name ?? "no-name"),
               RowWithLabelAndValueSet(
-                  label1: 'Gender ', label2: 'Mob ', value1: "sdsdw", value2: "wewew"),
-              const Separator(),
-              Typography2(label: 'Gurdian Name ', value: "wdqwd" ?? ""),
-              Typography2(label: 'Address ', value: "dwqdwq" ?? ""),
+                  label1: 'Size: ',
+                  value1: getFileSizeString(bytes: int.parse(file.size!), decimals: 2).toString(),
+                  label2: 'Version:',
+                  value2: file.version ?? "no-version"),
+              Typography2(label: 'Created Time ', value: timeago.format(file.createdTime!)),
+              const Separator(), 
+            
             ],
           ),
         ),

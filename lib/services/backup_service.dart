@@ -117,7 +117,7 @@ class BackupService {
     }
     var ll = await driveApi.files.list(
       spaces: 'appDataFolder',
-      $fields: 'files(id, name, modifiedTime)',
+      $fields: 'files(id, name, createdTime, size, version)',
     );
    
     return ll;
