@@ -9,6 +9,7 @@ import 'package:dispensary/providers/patient_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
+import 'package:dispensary/screens/manage_backup_screen.dart';
 import 'package:dispensary/screens/registration_screen.dart';
 import 'package:dispensary/screens/search_screen.dart';
 import 'package:dispensary/screens/settings_screen.dart';
@@ -29,7 +30,8 @@ class _LandingScreenState extends State<LandingScreen> {
     AllPatientsScreen(),
     SettingsScreen(),
     RegistrationScreen(), // 4
-    AllMedicineScreen() // 5
+    AllMedicineScreen(), // 5
+    ManageBackup()
   ];
   @override
   Widget build(BuildContext context) {
@@ -165,26 +167,14 @@ class _LandingScreenState extends State<LandingScreen> {
                             Navigator.pop(context); // Close the drawer
                           },
                         ),
+                        
                         if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
                           ListTile(
                             leading: const Icon(Icons.upload_file),
-                            title: const Text('Show Backup'),
-                            subtitle: const Text("All backedup files"),
+                            title: const Text('Manage Backup'),
                             onTap: () {
                               Navigator.pop(context);
-                              Provider.of<AuthProvider>(context, listen: false)
-                                  .showBackups(context);
-                            },
-                          ),
-                        if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
-                          ListTile(
-                            leading: const Icon(Icons.upload_file),
-                            title: const Text('Upload db'),
-                            subtitle: const Text("Create backup"),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Provider.of<AuthProvider>(context, listen: false)
-                                  .createBackup(context);
+                              Provider.of<LandingScreenProvider>(context, listen: false).index = 6;
                             },
                           ),
                       ],

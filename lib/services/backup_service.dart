@@ -110,37 +110,19 @@ class BackupService {
       Navigator.pop(context);
     }
   }
-
-  Future<void> showAllBackups(BuildContext context, GoogleSignInAccount account) async {
+  Future<drive.FileList?> showAllBackups(GoogleSignInAccount account) async {
     final driveApi = await _getDriveApi(account);
     if (driveApi == null) {
-      return;
+      return null;
     }
-
-    final fileList = await driveApi.files.list(
+    var ll = await driveApi.files.list(
       spaces: 'appDataFolder',
-      $fields: 'files(id, name, modifiedTime)',
+      $fields: 'files(id, name, createdTime, size, version)',
     );
-
-    final files = fileList.files;
-    if (files == null) {
-      return;
-    }
-
-    final alert = AlertDialog(
-      title: const Text("Backups"),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: files.map((e) => Text(e.name ?? "no-name")).toList(),
-        ),
-      ),
-    );
-
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) => alert,
-    );
+   
+    return ll;
   }
+
 }
 
 class GoogleAuthClient extends http.BaseClient {
