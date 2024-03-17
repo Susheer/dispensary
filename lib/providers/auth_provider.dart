@@ -81,8 +81,8 @@ class AuthProvider with ChangeNotifier {
     return driveApi;
   }
 
-  Future<void> showBackups(BuildContext context) async {
-    backupService.showAllBackups(context, currentUser!);
+  Future<drive.FileList?> showBackups() async {
+    return backupService.showAllBackups(currentUser!);
   }
 
   Future<void> createBackup(BuildContext context) async {

@@ -7,6 +7,7 @@ import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
+import 'package:dispensary/screens/manage_backup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -51,18 +52,20 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => AuthProvider(databaseService),
-        ),
+        )
         // Add more providers as needed
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: AppConfig.appName,
         theme: ThemeData(
-          appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(color: Colors.white), backgroundColor: Color(0xff6750a4), iconTheme: IconThemeData(color: Colors.white)),
+          appBarTheme: const AppBarTheme(
+              titleTextStyle: TextStyle(color: Colors.white),
+              backgroundColor: Color(0xff6750a4),
+              iconTheme: IconThemeData(color: Colors.white)),
           colorSchemeSeed: const Color(0xff6750a4),
           useMaterial3: true,
-          snackBarTheme:
-              const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
+          snackBarTheme: const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
         ),
         initialRoute: '/',
         routes: {
@@ -72,6 +75,7 @@ class MyApp extends StatelessWidget {
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
           '/allMedicine': (context) => AllMedicineScreen(),
+          '${ManageBackup.path}': (context) => ManageBackup(),
         },
       ),
     );
