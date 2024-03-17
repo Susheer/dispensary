@@ -180,7 +180,9 @@ class BackupResult extends StatelessWidget {
       ),
       TextButton(
         child: const Text('Delete this backup'),
-        onPressed: () {},
+        onPressed: () async {
+          await Provider.of<AuthProvider>(context, listen: false).deleteFile(file.id!);
+        },
       ),
     ]);
   }

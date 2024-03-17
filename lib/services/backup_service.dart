@@ -110,19 +110,28 @@ class BackupService {
       Navigator.pop(context);
     }
   }
+
   Future<drive.FileList?> showAllBackups(GoogleSignInAccount account) async {
     final driveApi = await _getDriveApi(account);
     if (driveApi == null) {
       return null;
     }
+
     var ll = await driveApi.files.list(
       spaces: 'appDataFolder',
       $fields: 'files(id, name, createdTime, size, version)',
     );
-   
+
     return ll;
   }
 
+  Future<void> deleteFile(GoogleSignInAccount account, String fileId) async {
+    final driveApi = await _getDriveApi(account);
+    if (driveApi == null) {
+      return null;
+    }
+    await driveApi.files.delete(fileId);
+  }
 }
 
 class GoogleAuthClient extends http.BaseClient {

@@ -89,5 +89,14 @@ class AuthProvider with ChangeNotifier {
     backupService.uploadBackup(context, currentUser!);
   }
 
+  Future<bool> deleteFile(String fileId) async {
+    try {
+      backupService.deleteFile(currentUser!, fileId!);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> signOut() => _googleSignIn.disconnect();
 }
