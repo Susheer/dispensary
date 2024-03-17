@@ -7,7 +7,6 @@ import 'package:dispensary/providers/medicine_provider.dart';
 import 'package:dispensary/screens/all_medicine_screen.dart';
 import 'package:dispensary/screens/all_patients_screen.dart';
 import 'package:dispensary/screens/dashboard_screen.dart';
-import 'package:dispensary/services/google_drive_backup_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +64,7 @@ class MyApp extends StatelessWidget {
           snackBarTheme:
               const SnackBarThemeData(backgroundColor: Color(0xff6750a4)),
         ),
-        initialRoute: '/test',
+        initialRoute: '/',
         routes: {
           '/dashboard': (context) => DashboardScreen(),
           '/': (context) => LandingScreen(),
@@ -73,7 +72,6 @@ class MyApp extends StatelessWidget {
           '/search': (context) => SearchScreen(),
           '/allPatients': (context) => AllPatientsScreen(),
           '/allMedicine': (context) => AllMedicineScreen(),
-          "/test": (context) => GoogleDriveTest()
         },
       ),
     );
