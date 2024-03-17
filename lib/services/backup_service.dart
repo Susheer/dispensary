@@ -69,6 +69,18 @@ class BackupService {
     }
   }
 
+  blockScreen(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: const Duration(seconds: 2),
+      barrierColor: Colors.black.withOpacity(0.5),
+      pageBuilder: (context, animation, secondaryAnimation) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
   Future<void> uploadBackup(BuildContext context, GoogleSignInAccount account) async {
     debugPrint("uploadBackup Invoked");
     try {
@@ -78,15 +90,7 @@ class BackupService {
       }
       debugPrint("driveApi created");
       // Not allow a user to do something else
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        transitionDuration: const Duration(seconds: 2),
-        barrierColor: Colors.black.withOpacity(0.5),
-        pageBuilder: (context, animation, secondaryAnimation) => Center(
-          child: const CircularProgressIndicator(),
-        ),
-      );
+      blockScreen(context);
 
       // db path
       var documentsDirectory = await getDatabasesPath();
@@ -110,19 +114,28 @@ class BackupService {
       Navigator.pop(context);
     }
   }
+
   Future<drive.FileList?> showAllBackups(GoogleSignInAccount account) async {
     final driveApi = await _getDriveApi(account);
     if (driveApi == null) {
       return null;
     }
+
     var ll = await driveApi.files.list(
       spaces: 'appDataFolder',
       $fields: 'files(id, name, createdTime, size, version)',
     );
-   
+
     return ll;
   }
 
+  Future<void> deleteFile(GoogleSignInAccount account, String fileId) async {
+    final driveApi = await _getDriveApi(account);
+    if (driveApi == null) {
+      return null;
+    }
+    await driveApi.files.delete(fileId);
+  }
 }
 
 class GoogleAuthClient extends http.BaseClient {

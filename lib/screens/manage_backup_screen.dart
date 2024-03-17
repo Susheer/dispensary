@@ -34,6 +34,12 @@ class _ManageBackupState extends State<ManageBackup> {
     });
   }
 
+  Future<void> onDelete(String fileId) async {
+    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+    await Provider.of<AuthProvider>(context, listen: false).deleteFile(fileId);
+    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+  }
+
   Future<void> onClear() async {
     setState(() {
       driveFiles = [];
@@ -59,7 +65,12 @@ class _ManageBackupState extends State<ManageBackup> {
               itemCount: driveFiles.length,
               itemBuilder: (context, index) {
                 drive.File file = driveFiles[index];
-                return BackupResult(file: file);
+                return BackupResult(
+                  file: file,
+                  onLoad: onLoad,
+                  onDelete: onDelete,
+                  onClear: onClear,
+                );
               },
             )),
             createBackup(context),
@@ -84,6 +95,7 @@ class _ManageBackupState extends State<ManageBackup> {
                     minimumSize: Size(MediaQuery.of(context).size.width * 80 / 100, 53)),
                 onPressed: () async {
                   await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
+                  await onLoad();
                 },
                 child: const Text('Create New Backup'),
               ),
@@ -125,13 +137,17 @@ class _ManageBackupState extends State<ManageBackup> {
 }
 
 class BackupResult extends StatelessWidget {
-  const BackupResult({
-    super.key,
-    required this.file,
-  });
+  const BackupResult(
+      {super.key,
+      required this.file,
+      required this.onLoad,
+      required this.onDelete,
+      required this.onClear});
 
   final drive.File file;
-
+  final Function onLoad;
+  final Function onClear;
+  final Function(String fileId) onDelete;
   String getFileSizeString({required int bytes, int decimals = 0}) {
     const suffixes = ["b", "kb", "mb", "gb", "tb"];
     if (bytes == 0) return '0${suffixes[0]}';
@@ -141,32 +157,30 @@ class BackupResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          width: MediaQuery.of(context).size.width - 12,
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-          ),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          padding: const EdgeInsets.only(top: 17, left: 25, right: 25),
-          child: Column(
-            children: [
-              Typography2(label: 'Name', value: file.name ?? "no-name"),
-              RowWithLabelAndValueSet(
-                  label1: 'Size: ',
-                  value1: getFileSizeString(bytes: int.parse(file.size!), decimals: 2).toString(),
-                  label2: 'Version:',
-                  value2: file.version ?? "no-version"),
-              Typography2(label: 'Created Time ', value: timeago.format(file.createdTime!)),
-              const Separator(),
-              buildActionButtonsRow(context, file)
-            ],
-          ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        width: MediaQuery.of(context).size.width - 12,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width,
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+        padding: const EdgeInsets.only(top: 17, left: 25, right: 25),
+        child: Column(
+          children: [
+            Typography2(label: 'Name', value: file.name ?? "no-name"),
+            RowWithLabelAndValueSet(
+                label1: 'Size: ',
+                value1: getFileSizeString(bytes: int.parse(file.size!), decimals: 2).toString(),
+                label2: 'Version:',
+                value2: file.version ?? "no-version"),
+            Typography2(label: 'Created Time ', value: timeago.format(file.createdTime!)),
+            const Separator(),
+            buildActionButtonsRow(context, file)
+          ],
         ),
       ),
     );
@@ -180,7 +194,10 @@ class BackupResult extends StatelessWidget {
       ),
       TextButton(
         child: const Text('Delete this backup'),
-        onPressed: () {},
+        onPressed: () async {
+          await onDelete(file.id!);
+          await onLoad();
+        },
       ),
     ]);
   }
