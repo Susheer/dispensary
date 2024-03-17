@@ -111,56 +111,85 @@ class _LandingScreenState extends State<LandingScreen> {
                   child: Container(
                       constraints: const BoxConstraints.expand(), child: const UserName())),
               Expanded(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.view_headline_outlined),
-                      title: const Text('Reset App'),
-                      subtitle: const Text("clear app data"),
-                      onTap: () {
-                        Provider.of<LandingScreenProvider>(context, listen: false)
-                            .deleteDatabaseAndClear();
-                        Navigator.pop(context); // Close the drawer
-                      },
+                child: SingleChildScrollView(
+                  child: Container(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.view_headline_outlined),
+                          title: const Text('Reset App'),
+                          subtitle: const Text("clear app data"),
+                          onTap: () {
+                            Provider.of<LandingScreenProvider>(context, listen: false)
+                                .deleteDatabaseAndClear();
+                            Navigator.pop(context); // Close the drawer
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.post_add_outlined),
+                          title: const Text('Add Medecine'),
+                          subtitle: const Text("fake drugs"),
+                          onTap: () {
+                            Provider.of<MedicineProvider>(context, listen: false)
+                                .insertsDummyMedicines();
+                            Navigator.pop(context); // Close the drawer
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.remove_from_queue),
+                          title: const Text('Clear Medecine'),
+                          subtitle: const Text("delete drugs"),
+                          onTap: () {
+                            Provider.of<MedicineProvider>(context, listen: false)
+                                .deleteAllMedicines();
+                            Navigator.pop(context); // Close the drawer
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.person_outline),
+                          title: const Text('Add Patient'),
+                          subtitle: const Text("fake data"),
+                          onTap: () {
+                            Provider.of<PatientProvider>(context, listen: false)
+                                .registerDummyPatient();
+                            Navigator.pop(context); // Close the drawer
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.remove_circle_outline),
+                          title: const Text('Delete Patient'),
+                          subtitle: const Text("clear all"),
+                          onTap: () {
+                            Provider.of<PatientProvider>(context, listen: false)
+                                .deleteAllPatients();
+                            Navigator.pop(context); // Close the drawer
+                          },
+                        ),
+                        if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
+                          ListTile(
+                            leading: const Icon(Icons.upload_file),
+                            title: const Text('Show Backup'),
+                            subtitle: const Text("All backedup files"),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Provider.of<AuthProvider>(context, listen: false)
+                                  .showBackups(context);
+                            },
+                          ),
+                        if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
+                          ListTile(
+                            leading: const Icon(Icons.upload_file),
+                            title: const Text('Upload db'),
+                            subtitle: const Text("Create backup"),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Provider.of<AuthProvider>(context, listen: false)
+                                  .createBackup(context);
+                            },
+                          ),
+                      ],
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.post_add_outlined),
-                      title: const Text('Add Medecine'),
-                      subtitle: const Text("fake drugs"),
-                      onTap: () {
-                        Provider.of<MedicineProvider>(context, listen: false)
-                            .insertsDummyMedicines();
-                        Navigator.pop(context); // Close the drawer
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.remove_from_queue),
-                      title: const Text('Clear Medecine'),
-                      subtitle: const Text("delete drugs"),
-                      onTap: () {
-                        Provider.of<MedicineProvider>(context, listen: false).deleteAllMedicines();
-                        Navigator.pop(context); // Close the drawer
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.person_outline),
-                      title: const Text('Add Patient'),
-                      subtitle: const Text("fake data"),
-                      onTap: () {
-                        Provider.of<PatientProvider>(context, listen: false).registerDummyPatient();
-                        Navigator.pop(context); // Close the drawer
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.remove_circle_outline),
-                      title: const Text('Delete Patient'),
-                      subtitle: const Text("clear all"),
-                      onTap: () {
-                        Provider.of<PatientProvider>(context, listen: false).deleteAllPatients();
-                        Navigator.pop(context); // Close the drawer
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               ),
               const DrawerFooter(),
@@ -206,8 +235,6 @@ class DrawerFooter extends StatelessWidget {
               subtitle: Text('Sudheer gupta'),
               trailing: Text('ver 0.1'),
             ),
-          
-
           ],
         ));
   }

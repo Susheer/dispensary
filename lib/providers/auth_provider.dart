@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:dispensary/services/database_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dispensary/services/backup_service.dart';
+import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with ChangeNotifier {
   final DatabaseService _databaseService;
   late GoogleSignIn _googleSignIn;
+  late BackupService backupService;
   GoogleSignInAccount? _currentUser;
+
   late StreamSubscription<GoogleSignInAccount?> streamSubscription;
   bool _isAuthorized = false;
   List<String> scopes = <String>[
@@ -19,13 +22,15 @@ class AuthProvider with ChangeNotifier {
   AuthProvider(this._databaseService) {
     debugPrint("AuthProvider: Constructer - invoked");
     _googleSignIn = GoogleSignIn.standard(scopes: scopes);
-    streamSubscription = _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
+    streamSubscription =
+        _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) async {
       debugPrint("onCurrentUserChanged invoked");
       bool isAuthorized = account != null;
       _currentUser = account;
       _isAuthorized = isAuthorized;
       notifyListeners();
     });
+    backupService = BackupService();
   }
 
   @override
@@ -59,6 +64,29 @@ class AuthProvider with ChangeNotifier {
       print(error);
       return false;
     }
+  }
+
+  Future<drive.DriveApi?> _getDriveApi() async {
+    Map<String, String>? headers;
+    if (currentUser != null) {
+      headers = await currentUser?.authHeaders;
+    }
+
+    if (headers == null) {
+      return null;
+    }
+
+    final client = GoogleAuthClient(headers);
+    final driveApi = drive.DriveApi(client);
+    return driveApi;
+  }
+
+  Future<void> showBackups(BuildContext context) async {
+    backupService.showAllBackups(context, currentUser!);
+  }
+
+  Future<void> createBackup(BuildContext context) async {
+    backupService.uploadBackup(context, currentUser!);
   }
 
   Future<void> signOut() => _googleSignIn.disconnect();
