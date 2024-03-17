@@ -92,10 +92,27 @@ class AuthProvider with ChangeNotifier {
   Future<bool> deleteFile(String fileId) async {
     try {
       backupService.deleteFile(currentUser!, fileId!);
+      Future.delayed(Duration(seconds: 3));
       return true;
     } catch (e) {
       return false;
     }
+  }
+
+  blockScreen(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      transitionDuration: const Duration(seconds: 2),
+      barrierColor: Colors.black.withOpacity(0.5),
+      pageBuilder: (context, animation, secondaryAnimation) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  unblockScreen(BuildContext context) {
+    Navigator.pop(context);
   }
 
   Future<void> signOut() => _googleSignIn.disconnect();
