@@ -138,10 +138,10 @@ class BackupResult extends StatelessWidget {
     var i = (log(bytes) / log(1024)).floor();
     return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
   }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
+    return Container(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
@@ -153,7 +153,7 @@ class BackupResult extends StatelessWidget {
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(6.0),
           ),
-          padding: const EdgeInsets.only(top: 17, bottom: 35, left: 25, right: 25),
+          padding: const EdgeInsets.only(top: 17, left: 25, right: 25),
           child: Column(
             children: [
               Typography2(label: 'Name', value: file.name ?? "no-name"),
@@ -163,12 +163,25 @@ class BackupResult extends StatelessWidget {
                   label2: 'Version:',
                   value2: file.version ?? "no-version"),
               Typography2(label: 'Created Time ', value: timeago.format(file.createdTime!)),
-              const Separator(), 
-            
+              const Separator(),
+              buildActionButtonsRow(context, file)
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget buildActionButtonsRow(BuildContext context, drive.File file) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      TextButton(
+        child: const Text('Apply this backup'),
+        onPressed: () {},
+      ),
+      TextButton(
+        child: const Text('Delete this backup'),
+        onPressed: () {},
+      ),
+    ]);
   }
 }
