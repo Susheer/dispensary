@@ -99,6 +99,15 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> onApply(String fileId) async {
+    try {
+      backupService.applyBackup(currentUser!, fileId!);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   blockScreen(BuildContext context) {
     showGeneralDialog(
       context: context,

@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class MedicineProvider extends ChangeNotifier {
   List<Medicine> _medicines = [];
@@ -14,8 +18,7 @@ class MedicineProvider extends ChangeNotifier {
   int get medicineCountInDb => _medicineCountInDb;
   // Medicines CRUD
   Future<void> loadAllMedicines() async {
-    final List<Map<String, dynamic>> maps =
-        await _databaseService.db.query('medicines');
+    final List<Map<String, dynamic>> maps = await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
     notifyListeners();
   }
@@ -28,8 +31,7 @@ class MedicineProvider extends ChangeNotifier {
   }
 
   Future<void> justLoadAllMedicines() async {
-    final List<Map<String, dynamic>> maps =
-        await _databaseService.db.query('medicines');
+    final List<Map<String, dynamic>> maps = await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
   }
 
@@ -38,7 +40,33 @@ class MedicineProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> calculateFileSize() async {
+    String dir = await getDatabasesPath();
+    String filePath = join(dir, dotenv.env['DB_PATH'] ?? 'default_database-passive.db');
+    final file = File(filePath);
+    debugPrint('calculateFileSize----------------');
+    // Check if the file exists
+    if (await file.exists()) {
+      // Get the file size in bytes
+      final int bytes = await file.length();
+      String fileSize;
+      if (bytes < 1024) {
+        fileSize = '${bytes}B'; // Bytes
+      } else if (bytes < 1024 * 1024) {
+        fileSize = '${(bytes / 1024).toStringAsFixed(2)} KB'; // Kilobytes
+      } else if (bytes < 1024 * 1024 * 1024) {
+        fileSize = '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'; // Megabytes
+      } else {
+        fileSize = '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB'; // Gigabytes
+      }
+      debugPrint('fileSize----------------: $fileSize');
+    } else {
+      throw Exception('File not found: $filePath');
+    }
+  }
+
   void insertsDummyMedicines() async {
+    await calculateFileSize();
     // Creating a list of Medicine objects for 10 commonly used medicines
     List<Medicine> medicines = [
       Medicine(
@@ -173,8 +201,7 @@ class MedicineProvider extends ChangeNotifier {
     // Your SQL query to get the count
     const String sql = 'SELECT COUNT(*) FROM medicines';
 
-    final List<Map<String, dynamic>> result =
-        await _databaseService.db.rawQuery(sql);
+    final List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(sql);
 
     // Extract the count from the result
     final int count = Sqflite.firstIntValue(result) ?? 0;
@@ -183,10 +210,9 @@ class MedicineProvider extends ChangeNotifier {
   }
 
   Future<void> fetchNextPage(int startIndex, int pageSize) async {
-    List<Map<String, dynamic>> result = await _databaseService.db
-        .query('medicines', limit: startIndex, offset: pageSize);
-    List<Medicine> nextPage =
-        result.map((map) => Medicine.fromMap(map)).toList();
+    List<Map<String, dynamic>> result =
+        await _databaseService.db.query('medicines', limit: startIndex, offset: pageSize);
+    List<Medicine> nextPage = result.map((map) => Medicine.fromMap(map)).toList();
     if (nextPage.isEmpty != true) {
       _medicines.addAll(nextPage);
     }

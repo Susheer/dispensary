@@ -40,6 +40,12 @@ class _ManageBackupState extends State<ManageBackup> {
     await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
   }
 
+  Future<void> onApply(String fileId) async {
+    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+    await Provider.of<AuthProvider>(context, listen: false).onApply(fileId);
+    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+  }
+
   Future<void> onClear() async {
     setState(() {
       driveFiles = [];
@@ -70,6 +76,7 @@ class _ManageBackupState extends State<ManageBackup> {
                   onLoad: onLoad,
                   onDelete: onDelete,
                   onClear: onClear,
+                  onApply: onApply,
                 );
               },
             )),
@@ -108,7 +115,7 @@ class _ManageBackupState extends State<ManageBackup> {
 
   Container pageHeaderContainer(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       width: MediaQuery.of(context).size.width,
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
@@ -119,15 +126,25 @@ class _ManageBackupState extends State<ManageBackup> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'All Backups: ${driveFiles.length}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                'Available Snapshot',
+                style: const TextStyle(fontSize: 18),
               ),
-              TextButton(
-                  onPressed: () async {
-                    onClear();
-                    onLoad();
-                  },
-                  child: const Text('Refresh'))
+              Stack(
+                children: [
+                  Icon(Icons.storage, size: 40), // Database icon
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(Icons.circle, size: 16, color: Colors.red), // Badge background
+                        Text((driveFiles.length).toString(), style: TextStyle(fontSize: 10, color: Colors.white)), // Number
+                      ],
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ],
@@ -142,10 +159,12 @@ class BackupResult extends StatelessWidget {
       required this.file,
       required this.onLoad,
       required this.onDelete,
+      required this.onApply,
       required this.onClear});
 
   final drive.File file;
   final Function onLoad;
+  final Function onApply;
   final Function onClear;
   final Function(String fileId) onDelete;
   String getFileSizeString({required int bytes, int decimals = 0}) {
@@ -190,7 +209,9 @@ class BackupResult extends StatelessWidget {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       TextButton(
         child: const Text('Apply this backup'),
-        onPressed: () {},
+        onPressed: () async {
+          await onApply(file.id);
+        },
       ),
       TextButton(
         child: const Text('Delete this backup'),

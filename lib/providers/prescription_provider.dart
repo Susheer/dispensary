@@ -140,7 +140,7 @@ class PrescriptionProvider extends ChangeNotifier {
 
   Future<void> addFakePrescriptions(int patientId) async {
     Prescription fakePrescription =
-        FakePrescriptionGenerator.generateFakePrescription(patientId);
+        await FakePrescriptionGenerator.generateFakePrescription(patientId);
     await storePrescriptionAndLines(fakePrescription);
     dbCount++;
     notifyListeners();
