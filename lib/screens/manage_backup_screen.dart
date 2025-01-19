@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/common/typography.dart';
 import 'package:dispensary/providers/auth_provider.dart';
+import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class ManageBackup extends StatefulWidget {
 
 class _ManageBackupState extends State<ManageBackup> {
   late List<drive.File> driveFiles = [];
+  late String dbSize = '';
 
   Future<void> onLoad() async {
     setState(() {
@@ -50,6 +52,13 @@ class _ManageBackupState extends State<ManageBackup> {
     await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
   }
 
+  Future<void> calculateDatabaseSize() async {
+    String size = await DatabaseService.calculateDatabaseSize();
+    setState(() {
+      dbSize = size;
+    });
+  }
+
   Future<void> onClear() async {
     setState(() {
       driveFiles = [];
@@ -59,6 +68,7 @@ class _ManageBackupState extends State<ManageBackup> {
   @override
   void initState() {
     super.initState();
+    calculateDatabaseSize();
     onLoad();
   }
 
@@ -110,7 +120,7 @@ class _ManageBackupState extends State<ManageBackup> {
         children: [
           RowWithLabelAndValueSet(
               label1: 'Database Size: ',
-              value1: getFileSizeString(bytes: int.parse("221000"), decimals: 2).toString(),
+              value1: dbSize,
               label2: 'Last Backup:',
               value2: "12/02/2024"),
           Container(
@@ -141,7 +151,6 @@ class _ManageBackupState extends State<ManageBackup> {
           ),
         ],
       ),
-    
     );
   }
 
@@ -184,7 +193,6 @@ class _ManageBackupState extends State<ManageBackup> {
                     },
                   ),
                   Stack(
-
                     children: [
                       Icon(Icons.storage, size: 30), // Database icon
                       Positioned(
@@ -217,7 +225,7 @@ String getFileSizeString({required int bytes, int decimals = 0}) {
   var i = (log(bytes) / log(1024)).floor();
   return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
 }
-  
+
 class BackupResult extends StatelessWidget {
   const BackupResult(
       {super.key,
@@ -232,7 +240,6 @@ class BackupResult extends StatelessWidget {
   final Function onApply;
   final Function onClear;
   final Function(String fileId) onDelete;
-
 
   @override
   Widget build(BuildContext context) {

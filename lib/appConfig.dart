@@ -1,7 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
-  static String appName = dotenv.env['app_name'] ?? "";
+  static String appName = dotenv.env['app_name'] ?? "No Name";
   static const int PageSize = 10;
   static const int PrescriptionSize = 2;
   static String prescriptionPDFAuther = dotenv.env['prescription_pdf_auther'] ?? "";

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -40,33 +39,7 @@ class MedicineProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> calculateFileSize() async {
-    String dir = await getDatabasesPath();
-    String filePath = join(dir, dotenv.env['DB_PATH'] ?? 'default_database-passive.db');
-    final file = File(filePath);
-    debugPrint('calculateFileSize----------------');
-    // Check if the file exists
-    if (await file.exists()) {
-      // Get the file size in bytes
-      final int bytes = await file.length();
-      String fileSize;
-      if (bytes < 1024) {
-        fileSize = '${bytes}B'; // Bytes
-      } else if (bytes < 1024 * 1024) {
-        fileSize = '${(bytes / 1024).toStringAsFixed(2)} KB'; // Kilobytes
-      } else if (bytes < 1024 * 1024 * 1024) {
-        fileSize = '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'; // Megabytes
-      } else {
-        fileSize = '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB'; // Gigabytes
-      }
-      debugPrint('fileSize----------------: $fileSize');
-    } else {
-      throw Exception('File not found: $filePath');
-    }
-  }
-
   void insertsDummyMedicines() async {
-    await calculateFileSize();
     // Creating a list of Medicine objects for 10 commonly used medicines
     List<Medicine> medicines = [
       Medicine(
