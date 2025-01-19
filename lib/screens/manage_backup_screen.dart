@@ -106,47 +106,38 @@ class _ManageBackupState extends State<ManageBackup> {
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Database Details',
-                style: TextStyle(fontSize: 16),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    iconSize: 20,
-                    icon: Icon(Icons.info_sharp),
-                    tooltip: "info",
-                    onPressed: null,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    iconSize: 20,
-                    icon: Icon(Icons.sd_storage),
-                    tooltip: "storage",
-                    onPressed: null,
-                  ),
-                  Text(
-                    '23GB',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              
-              ),
-            
-            ],
+          RowWithLabelAndValueSet(
+              label1: 'Database Size: ',
+              value1: getFileSizeString(bytes: int.parse("221000"), decimals: 2).toString(),
+              label2: 'Last Backup:',
+              value2: "12/02/2024"),
+          Container(
+            margin: const EdgeInsets.only(
+              bottom: 15,
+            ),
+            padding: const EdgeInsets.all(0.0),
+            decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 1)),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      iconSize: 20,
+                      icon: Icon(Icons.sd_storage),
+                      tooltip: "storage",
+                      onPressed: null,
+                    ),
+                    Text(
+                      '23GB',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -220,6 +211,13 @@ class _ManageBackupState extends State<ManageBackup> {
   }
 }
 
+String getFileSizeString({required int bytes, int decimals = 0}) {
+  const suffixes = ["b", "kb", "mb", "gb", "tb"];
+  if (bytes == 0) return '0${suffixes[0]}';
+  var i = (log(bytes) / log(1024)).floor();
+  return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
+}
+  
 class BackupResult extends StatelessWidget {
   const BackupResult(
       {super.key,
@@ -234,12 +232,7 @@ class BackupResult extends StatelessWidget {
   final Function onApply;
   final Function onClear;
   final Function(String fileId) onDelete;
-  String getFileSizeString({required int bytes, int decimals = 0}) {
-    const suffixes = ["b", "kb", "mb", "gb", "tb"];
-    if (bytes == 0) return '0${suffixes[0]}';
-    var i = (log(bytes) / log(1024)).floor();
-    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
-  }
+
 
   @override
   Widget build(BuildContext context) {
