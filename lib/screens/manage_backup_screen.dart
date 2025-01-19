@@ -102,7 +102,7 @@ class _ManageBackupState extends State<ManageBackup> {
   Container createBackup(BuildContext context) {
     var boxDecoration = BoxDecoration(
       borderRadius: const BorderRadius.all(
-        Radius.circular(10.0),
+        Radius.circular(6.0),
       ),
       border: Border.all(
         color: Colors.black,
@@ -118,39 +118,30 @@ class _ManageBackupState extends State<ManageBackup> {
       ),
       child: Column(
         children: [
-          RowWithLabelAndValueSet(
-              label1: 'Database Size: ',
-              value1: dbSize,
-              label2: 'Last Backup:',
-              value2: "12/02/2024"),
           Container(
-            margin: const EdgeInsets.only(
-              bottom: 15,
-            ),
-            padding: const EdgeInsets.all(0.0),
-            decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 1)),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+            padding: const EdgeInsets.all(5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      iconSize: 20,
-                      icon: Icon(Icons.sd_storage),
-                      tooltip: "storage",
-                      onPressed: null,
-                    ),
-                    Text(
-                      '23GB',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ],
+                Expanded(
+                  child: RowWithLabelAndValue(label: 'Size', value: dbSize, isOverflow: false),
                 ),
+                // Add space between RowWithLabelAndValue widgets
+                Expanded(
+                    child: TextButton(
+                  child: const Text('Create Backup'),
+                  onPressed: () async {
+                    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+                    await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
+                    await onLoad();
+                    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+                  },
+                )),
               ],
             ),
-          ),
-        ],
-      ),
+          )
+        ])
     );
   }
 
@@ -166,15 +157,30 @@ class _ManageBackupState extends State<ManageBackup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Available Snapshot',
-                style: const TextStyle(fontSize: 18),
-              ),
               Row(
                 children: [
-                  IconButton(
+                  const Text(
+                    'Available Snapshot',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(Icons.circle,
+                          size: 25, color: Color(0xff6750a4)), // Badge background
+                      Text((driveFiles.length).toString(),
+                          style: const TextStyle(fontSize: 10, color: Colors.white)), // Number
+                    ],
+                  ),
+                ],
+              ),
+             
+              IconButton(
                     iconSize: 32,
-                    icon: Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh),
                     tooltip: "Refresh",
                     onPressed: () async {
                       await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
@@ -182,35 +188,7 @@ class _ManageBackupState extends State<ManageBackup> {
                       await Provider.of<AuthProvider>(context, listen: false)
                           .unblockScreen(context);
                     },
-                  ),
-                  IconButton(
-                    iconSize: 32,
-                    icon: Icon(Icons.add_box),
-                    tooltip: "New Snapshot",
-                    onPressed: () async {
-                      await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
-                      await onLoad();
-                    },
-                  ),
-                  Stack(
-                    children: [
-                      Icon(Icons.storage, size: 30), // Database icon
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Icon(Icons.circle, size: 16, color: Colors.red), // Badge background
-                            Text((driveFiles.length).toString(),
-                                style: TextStyle(fontSize: 10, color: Colors.white)), // Number
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              )
+              ),
             ],
           ),
         ],
