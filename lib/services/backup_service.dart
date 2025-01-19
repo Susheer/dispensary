@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:typed_data';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart';
@@ -134,7 +133,7 @@ class BackupService {
     await driveApi.files.delete(fileId);
   }
 
-  Future<void> applyBackup(GoogleSignInAccount account, String fileId) async {
+  Future<void> applyBackup(GoogleSignInAccount account, String fileId, int totalBytes) async {
     var documentsDirectory = await getDatabasesPath();
     String databasepath = join(documentsDirectory, DatabaseService.getDatabaseName());
 
@@ -155,13 +154,23 @@ class BackupService {
       debugPrint('Write chunk to file');
       fileSink.add(chunk);
       totalDownloaded += chunk.length;
-      debugPrint('Downloaded $totalDownloaded bytes');
+      double downloadedPrec = calculateDownloadPercentage(totalBytes, totalDownloaded);
+      debugPrint('Downloaded $totalDownloaded bytes, downloadedPrec-$downloadedPrec');
     }
 
     debugPrint('Close the file sink');
     await fileSink.close();
     debugPrint('Backup restored successfully.');
   }
+}
+
+double calculateDownloadPercentage(int totalBytes, int downloadedBytes) {
+  if (totalBytes == 0) {
+    return 0.0;
+  }
+  // Calculate the percentage
+  double percentage = (downloadedBytes / totalBytes) * 100;
+  return percentage;
 }
 
 class GoogleAuthClient extends http.BaseClient {

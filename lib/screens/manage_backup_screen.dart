@@ -1,4 +1,5 @@
 // search_screen.dart
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:dispensary/common/seperator.dart';
@@ -7,6 +8,7 @@ import 'package:dispensary/providers/auth_provider.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/healthcare/v1.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -47,9 +49,9 @@ class _ManageBackupState extends State<ManageBackup> {
     await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
   }
 
-  Future<void> onApply(String fileId) async {
+  Future<void> onApply(String fileId, int totalBytes) async {
     await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-    await Provider.of<AuthProvider>(context, listen: false).onApply(fileId);
+    await Provider.of<AuthProvider>(context, listen: false).onApply(fileId, totalBytes);
     await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
   }
 
@@ -57,6 +59,7 @@ class _ManageBackupState extends State<ManageBackup> {
     String size = await DatabaseService.calculateDatabaseSize();
     setState(() {
       dbSize = size;
+      debugPrint('convertToBytes($dbSize)');
     });
   }
 
@@ -212,8 +215,8 @@ class BackupResult extends StatelessWidget {
 
   final drive.File file;
   final Function onLoad;
-  final Function onApply;
   final Function onClear;
+  final Function(String fileId, int totalSize) onApply;
   final Function(String fileId) onDelete;
 
   @override
@@ -252,7 +255,10 @@ class BackupResult extends StatelessWidget {
       TextButton(
         child: const Text('Apply this backup'),
         onPressed: () async {
-          await onApply(file.id);
+          //debugPrint('file ${file.size}');
+          if (file.size != null || file.size != '' || file.id != null || file.id != '') {
+            await onApply(file.id!, int.parse(file.size!));
+          }
         },
       ),
       TextButton(

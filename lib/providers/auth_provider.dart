@@ -99,9 +99,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> onApply(String fileId) async {
+  Future<bool> onApply(String fileId, int totalBytes) async {
     try {
-      backupService.applyBackup(currentUser!, fileId!);
+      backupService.applyBackup(currentUser!, fileId!, totalBytes);
       return true;
     } catch (e) {
       return false;
@@ -123,6 +123,6 @@ class AuthProvider with ChangeNotifier {
   unblockScreen(BuildContext context) {
     Navigator.pop(context);
   }
-
+  
   Future<void> signOut() => _googleSignIn.disconnect();
 }
