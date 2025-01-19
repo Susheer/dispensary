@@ -43,6 +43,7 @@ class _ManageBackupState extends State<ManageBackup> {
   Future<void> onDelete(String fileId) async {
     await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
     await Provider.of<AuthProvider>(context, listen: false).deleteFile(fileId);
+    await onLoad();
     await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
   }
 
@@ -110,14 +111,13 @@ class _ManageBackupState extends State<ManageBackup> {
       ),
     );
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      width: MediaQuery.of(context).size.width,
-      decoration: boxDecoration,
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width,
-      ),
-      child: Column(
-        children: [
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        width: MediaQuery.of(context).size.width,
+        decoration: boxDecoration,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width,
+        ),
+        child: Column(children: [
           Container(
             padding: const EdgeInsets.all(5),
             child: Row(
@@ -141,8 +141,7 @@ class _ManageBackupState extends State<ManageBackup> {
               ],
             ),
           )
-        ])
-    );
+        ]));
   }
 
   Container pageHeaderContainer(BuildContext context) {
@@ -177,17 +176,15 @@ class _ManageBackupState extends State<ManageBackup> {
                   ),
                 ],
               ),
-             
               IconButton(
-                    iconSize: 32,
+                iconSize: 32,
                 icon: const Icon(Icons.refresh),
-                    tooltip: "Refresh",
-                    onPressed: () async {
-                      await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-                      await onLoad();
-                      await Provider.of<AuthProvider>(context, listen: false)
-                          .unblockScreen(context);
-                    },
+                tooltip: "Refresh",
+                onPressed: () async {
+                  await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+                  await onLoad();
+                  await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+                },
               ),
             ],
           ),
