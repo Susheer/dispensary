@@ -19,6 +19,10 @@ class _ManageBackupState extends State<ManageBackup> {
   late List<drive.File> driveFiles = [];
 
   Future<void> onLoad() async {
+    setState(() {
+      driveFiles = [];
+    });
+
     var fileList = await Provider.of<AuthProvider>(context, listen: false).showBackups();
 
     if (fileList == null) {
@@ -66,6 +70,7 @@ class _ManageBackupState extends State<ManageBackup> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             pageHeaderContainer(context),
+            createBackup(context),
             Expanded(
                 child: ListView.builder(
               itemCount: driveFiles.length,
@@ -80,36 +85,72 @@ class _ManageBackupState extends State<ManageBackup> {
                 );
               },
             )),
-            createBackup(context),
           ],
         ));
   }
 
   Container createBackup(BuildContext context) {
+    var boxDecoration = BoxDecoration(
+      borderRadius: const BorderRadius.all(
+        Radius.circular(10.0),
+      ),
+      border: Border.all(
+        color: Colors.black,
+        width: 1.0,
+      ),
+    );
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       width: MediaQuery.of(context).size.width,
+      decoration: boxDecoration,
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
       ),
-      child: Column(
+      child: const Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size(MediaQuery.of(context).size.width * 80 / 100, 53)),
-                onPressed: () async {
-                  await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
-                  await onLoad();
-                },
-                child: const Text('Create New Backup'),
+              Text(
+                'Database Details',
+                style: TextStyle(fontSize: 16),
               ),
+              Row(
+                children: [
+                  IconButton(
+                    iconSize: 20,
+                    icon: Icon(Icons.info_sharp),
+                    tooltip: "info",
+                    onPressed: null,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    iconSize: 20,
+                    icon: Icon(Icons.sd_storage),
+                    tooltip: "storage",
+                    onPressed: null,
+                  ),
+                  Text(
+                    '23GB',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              
+              ),
+            
             ],
           ),
         ],
       ),
+    
     );
   }
 
@@ -129,20 +170,46 @@ class _ManageBackupState extends State<ManageBackup> {
                 'Available Snapshot',
                 style: const TextStyle(fontSize: 18),
               ),
-              Stack(
+              Row(
                 children: [
-                  Icon(Icons.storage, size: 40), // Database icon
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Icon(Icons.circle, size: 16, color: Colors.red), // Badge background
-                        Text((driveFiles.length).toString(), style: TextStyle(fontSize: 10, color: Colors.white)), // Number
-                      ],
-                    ),
+                  IconButton(
+                    iconSize: 32,
+                    icon: Icon(Icons.refresh),
+                    tooltip: "Refresh",
+                    onPressed: () async {
+                      await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+                      await onLoad();
+                      await Provider.of<AuthProvider>(context, listen: false)
+                          .unblockScreen(context);
+                    },
                   ),
+                  IconButton(
+                    iconSize: 32,
+                    icon: Icon(Icons.add_box),
+                    tooltip: "New Snapshot",
+                    onPressed: () async {
+                      await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
+                      await onLoad();
+                    },
+                  ),
+                  Stack(
+
+                    children: [
+                      Icon(Icons.storage, size: 30), // Database icon
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(Icons.circle, size: 16, color: Colors.red), // Badge background
+                            Text((driveFiles.length).toString(),
+                                style: TextStyle(fontSize: 10, color: Colors.white)), // Number
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               )
             ],
