@@ -133,7 +133,8 @@ class BackupService {
     await driveApi.files.delete(fileId);
   }
 
-  Future<void> applyBackup(GoogleSignInAccount account, String fileId, int totalBytes) async {
+  Future<void> applyBackup(
+      GoogleSignInAccount account, String fileId, int totalBytes, Function updateProgress) async {
     var documentsDirectory = await getDatabasesPath();
     String databasepath = join(documentsDirectory, DatabaseService.getDatabaseName());
 
@@ -155,7 +156,8 @@ class BackupService {
       fileSink.add(chunk);
       totalDownloaded += chunk.length;
       double downloadedPrec = calculateDownloadPercentage(totalBytes, totalDownloaded);
-      debugPrint('Downloaded $totalDownloaded bytes, downloadedPrec-$downloadedPrec');
+      updateProgress(downloadedPrec);
+      //debugPrint('Downloaded $totalDownloaded bytes, downloadedPrec-$downloadedPrec');
     }
 
     debugPrint('Close the file sink');

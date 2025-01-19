@@ -99,9 +99,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  void updateProgressWhenApplying(double progress) {
+    debugPrint('Progress $progress');
+  }
+
   Future<bool> onApply(String fileId, int totalBytes) async {
     try {
-      backupService.applyBackup(currentUser!, fileId!, totalBytes);
+      backupService.applyBackup(currentUser!, fileId!, totalBytes, updateProgressWhenApplying);
       return true;
     } catch (e) {
       return false;
@@ -123,6 +127,6 @@ class AuthProvider with ChangeNotifier {
   unblockScreen(BuildContext context) {
     Navigator.pop(context);
   }
-  
+
   Future<void> signOut() => _googleSignIn.disconnect();
 }
