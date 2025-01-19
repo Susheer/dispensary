@@ -9,11 +9,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:dispensary/services/database_service.dart';
 
 class BackupService {
   Future<String> getdbPath() async {
     var documentsDirectory = await getDatabasesPath();
-    String dbPath = join(documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
+    String dbPath = join(documentsDirectory, DatabaseService.getDatabaseName());
     return dbPath;
   }
 
@@ -27,18 +28,20 @@ class BackupService {
 // Function to create a backup of the SQLite database file
   Future<File?> _createDatabaseBackup(File databaseFile) async {
     try {
+      final backupPath =
+          join(databaseFile.parent.path, '${basenameWithoutExtension(databaseFile.path)}_bk.db');
+      debugPrint('Creating a backup on given location');
+      debugPrint(backupPath);
       // Read database file
       List<int> fileBytes = await databaseFile.readAsBytes();
 
-      // Create backup file
-      final backupFileName = "${basenameWithoutExtension(databaseFile.path)}_backup.db";
-      final backupFile = File("${databaseFile.parent.path}/$backupFileName");
+      final backup = File(backupPath);
 
       // Write database content to backup file
-      await backupFile.writeAsBytes(fileBytes);
+      await backup.writeAsBytes(fileBytes);
 
-      ('Database backup created successfully: ${backupFile.path}');
-      return backupFile;
+      debugPrint('A backup is written successfully.');
+      return backup;
     } catch (e) {
       debugPrint('Error creating database backup: $e');
       return null;
@@ -48,26 +51,24 @@ class BackupService {
   // Function to upload the database backup file to Google Drive
   Future<void> _uploadDatabaseBackupToDrive(
       drive.DriveApi driveApi, File backupFile, String folderId) async {
+    debugPrint("Upload backup to Google Drive");
     try {
-      debugPrint("uploadDatabaseBackupToDrive Invoked");
-      // Read backup file
+      debugPrint("Reading backup...");
       List<int> fileBytes = await backupFile.readAsBytes();
-      // Set up media stream
+      debugPrint("Set up media stream");
       final mediaStream = Stream<List<int>>.fromIterable([fileBytes]);
-
-      // Set up File info
+      debugPrint("Set up File info such as name, modifiedTime and folder id");
       final driveFile = drive.File();
-
-      driveFile.name = basename(backupFile.path); // Use backup file name
+      driveFile.name = basename(backupFile.path);
       driveFile.modifiedTime = DateTime.now().toUtc();
-      driveFile.parents = [folderId]; // Assuming folderId is defined elsewhere
-
-      // Upload
+      driveFile.parents = [folderId];
+      debugPrint("Upload started....");
       final media = drive.Media(mediaStream, fileBytes.length);
       final response = await driveApi.files.create(driveFile, uploadMedia: media);
-      debugPrint('Database backup uploaded successfully: ${response.name}');
+      debugPrint('Backup uploaded successfully with response name as ${response.name}');
     } catch (e) {
-      debugPrint('Error uploading database backup: $e');
+      debugPrint('Failed during read or uploading backup to drive');
+      debugPrint(e.toString());
     }
   }
 
@@ -84,35 +85,29 @@ class BackupService {
   }
 
   Future<void> uploadBackup(BuildContext context, GoogleSignInAccount account) async {
-    debugPrint("uploadBackup Invoked");
     try {
+      debugPrint("Creating drive api...");
       final driveApi = await _getDriveApi(account);
       if (driveApi == null) {
         return;
       }
-      debugPrint("driveApi created");
-      // Not allow a user to do something else
-      blockScreen(context);
 
+      // ignore: use_build_context_synchronously
+      blockScreen(context);
       // db path
       var documentsDirectory = await getDatabasesPath();
-      String dbPath = join(documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
-      debugPrint("[Database Path] $dbPath");
+      String dbPath = join(documentsDirectory, DatabaseService.getDatabaseName());
       final databaseFile = File(dbPath);
-      // createDb backup
-      File? backupFile = await _createDatabaseBackup(databaseFile);
+      debugPrint("Createing backup in memory...");
+      File? backup = await _createDatabaseBackup(databaseFile);
 
-      if (backupFile != null) {
-        // Upload backup to Google Drive
-        debugPrint("[Backup database path] ${backupFile.path}");
-        await _uploadDatabaseBackupToDrive(driveApi, backupFile, 'appDataFolder');
+      if (backup != null) {
+        debugPrint("Backup location ${backup.path}");
+        await _uploadDatabaseBackupToDrive(driveApi, backup, 'appDataFolder');
       } else {
-        debugPrint('Database backup creation failed. Upload aborted.');
+        debugPrint('Createing backup in memory failed');
       }
-      // simulate a slow process
-      await Future.delayed(const Duration(seconds: 2));
     } finally {
-      // Remove a dialog
       Navigator.pop(context);
     }
   }
@@ -134,16 +129,14 @@ class BackupService {
   Future<void> deleteFile(GoogleSignInAccount account, String fileId) async {
     final driveApi = await _getDriveApi(account);
     if (driveApi == null) {
-      return null;
+      return;
     }
     await driveApi.files.delete(fileId);
   }
 
   Future<void> applyBackup(GoogleSignInAccount account, String fileId) async {
-    debugPrint('invoked');
-
     var documentsDirectory = await getDatabasesPath();
-    String dbPath = join(documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database-passive.db');
+    String databasepath = join(documentsDirectory, DatabaseService.getDatabaseName());
 
     final localDriveApi = await _getDriveApi(account);
     if (localDriveApi == null) {
@@ -152,30 +145,22 @@ class BackupService {
 
     drive.Media res = await localDriveApi.files
         .get(fileId, downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
-
-    // Initialize total bytes downloaded
+    debugPrint('Initialize total bytes downloaded');
     int totalDownloaded = 0;
-
-    // Open a file for writing
-    final file = File(dbPath);
+    debugPrint('Open a file for writing');
+    final file = File(databasepath);
     final fileSink = file.openWrite();
-
-    // Listen to the stream and process chunks of data
+    debugPrint('Listen to the stream and process chunks of data');
     await for (final chunk in res.stream) {
-      // Write chunk to file
+      debugPrint('Write chunk to file');
       fileSink.add(chunk);
-
-      // Update total downloaded
       totalDownloaded += chunk.length;
-
-      // Display progress
       debugPrint('Downloaded $totalDownloaded bytes');
     }
 
-    // Close the file sink
+    debugPrint('Close the file sink');
     await fileSink.close();
-
-    debugPrint('Backup applied successfully to $dbPath');
+    debugPrint('Backup restored successfully.');
   }
 }
 
