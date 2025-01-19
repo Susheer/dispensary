@@ -201,24 +201,44 @@ class DatabaseService {
 
   // Function to delete the database and clear its contents
   Future<void> deleteDatabaseAndClear() async {
-    debugPrint("deleteDatabaseAndClear: Invoked");
-    debugPrint("deleteDatabaseAndClear: Start");
+    debugPrint("Deleting database...");
     var documentsDirectory = await getDatabasesPath();
-    String databasePath = join(
-        documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
-    debugPrint("deleteDatabaseAndClear: path $documentsDirectory");
-    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
-    debugPrint("closing db");
+    String databasePath = join(documentsDirectory, getDatabaseName());
     // Close the database before deleting
     if (_database.isOpen) {
+      debugPrint("Closing database...");
       await _database.close();
     }
-    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
-    debugPrint("------Deleting Db------");
-    // Delete the database file
+
     await deleteDatabase(databasePath);
-    // Reinitialize the database if needed
-    debugPrint("------Re creating Db------");
+    debugPrint("Database deleted successfully");
+    debugPrint("Re-initializing database....");
     await initializeDatabase();
+  }
+ 
+  static Future<String> calculateDatabaseSize() async {
+    debugPrint('calculating file size on disk...');
+    String databaseDirectory = await getDatabasesPath();
+    String filePath = join(databaseDirectory, DatabaseService.getDatabaseName());
+    final file = File(filePath);
+    debugPrint('Check if the file exists');
+    if (await file.exists()) {
+      debugPrint('Get the file size in bytes');
+      final int bytes = await file.length();
+      String fileSize;
+      if (bytes < 1024) {
+        fileSize = '${bytes}B'; // Bytes
+      } else if (bytes < 1024 * 1024) {
+        fileSize = '${(bytes / 1024).toStringAsFixed(2)} KB'; // Kilobytes
+      } else if (bytes < 1024 * 1024 * 1024) {
+        fileSize = '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'; // Megabytes
+      } else {
+        fileSize = '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB'; // Gigabytes
+      }
+      return fileSize;
+    } else {
+      debugPrint('file does not exists on disk');
+      return 'Invalid';
+    }
   }
 }
