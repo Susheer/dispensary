@@ -83,7 +83,7 @@ class BackupService {
     );
   }
 
-  Future<void> uploadBackup(BuildContext context, GoogleSignInAccount account) async {
+  Future<void> uploadBackup(GoogleSignInAccount account) async {
     try {
       debugPrint("Creating drive api...");
       final driveApi = await _getDriveApi(account);
@@ -91,8 +91,6 @@ class BackupService {
         return;
       }
 
-      // ignore: use_build_context_synchronously
-      blockScreen(context);
       // db path
       var documentsDirectory = await getDatabasesPath();
       String dbPath = join(documentsDirectory, DatabaseService.getDatabaseName());
@@ -107,7 +105,7 @@ class BackupService {
         debugPrint('Createing backup in memory failed');
       }
     } finally {
-      Navigator.pop(context);
+      debugPrint('Upload Service Completed');
     }
   }
 
