@@ -98,7 +98,7 @@ class _ManageBackupState extends State<ManageBackup> {
                   onLoad: onLoad,
                   onDeletePressed: onDelete,
                   onClear: onClear,
-                  onApply: onApply,
+                  onRestoreBackupPressed: onApply,
                 );
               },
             )),
@@ -217,13 +217,13 @@ class BackupResult extends StatelessWidget {
       required this.file,
       required this.onLoad,
       required this.onDeletePressed,
-      required this.onApply,
+      required this.onRestoreBackupPressed,
       required this.onClear});
 
   final drive.File file;
   final Function onLoad;
   final Function onClear;
-  final Function(String fileId, int totalSize) onApply;
+  final Function(String fileId, int totalSize) onRestoreBackupPressed;
   final Function(String fileId) onDeletePressed;
 
   @override
@@ -262,9 +262,8 @@ class BackupResult extends StatelessWidget {
       TextButton(
         child: const Text('Apply this backup'),
         onPressed: () async {
-          //debugPrint('file ${file.size}');
           if (file.size != null || file.size != '' || file.id != null || file.id != '') {
-            await onApply(file.id!, int.parse(file.size!));
+            await onRestoreBackupPressed(file.id!, int.parse(file.size!));
           }
         },
       ),
