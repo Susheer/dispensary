@@ -43,10 +43,13 @@ class _ManageBackupState extends State<ManageBackup> {
   }
 
   Future<void> onDelete(String fileId) async {
-    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-    await Provider.of<AuthProvider>(context, listen: false).deleteFile(fileId);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.blockScreen(context);
+    await authProvider.deleteFile(fileId);
     await onLoad();
-    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+    if (context.mounted) {
+      await authProvider.unblockScreen(context);
+    }
   }
 
   Future<void> onApply(String fileId, int totalBytes) async {
