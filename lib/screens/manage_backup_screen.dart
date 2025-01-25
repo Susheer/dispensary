@@ -135,10 +135,14 @@ class _ManageBackupState extends State<ManageBackup> {
                     child: TextButton(
                   child: const Text('Create Backup'),
                   onPressed: () async {
-                    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-                    await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    await authProvider.blockScreen(context);
+                    await authProvider.createBackup();
                     await onLoad();
-                    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+                    // Safely unblock the screen if the context is still valid
+                    if (context.mounted) {
+                      authProvider.unblockScreen(context);
+                    }
                   },
                 )),
               ],
