@@ -269,7 +269,6 @@ class BackupResult extends StatelessWidget {
         child: const Text('Delete this backup'),
         onPressed: () async {
           await onDelete(file.id!);
-          await onLoad();
         },
       ),
     ]);
