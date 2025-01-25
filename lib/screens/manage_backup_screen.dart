@@ -93,7 +93,7 @@ class _ManageBackupState extends State<ManageBackup> {
                 return BackupResult(
                   file: file,
                   onLoad: onLoad,
-                  onDelete: onDelete,
+                  onDeletePressed: onDelete,
                   onClear: onClear,
                   onApply: onApply,
                 );
@@ -213,7 +213,7 @@ class BackupResult extends StatelessWidget {
       {super.key,
       required this.file,
       required this.onLoad,
-      required this.onDelete,
+      required this.onDeletePressed,
       required this.onApply,
       required this.onClear});
 
@@ -221,7 +221,7 @@ class BackupResult extends StatelessWidget {
   final Function onLoad;
   final Function onClear;
   final Function(String fileId, int totalSize) onApply;
-  final Function(String fileId) onDelete;
+  final Function(String fileId) onDeletePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +268,7 @@ class BackupResult extends StatelessWidget {
       TextButton(
         child: const Text('Delete this backup'),
         onPressed: () async {
-          await onDelete(file.id!);
+          await onDeletePressed(file.id!);
         },
       ),
     ]);
