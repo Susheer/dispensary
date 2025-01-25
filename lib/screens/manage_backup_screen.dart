@@ -53,9 +53,12 @@ class _ManageBackupState extends State<ManageBackup> {
   }
 
   Future<void> onApply(String fileId, int totalBytes) async {
-    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-    await Provider.of<AuthProvider>(context, listen: false).onApply(fileId, totalBytes);
-    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.blockScreen(context);
+    await authProvider.onApply(fileId, totalBytes);
+    if (context.mounted) {
+      authProvider.unblockScreen(context);
+    }
   }
 
   Future<void> calculateDatabaseSize() async {

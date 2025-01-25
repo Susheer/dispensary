@@ -106,7 +106,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> onApply(String fileId, int totalBytes) async {
     try {
-      backupService.applyBackup(currentUser!, fileId!, totalBytes, updateProgressWhenApplying);
+      await backupService.applyBackup(
+          currentUser!, fileId!, totalBytes, updateProgressWhenApplying);
       return true;
     } catch (e) {
       return false;
