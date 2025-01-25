@@ -91,8 +91,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> deleteFile(String fileId) async {
     try {
-      backupService.deleteFile(currentUser!, fileId!);
-      Future.delayed(Duration(seconds: 3));
+      await backupService.deleteFile(currentUser!, fileId!);
+      await Future.delayed(const Duration(seconds: 3));
       return true;
     } catch (e) {
       return false;
