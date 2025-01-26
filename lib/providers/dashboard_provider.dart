@@ -71,43 +71,11 @@ class DashboardScreenProvider with ChangeNotifier {
     return patients;
   }
 
-  Future<void>
-      calculateTotalPendingAmountForScheduledPatientsOnTommrow() async {
-    double total, paid, pending;
-    total = paid = pending = 0.0;
-    String query =
-        ''' select SUM(total_amount) as total, SUM(paid_amount) as paid, (SUM(total_amount) - SUM(paid_amount))  as pending from prescriptions where patient_id in (SELECT id FROM patients WHERE date(scheduled_date) == date('now','+1 day')) 
-        ''';
-    List<Map<String, dynamic>> result =
-        await _databaseService.db.rawQuery(query);
-    if (result.isEmpty) {
-      return;
-    }
-
-    if (!result[0].containsKey('total') ||
-        !result[0].containsKey('paid') ||
-        !result[0].containsKey('pending')) {
-      return;
-    }
-
-    if (result[0]['total'] != null && result[0]['total'] >= 0) {
-      total = result[0]['total'];
-    }
-
-    if (result[0]['paid'] != null && result[0]['paid'] >= 0) {
-      paid = result[0]['paid'];
-    }
-
-    if (result[0]['pending'] != null && result[0]['pending'] >= 0) {
-      pending = result[0]['pending'];
-    }
-
-    Map<String, dynamic> op = {
-      "total": total,
-      "paid": paid,
-      "pending": pending
-    };
-    pendingAmount = pending;
+  Future<void> calculateTotalPendingAmountForScheduledPatientsOnTommrow() async {
+    _databaseService
+        .calculateTotalsInBatches(500)
+        .then((response) => {pendingAmount = response['pending'] as double? ?? 0})
+        .catchError((e) => {debugPrint('Error in caalculation ${e.toString()}')});
   }
 
   Future<void> scheduledPatientsToday() async {

@@ -192,7 +192,7 @@ class DatabaseService {
     debugPrint("Re-initializing database....");
     await initializeDatabase();
   }
- 
+
   static Future<String> calculateDatabaseSize() async {
     debugPrint('calculating file size on disk...');
     String databaseDirectory = await getDatabasesPath();
@@ -217,5 +217,52 @@ class DatabaseService {
       debugPrint('file does not exists on disk');
       return 'Invalid';
     }
+  }
+
+  Future<Map<String, dynamic>> calculateTotalsInBatches(int batchSize) async {
+    int offset = 0;
+    double total = 0;
+    double paid = 0;
+
+    while (true) {
+      // Fetch patient IDs in batches
+      final patientIds = await db.rawQuery('''
+      SELECT id 
+      FROM patients 
+      WHERE DATE(scheduled_date) = DATE('now', '+1 day')
+      LIMIT ? OFFSET ?
+    ''', [batchSize, offset]);
+
+      // Break the loop if no more patient IDs are found
+      if (patientIds.isEmpty) break;
+
+      // Extract patient IDs for the current batch
+      final idList = patientIds.map((row) => row['id']).toList();
+
+      // Calculate the totals for the current batch of patient IDs
+      final batchResult = await db.rawQuery('''
+      SELECT 
+        SUM(total_amount) AS batchTotal,
+        SUM(paid_amount) AS batchPaid
+      FROM prescriptions
+      WHERE patient_id IN (${List.filled(idList.length, '?').join(',')})
+    ''', idList);
+
+      // Add the batch results to the running totals
+      final batchTotal = batchResult.first['batchTotal'] as double? ?? 0;
+      final batchPaid = batchResult.first['batchPaid'] as double? ?? 0;
+
+      total += batchTotal;
+      paid += batchPaid;
+
+      // Move to the next batch
+      offset += batchSize;
+    }
+
+    // Calculate the pending amount
+    final pending = total - paid;
+
+    // Return the final result
+    return {'total': total, 'paid': paid, 'pending': pending};
   }
 }
