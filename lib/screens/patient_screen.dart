@@ -361,7 +361,7 @@ class _PatientScreenState extends State<PatientScreen> {
             await showDatePicker(
               context: context,
               initialDate: patient?.scheduledDate ?? DateTime.now(),
-              firstDate: DateTime.now(),
+              firstDate: patient?.scheduledDate ?? DateTime.now(),
               lastDate: DateTime(2101),
             ).then((selected) {
               if (selected != null) {
