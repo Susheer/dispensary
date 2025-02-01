@@ -36,9 +36,9 @@ class DatabaseService {
             guardianGender TEXT,
             guardianAddress TEXT,
             guardianRelation TEXT,
-            created_date TEXT,
-            updated_date TEXT,
-            scheduled_date TEXT
+            created_date INTEGER,
+            updated_date INTEGER,
+            scheduled_date INTEGER
           )
         ''');
         db.execute('CREATE INDEX idx_created_date ON patients(created_date)');
@@ -82,6 +82,18 @@ class DatabaseService {
     );
   }
 
+  int convertISODateStringToUnixTimestampInSeconds(String isoString) {
+    DateTime dateTime = DateTime.parse(isoString);
+    return dateTime.millisecondsSinceEpoch ~/ 1000;
+  }
+
+  DateTime convertUnixTimeStampToDatetime(int unixTimestampInSecond) {
+    // Convert to DateTime
+    DateTime dateTime =
+        DateTime.fromMillisecondsSinceEpoch(unixTimestampInSecond * 1000, isUtc: true);
+    return dateTime;
+  }
+
   Database get db => _database;
   Future<void> savePatient({
     required String name,
@@ -94,9 +106,9 @@ class DatabaseService {
     required String guardianGender,
     required String guardianAddress,
     required String guardianRelation,
-    required String updatedDate,
-    required String createdDate,
-    required String? scheduledDate,
+    required String isoUpdatedDate,
+    required String isoCreatedDate,
+    required String? isoScheduledDate,
   }) async {
     await _database.insert('patients', {
       'name': _wrapWithQuotes(name),
@@ -109,10 +121,16 @@ class DatabaseService {
       'guardianGender': _wrapWithQuotes(guardianGender),
       'guardianAddress': _wrapWithQuotes(guardianAddress),
       'guardianRelation': _wrapWithQuotes(guardianRelation),
-      'created_date': _wrapWithQuotes(createdDate),
-      'updated_date': _wrapWithQuotes(updatedDate),
-      'scheduled_date': _wrapWithQuotes(scheduledDate ?? ""),
+      'created_date': convertISODateStringToUnixTimestampInSeconds(isoCreatedDate),
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(isoUpdatedDate),
+      'scheduled_date': isNullOrBlank(isoScheduledDate)
+          ? convertISODateStringToUnixTimestampInSeconds(isoScheduledDate!)
+          : 0,
     });
+  }
+
+  bool isNullOrBlank(String? value) {
+    return value == null || value.trim().isEmpty;
   }
 
   Future<int> updatePatientByPatientId({required int id, required Map<String, String> obj}) async {
