@@ -67,7 +67,9 @@ class DashboardScreenProvider with ChangeNotifier {
 
   Future<List<Patient>> getFollowUpPatientsToday() async {
     // String query =
-    //     ''' SELECT * FROM patients WHERE date(updated_date) == date('now', 'localtime') AND date(created_date) != date('now', 'localtime')
+    //     ''' SELECT * FROM patients
+    //WHERE date(updated_date) == date('now', 'localtime') AND
+    //date(created_date) != date('now', 'localtime')
     //     ''';
     // List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(query);
 
