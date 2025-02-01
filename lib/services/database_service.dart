@@ -41,6 +41,8 @@ class DatabaseService {
             scheduled_date TEXT
           )
         ''');
+        db.execute('CREATE INDEX idx_created_date ON patients(created_date)');
+        db.execute('CREATE INDEX idx_scheduled_date ON patients(scheduled_date)');
         db.execute('''
           CREATE TABLE IF NOT EXISTS prescriptions (
             sys_prescription_id INTEGER PRIMARY KEY,
