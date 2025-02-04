@@ -1,6 +1,7 @@
 // database_service.dart
 import 'dart:io';
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/utils.dart/util.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -82,17 +83,6 @@ class DatabaseService {
     );
   }
 
-  int convertISODateStringToUnixTimestampInSeconds(String isoString) {
-    DateTime dateTime = DateTime.parse(isoString);
-    return dateTime.millisecondsSinceEpoch ~/ 1000;
-  }
-
-  DateTime convertUnixTimeStampToDatetime(int unixTimestampInSecond) {
-    // Convert to DateTime
-    DateTime dateTime =
-        DateTime.fromMillisecondsSinceEpoch(unixTimestampInSecond * 1000, isUtc: true);
-    return dateTime;
-  }
 
   Database get db => _database;
   Future<void> savePatient({
@@ -129,11 +119,8 @@ class DatabaseService {
     });
   }
 
-  bool isNullOrBlank(String? value) {
-    return value == null || value.trim().isEmpty;
-  }
 
-  Future<int> updatePatientByPatientId({required int id, required Map<String, String> obj}) async {
+  Future<int> updatePatientByPatientId({required int id, required Map<String, dynamic> obj}) async {
     int rowEffected = await _database.update('patients', obj, where: "id = ?", whereArgs: [id]);
     return rowEffected;
   }
@@ -152,7 +139,17 @@ class DatabaseService {
   Future<List<Patient>> fetchPaginatedPatients(int offset, int pageSize) async {
     List<Map<String, dynamic>> result = await _database.query('patients',
         orderBy: "updated_date DESC", limit: pageSize, offset: offset);
-    return result.map((map) => Patient.fromMap(map)).toList();
+    Map<String, dynamic> record;
+    return result.map((map) {
+      record = Map.from(map);
+      record['created_date'] =
+          convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] =
+          convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      record['scheduled_date'] =
+          convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      return Patient.fromMap(record);
+    }).toList();
   }
 
   Future<void> deleteAllPatients() async {
@@ -189,7 +186,19 @@ class DatabaseService {
     // Check if the results list is not empty
     if (results.isNotEmpty) {
       // Convert the result to a Patient object
-      return Patient.fromMap(results.first);
+      Map<String, dynamic> record = Map.from(results.first);
+      record['created_date'] =
+          convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] =
+          convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      if (record['scheduled_date'] > 100) {
+        record['scheduled_date'] =
+            convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      } else {
+        record['scheduled_date'] = "";
+      }
+
+      return Patient.fromMap(record);
     }
 
     // If patient not found, return null

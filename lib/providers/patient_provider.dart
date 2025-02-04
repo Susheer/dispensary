@@ -1,6 +1,7 @@
 // patient_provider.dart
 import 'dart:math';
 import 'package:dispensary/models/account_model.dart';
+import 'package:dispensary/utils.dart/util.dart';
 import 'package:flutter/material.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/services/database_service.dart';
@@ -18,8 +19,7 @@ class PatientProvider extends ChangeNotifier {
   Future<void> initializePatients() async {
     // Load patients from the database (example)
     _patientsCount = await _databaseService.getPatientsCount();
-    _patients =
-        await _databaseService.fetchPaginatedPatients(0, AppConfig.PageSize);
+    _patients = await _databaseService.fetchPaginatedPatients(0, AppConfig.PageSize);
     notifyListeners();
   }
 
@@ -48,8 +48,7 @@ class PatientProvider extends ChangeNotifier {
       rel = Patient.parseRelation(relation);
     }
     Patient newPatient = Patient(
-        id: _patients.length +
-            1, // Assuming the id is auto-incremented by the database
+        id: _patients.length + 1, // Assuming the id is auto-incremented by the database
         name: name,
         mobileNumber: mobileNumber,
         gender: Patient.parseGender(gender),
@@ -79,9 +78,9 @@ class PatientProvider extends ChangeNotifier {
         guardianGender: guardianGender ?? "",
         guardianAddress: guardianAddress ?? "",
         guardianRelation: relation ?? "",
-        createdDate: newPatient.createdDate.toIso8601String(),
-        updatedDate: newPatient.updatedDate.toIso8601String(),
-        scheduledDate: newPatient.scheduledDate?.toIso8601String() ?? "");
+        isoCreatedDate: newPatient.createdDate.toIso8601String(),
+        isoUpdatedDate: newPatient.updatedDate.toIso8601String(),
+        isoScheduledDate: newPatient.scheduledDate?.toIso8601String() ?? "");
   }
 
   Future<int> getPatientsCount() {
@@ -110,8 +109,7 @@ class PatientProvider extends ChangeNotifier {
 
     if (mobileNumber != "") {
       if (whereClause.isNotEmpty) {
-        whereClause
-            .add(" AND UPPER(mobileNumber) LIKE UPPER('%$mobileNumber%')");
+        whereClause.add(" AND UPPER(mobileNumber) LIKE UPPER('%$mobileNumber%')");
       } else {
         whereClause.add(" UPPER(mobileNumber) LIKE UPPER('%$mobileNumber%')");
       }
@@ -122,28 +120,30 @@ class PatientProvider extends ChangeNotifier {
 
     query += " limit 10";
     debugPrint("Query- $query");
-    final List<Map<String, dynamic>> result =
-        await _databaseService.db.rawQuery(query);
+    final List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(query);
     List<Patient> list = result.map((obj) => Patient.fromMap(obj)).toList();
     return list;
   }
 
   Future<void> fetchNextPage(int startIndex, int pageSize) async {
     await Future.delayed(const Duration(seconds: 2));
-    List<Patient> nextPage =
-        await _databaseService.fetchPaginatedPatients(startIndex, pageSize);
+    List<Patient> nextPage = await _databaseService.fetchPaginatedPatients(startIndex, pageSize);
     if (nextPage.isEmpty != true) {
       _patients.addAll(nextPage);
       notifyListeners();
     }
   }
 
+  String isoStringFromNow(Duration days) {
+    return DateTime.now().subtract(days).toIso8601String();
+  }
+
   Future<void> registerDummyPatient() async {
     print("registerDummyPatient invoked");
     const int numberOfPatients = 5;
     int start = 0;
-    List<Map<String, dynamic>> list = await _databaseService.db
-        .query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
+    List<Map<String, dynamic>> list =
+        await _databaseService.db.query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
     if (list.isNotEmpty && list[0].containsKey('id')) {
       if (list[0]['id'] != null && list[0]['id'] != "" && list[0]['id'] >= 0) {
         start = list[0]['id'];
@@ -161,14 +161,9 @@ class PatientProvider extends ChangeNotifier {
           guardianGender: Random().nextBool() ? 'Male' : 'Female',
           guardianAddress: 'Guardian Address-${i + start}',
           guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
-          createdDate: DateTime.now()
-              .subtract(const Duration(days: 30))
-              .toIso8601String(),
-          updatedDate: DateTime.now()
-              .subtract(const Duration(days: 10))
-              .toIso8601String(),
-          scheduledDate:
-              DateTime.now().add(const Duration(days: 1)).toIso8601String());
+          isoCreatedDate: isoStringFromNow(const Duration(days: 30)),
+          isoUpdatedDate: isoStringFromNow(const Duration(days: 10)),
+          isoScheduledDate: isoStringFromNow(const Duration(days: 1)));
       debugPrint("Patient ${i + start} inserted");
     }
     initializePatients();
@@ -183,19 +178,16 @@ class PatientProvider extends ChangeNotifier {
   }
 
   Future<bool> updateGuardianByPatientId(Patient p) async {
-    Map<String, String> obj = {
+    Map<String, dynamic> obj = {
       'guardianName': p.guardianName ?? "",
       'guardianMobileNumber': p.guardianMobileNumber ?? "",
-      'guardianGender':
-          Patient.parseGenderToString(p.guardianGender ?? Gender.Other),
+      'guardianGender': Patient.parseGenderToString(p.guardianGender ?? Gender.Other),
       'guardianAddress': p.guardianAddress ?? "",
-      'guardianRelation':
-          Patient.parseRelationToString(p.relation ?? GuardianRelation.Other),
-      'updated_date': p.updatedDate.toIso8601String()
+      'guardianRelation': Patient.parseRelationToString(p.relation ?? GuardianRelation.Other),
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(p.updatedDate.toIso8601String())
     };
 
-    int totalRowAffected =
-        await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
+    int totalRowAffected = await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
     if (totalRowAffected >= 1) {
       return true;
     }
@@ -203,17 +195,16 @@ class PatientProvider extends ChangeNotifier {
   }
 
   Future<bool> updatePatientByPatientId(Patient p) async {
-    Map<String, String> obj = {
+    Map<String, dynamic> obj = {
       'name': p.name ?? "",
       'mobileNumber': p.mobileNumber ?? "",
       'gender': Patient.parseGenderToString(p.gender),
       'address': p.address ?? "",
       'allergies': p.allergies.join(','),
-      'updated_date': p.updatedDate.toIso8601String()
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(p.updatedDate.toIso8601String())
     };
 
-    int totalRowAffected =
-        await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
+    int totalRowAffected = await _databaseService.updatePatientByPatientId(id: p.id, obj: obj);
     if (totalRowAffected >= 1) {
       return true;
     }
@@ -287,8 +278,7 @@ class PatientProvider extends ChangeNotifier {
     patient_id = $patientId;
     ''';
 
-    final List<Map<String, dynamic>> result =
-        await _databaseService.db.rawQuery(sql);
+    final List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(sql);
     Account? account;
     Map<String, dynamic>? obj = null;
     if (result.isEmpty) {
@@ -309,9 +299,10 @@ class PatientProvider extends ChangeNotifier {
   }
 
   Future<void> updateScheduledDate(int id, String newDate) async {
-    Map<String, String> obj = {
-      'scheduled_date': newDate,
-      'updated_date': DateTime.now().toIso8601String(),
+    Map<String, dynamic> obj = {
+      'scheduled_date': convertISODateStringToUnixTimestampInSeconds(newDate),
+      'updated_date':
+          convertISODateStringToUnixTimestampInSeconds(DateTime.now().toIso8601String()),
     };
     await _databaseService.updatePatientByPatientId(id: id, obj: obj);
   }
