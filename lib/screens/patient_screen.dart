@@ -322,9 +322,11 @@ class _PatientScreenState extends State<PatientScreen> {
           }
           if (val == 2) {
             DateTime firstDate = patient!.createdDate!;
-            if (patient != null && patient!.scheduledDate != null) {
-              firstDate = patient!.scheduledDate!;
-            } else if (patient != null && patient!.updatedDate != null) {
+            /**
+             * firstDate = patient!.updatedDate; -> ensure that follow up date can be set next to 
+             * the any date from the last visit date
+             */
+            if (patient != null && patient!.updatedDate != null) {
               firstDate = patient!.updatedDate;
             }
 
