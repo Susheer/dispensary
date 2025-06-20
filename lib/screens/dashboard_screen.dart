@@ -18,8 +18,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Ensure calculation is triggered only once when screen is visible
     if (!_isPendingAmountCalculated) {
       _isPendingAmountCalculated = true; // Set flag to prevent multiple calls
-      final dashboardProvider = context.read<DashboardScreenProvider>();
+      final dashboardProvider = Provider.of<DashboardScreenProvider>(context);
       dashboardProvider.calculateTotalPendingAmountForScheduledPatientsOnTommrow();
+      //dashboardProvider.scheduledPatientsTomorrow(100);
+      // dashboardProvider.getPatientsCreatedToday();
+      //dashboardProvider.getFollowUpPatientsToday();
+      //dashboardProvider.scheduledPatientsToday();
+      dashboardProvider.updateCounts();
     }
   }
 
@@ -89,14 +94,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildStatCard('Pending Bal', dashboardProvider.pendingAmount.toStringAsFixed(1),
-                      Icons.currency_rupee, (MediaQuery.of(context).size.width / 2) - 20, context),
-                  _buildStatCard(
-                      'Total Appointments',
-                      dashboardProvider.scheduledTomorrow.toString(),
-                      Icons.person_2,
-                      (MediaQuery.of(context).size.width / 2) - 20,
-                      context),
+                  _buildStatCard('Pending Bal', dashboardProvider.pendingAmount.toStringAsFixed(1), Icons.currency_rupee, (MediaQuery.of(context).size.width / 2) - 20, context),
+                  _buildStatCard('Total Appointments', dashboardProvider.scheduledTomorrow.toString(), Icons.person_2, (MediaQuery.of(context).size.width / 2) - 20, context),
                 ],
               ),
               const SizedBox(
@@ -216,8 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(
-      String title, String value, IconData iconName, double maxWidth, BuildContext context) {
+  Widget _buildStatCard(String title, String value, IconData iconName, double maxWidth, BuildContext context) {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: Card(
@@ -264,10 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: list),
+        child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: list),
       ),
     );
   }
@@ -280,12 +275,7 @@ class CircleWidget extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  CircleWidget(
-      {required this.radius,
-      required this.text,
-      required this.backgroundColor,
-      required this.value,
-      required this.icon});
+  CircleWidget({required this.radius, required this.text, required this.backgroundColor, required this.value, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -295,8 +285,7 @@ class CircleWidget extends StatelessWidget {
         Container(
           width: radius,
           height: radius,
-          decoration: BoxDecoration(
-              shape: BoxShape.circle, border: Border.all(color: backgroundColor, width: 1)),
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: backgroundColor, width: 1)),
           child: Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

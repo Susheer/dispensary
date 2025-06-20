@@ -44,6 +44,7 @@ class DatabaseService {
         ''');
         db.execute('CREATE INDEX idx_created_date ON patients(created_date)');
         db.execute('CREATE INDEX idx_scheduled_date ON patients(scheduled_date)');
+        db.execute('CREATE INDEX idx_updated_date ON patients(updated_date)');
         db.execute('''
           CREATE TABLE IF NOT EXISTS prescriptions (
             sys_prescription_id INTEGER PRIMARY KEY,
@@ -56,6 +57,8 @@ class DatabaseService {
             paid_amount REAL
             )
           ''');
+        db.execute('CREATE INDEX idx_sys_prescription_id ON prescriptions(sys_prescription_id)');
+        db.execute('CREATE INDEX idx_patient_id ON prescriptions(patient_id)');
         db.execute('''
           CREATE TABLE IF NOT EXISTS medicines (
             sys_medicine_id INTEGER PRIMARY KEY,
@@ -83,7 +86,6 @@ class DatabaseService {
     );
   }
 
-
   Database get db => _database;
   Future<void> savePatient({
     required String name,
@@ -96,7 +98,7 @@ class DatabaseService {
     required String guardianGender,
     required String guardianAddress,
     required String guardianRelation,
-    required String isoUpdatedDate,
+    required String? isoUpdatedDate,
     required String isoCreatedDate,
     required String? isoScheduledDate,
   }) async {
@@ -112,13 +114,10 @@ class DatabaseService {
       'guardianAddress': _wrapWithQuotes(guardianAddress),
       'guardianRelation': _wrapWithQuotes(guardianRelation),
       'created_date': convertISODateStringToUnixTimestampInSeconds(isoCreatedDate),
-      'updated_date': convertISODateStringToUnixTimestampInSeconds(isoUpdatedDate),
-      'scheduled_date': isNullOrBlank(isoScheduledDate)
-          ? convertISODateStringToUnixTimestampInSeconds(isoScheduledDate!)
-          : 0,
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(isoUpdatedDate!),
+      'scheduled_date': isNullOrBlank(isoScheduledDate) ? 0 : convertISODateStringToUnixTimestampInSeconds(isoScheduledDate!),
     });
   }
-
 
   Future<int> updatePatientByPatientId({required int id, required Map<String, dynamic> obj}) async {
     int rowEffected = await _database.update('patients', obj, where: "id = ?", whereArgs: [id]);
@@ -137,17 +136,13 @@ class DatabaseService {
 
 // Fetch a paginated list of patients from the database
   Future<List<Patient>> fetchPaginatedPatients(int offset, int pageSize) async {
-    List<Map<String, dynamic>> result = await _database.query('patients',
-        orderBy: "updated_date DESC", limit: pageSize, offset: offset);
+    List<Map<String, dynamic>> result = await _database.query('patients', orderBy: "updated_date DESC", limit: pageSize, offset: offset);
     Map<String, dynamic> record;
     return result.map((map) {
       record = Map.from(map);
-      record['created_date'] =
-          convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
-      record['updated_date'] =
-          convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
-      record['scheduled_date'] =
-          convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      record['created_date'] = convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] = convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      record['scheduled_date'] = convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
       return Patient.fromMap(record);
     }).toList();
   }
@@ -187,13 +182,10 @@ class DatabaseService {
     if (results.isNotEmpty) {
       // Convert the result to a Patient object
       Map<String, dynamic> record = Map.from(results.first);
-      record['created_date'] =
-          convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
-      record['updated_date'] =
-          convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      record['created_date'] = convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] = convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
       if (record['scheduled_date'] > 100) {
-        record['scheduled_date'] =
-            convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+        record['scheduled_date'] = convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
       } else {
         record['scheduled_date'] = "";
       }
@@ -252,15 +244,21 @@ class DatabaseService {
     int offset = 0;
     double total = 0;
     double paid = 0;
-
+    DateTime today = DateTime.now().toUtc();
+    DateTime startDate = DateTime.utc(today.year, today.month, today.day);
+    DateTime tomorrow = startDate.add(Duration(days: 1));
+    DateTime dayAfterTomorrow = startDate.add(Duration(days: 2));
+    final tomorrowSec = tomorrow.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowSec = dayAfterTomorrow.millisecondsSinceEpoch ~/ 1000;
+    // finally date will stored in UTC
     while (true) {
       // Fetch patient IDs in batches
       final patientIds = await db.rawQuery('''
       SELECT id 
       FROM patients 
-      WHERE DATE(scheduled_date) = DATE('now', '+1 day')
+      WHERE scheduled_date >= ? AND scheduled_date <  ?
       LIMIT ? OFFSET ?
-    ''', [batchSize, offset]);
+    ''', [tomorrowSec, dayAfterTomorrowSec, batchSize, offset]);
 
       // Break the loop if no more patient IDs are found
       if (patientIds.isEmpty) break;
@@ -293,5 +291,83 @@ class DatabaseService {
 
     // Return the final result
     return {'total': total, 'paid': paid, 'pending': pending};
+  }
+
+  Future<int> getTotalappointmentScheduledNextDayV1() async {
+    final today = DateTime.now().toUtc();
+    DateTime startDate = DateTime.utc(today.year, today.month, today.day);
+    DateTime tomorrow = startDate.add(const Duration(days: 1));
+    DateTime dayAfterTomorrow = startDate.add(const Duration(days: 2));
+    final tomorrowSec = tomorrow.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowSec = dayAfterTomorrow.millisecondsSinceEpoch ~/ 1000;
+
+    // finally date will stored in UTC
+    // Fetch patient IDs in batches
+    final result = await db.rawQuery('''
+      SELECT count(id) as totalPatients 
+      FROM patients 
+      WHERE scheduled_date >= ? AND scheduled_date <  ?
+    ''', [tomorrowSec, dayAfterTomorrowSec]);
+
+    // Add the batch results to the running totals
+    final totalPatients = result.first['totalPatients'] as int? ?? 0;
+
+    // Return the final result
+    return totalPatients;
+  }
+
+  Future<Map<String, int>> getCountsV1() async {
+    final Map<String, int> map = {};
+
+    final now = DateTime.now().toUtc();
+
+    final todayStart = DateTime.utc(now.year, now.month, now.day);
+    final tomorrowStart = todayStart.add(Duration(days: 1));
+    final dayAfterTomorrowStart = todayStart.add(Duration(days: 2));
+
+    // Convert to seconds
+    final todayStartSec = todayStart.millisecondsSinceEpoch ~/ 1000;
+    final tomorrowStartSec = tomorrowStart.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowStartSec = dayAfterTomorrowStart.millisecondsSinceEpoch ~/ 1000;
+
+    final result = await db.rawQuery('''
+    SELECT
+      SUM(CASE
+          WHEN created_date >= ? AND created_date < ?
+          THEN 1 ELSE 0 END
+      ) AS created_today,
+
+      SUM(CASE
+          WHEN scheduled_date >= ? AND scheduled_date < ?
+          THEN 1 ELSE 0 END
+      ) AS scheduled_today,
+
+      SUM(CASE
+          WHEN scheduled_date >= ? AND scheduled_date < ?
+          THEN 1 ELSE 0 END
+      ) AS scheduled_next_day,
+
+      SUM(CASE
+          WHEN updated_date >= ? AND updated_date < ?
+           AND created_date < ?
+          THEN 1 ELSE 0 END
+      ) AS followups_today
+    FROM patients
+  ''', [
+      todayStartSec, tomorrowStartSec, // created_today
+      todayStartSec, tomorrowStartSec, // scheduled_today
+      tomorrowStartSec, dayAfterTomorrowStartSec, // scheduled_next_day
+      todayStartSec, tomorrowStartSec, // updated_date range
+      todayStartSec // created_date cutoff
+    ]);
+
+    final row = result.first;
+    print(row);
+    return {
+      'created_today': (row['created_today'] as num?)?.toInt() ?? 0,
+      'scheduled_today': (row['scheduled_today'] as num?)?.toInt() ?? 0,
+      'scheduled_next_day': (row['scheduled_next_day'] as num?)?.toInt() ?? 0,
+      'followups_today': (row['followups_today'] as num?)?.toInt() ?? 0,
+    };
   }
 }

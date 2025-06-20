@@ -161,9 +161,9 @@ class PatientProvider extends ChangeNotifier {
           guardianGender: Random().nextBool() ? 'Male' : 'Female',
           guardianAddress: 'Guardian Address-${i + start}',
           guardianRelation: Random().nextBool() ? 'parent' : 'sibling',
-          isoCreatedDate: isoStringFromNow(const Duration(days: 30)),
-          isoUpdatedDate: isoStringFromNow(const Duration(days: 10)),
-          isoScheduledDate: isoStringFromNow(const Duration(days: 1)));
+          isoCreatedDate: isoStringFromNow(const Duration(days: 1)),
+          isoUpdatedDate: DateTime.now().toIso8601String(), //isoStringFromNow(const Duration(days: 10)),
+          isoScheduledDate: ''); //isoStringFromNow(const Duration(days: 1)));
       debugPrint("Patient ${i + start} inserted");
     }
     initializePatients();
