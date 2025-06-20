@@ -121,7 +121,13 @@ class PatientProvider extends ChangeNotifier {
     query += " limit 10";
     debugPrint("Query- $query");
     final List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(query);
-    List<Patient> list = result.map((obj) => Patient.fromMap(obj)).toList();
+    List<Patient> list = result.map((obj) {
+      Map<String, dynamic> record = Map.from(obj);
+      record['created_date'] = convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] = convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      record['scheduled_date'] = convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      return Patient.fromMap(record);
+    }).toList();
     return list;
   }
 
@@ -142,8 +148,7 @@ class PatientProvider extends ChangeNotifier {
     print("registerDummyPatient invoked");
     const int numberOfPatients = 5;
     int start = 0;
-    List<Map<String, dynamic>> list =
-        await _databaseService.db.query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
+    List<Map<String, dynamic>> list = await _databaseService.db.query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
     if (list.isNotEmpty && list[0].containsKey('id')) {
       if (list[0]['id'] != null && list[0]['id'] != "" && list[0]['id'] >= 0) {
         start = list[0]['id'];
@@ -285,10 +290,7 @@ class PatientProvider extends ChangeNotifier {
       return null;
     }
     obj = result[0];
-    if (obj == null ||
-        obj['total_amount'] == null ||
-        obj['total_paid_amount'] == null ||
-        obj['total_pending_amount'] == null) {
+    if (obj == null || obj['total_amount'] == null || obj['total_paid_amount'] == null || obj['total_pending_amount'] == null) {
       return null;
     }
 
@@ -301,8 +303,7 @@ class PatientProvider extends ChangeNotifier {
   Future<void> updateScheduledDate(int id, String newDate) async {
     Map<String, dynamic> obj = {
       'scheduled_date': convertISODateStringToUnixTimestampInSeconds(newDate),
-      'updated_date':
-          convertISODateStringToUnixTimestampInSeconds(DateTime.now().toIso8601String()),
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(DateTime.now().toIso8601String()),
     };
     await _databaseService.updatePatientByPatientId(id: id, obj: obj);
   }
