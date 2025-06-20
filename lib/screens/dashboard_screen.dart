@@ -4,35 +4,49 @@ import 'package:dispensary/providers/landing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class DashboardScreen extends StatelessWidget {
-  ButtonStyle btnStyle = ElevatedButton.styleFrom(
+class DashboardScreen extends StatefulWidget {
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isPendingAmountCalculated = false; // Flag to track calculation
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ensure calculation is triggered only once when screen is visible
+    if (!_isPendingAmountCalculated) {
+      _isPendingAmountCalculated = true; // Set flag to prevent multiple calls
+      final dashboardProvider = Provider.of<DashboardScreenProvider>(context);
+      dashboardProvider.calculateTotalPendingAmountForScheduledPatientsOnTommrow();
+      //dashboardProvider.scheduledPatientsTomorrow(100);
+      // dashboardProvider.getPatientsCreatedToday();
+      //dashboardProvider.getFollowUpPatientsToday();
+      //dashboardProvider.scheduledPatientsToday();
+      dashboardProvider.updateCounts();
+    }
+  }
+
+  // Flag to prevent infinite loop
+  final ButtonStyle btnStyle = ElevatedButton.styleFrom(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10.0), // Adjust the border radius
     ),
-    minimumSize:
-        const Size(double.infinity, 50), // Set the minimum width and height
+    minimumSize: const Size(double.infinity, 50), // Set the minimum width and height
   );
 
+  // DashboardScreenProvider dashboardScreenProvider =
   @override
   Widget build(BuildContext context) {
     debugPrint("Invoking build: dashboard screen");
-    DashboardScreenProvider dashboardScreenProvider =
-        Provider.of<DashboardScreenProvider>(context, listen: false);
-    dashboardScreenProvider.getPatientsCreatedToday();
-    dashboardScreenProvider.getFollowUpPatientsToday();
-    dashboardScreenProvider
-        .calculateTotalPendingAmountForScheduledPatientsOnTommrow();
-    dashboardScreenProvider.scheduledPatientsToday();
-    dashboardScreenProvider.scheduledPatientsTomorrow();
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10.0),
-        child: Consumer<DashboardScreenProvider>(
-            builder: (context, dashboardProvider, child) {
+        child: Consumer<DashboardScreenProvider>(builder: (context, dashboardProvider, child) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              
               const SizedBox(
                 height: 16,
               ),
@@ -65,7 +79,7 @@ class DashboardScreen extends StatelessWidget {
                       icon: Icons.schedule,
                       text: 'Scheduled Today',
                       backgroundColor: Colors.black12,
-                      value: dashboardScreenProvider.scheduledToday.toString(),
+                      value: dashboardProvider.scheduledToday.toString(),
                     ),
                   ],
                   context: context),
@@ -73,34 +87,22 @@ class DashboardScreen extends StatelessWidget {
                 height: 25,
               ),
               // Collection Information
-              const Text("Scheduled For Tomorrow",
-                  style: TextStyle(fontSize: 20)),
+              const Text("Scheduled For Tomorrow", style: TextStyle(fontSize: 20)),
               const SizedBox(
                 height: 6,
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildStatCard(
-                      'Pending Bal',
-                      dashboardScreenProvider.pendingAmount.toStringAsFixed(1),
-                      Icons.currency_rupee,
-                      (MediaQuery.of(context).size.width / 2) - 20,
-                      context),
-                  _buildStatCard(
-                      'Total Appointments',
-                      dashboardScreenProvider.scheduledTomorrow.toString(),
-                      Icons.person_2,
-                      (MediaQuery.of(context).size.width / 2) - 20,
-                      context),
+                  _buildStatCard('Pending Bal', dashboardProvider.pendingAmount.toStringAsFixed(1), Icons.currency_rupee, (MediaQuery.of(context).size.width / 2) - 20, context),
+                  _buildStatCard('Total Appointments', dashboardProvider.scheduledTomorrow.toString(), Icons.person_2, (MediaQuery.of(context).size.width / 2) - 20, context),
                 ],
               ),
               const SizedBox(
                 height: 8,
               ),
               Container(
-                constraints:
-                    BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -129,8 +131,7 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 14),
 
               Container(
-                constraints:
-                    BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -138,9 +139,7 @@ class DashboardScreen extends StatelessWidget {
                     ElevatedButton(
                       style: btnStyle,
                       onPressed: () {
-                        Provider.of<LandingScreenProvider>(context,
-                                listen: false)
-                            .index = 2;
+                        Provider.of<LandingScreenProvider>(context, listen: false).index = 2;
                       },
                       child: const Text("View All Patients"),
                     ),
@@ -150,9 +149,7 @@ class DashboardScreen extends StatelessWidget {
                     ElevatedButton(
                       style: btnStyle,
                       onPressed: () {
-                        Provider.of<LandingScreenProvider>(context,
-                                listen: false)
-                            .index = 1;
+                        Provider.of<LandingScreenProvider>(context, listen: false).index = 1;
                         // Implement the logic to send reminders
                       },
                       child: const Text('Search Patient'),
@@ -163,9 +160,7 @@ class DashboardScreen extends StatelessWidget {
                     ElevatedButton(
                       style: btnStyle,
                       onPressed: () {
-                        Provider.of<LandingScreenProvider>(context,
-                                listen: false)
-                            .index = 4;
+                        Provider.of<LandingScreenProvider>(context, listen: false).index = 4;
                         // Implement the logic to send reminders
                       },
                       child: const Text('Add Patient'),
@@ -214,16 +209,13 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: content),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: content),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData iconName,
-      double maxWidth, BuildContext context) {
+  Widget _buildStatCard(String title, String value, IconData iconName, double maxWidth, BuildContext context) {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: Card(
@@ -233,9 +225,7 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               const SizedBox(height: 13),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -254,8 +244,7 @@ class DashboardScreen extends StatelessWidget {
                       baselineType: TextBaseline.alphabetic,
                       child: Text(
                         value,
-                        style: const TextStyle(
-                            overflow: TextOverflow.clip, fontSize: 20),
+                        style: const TextStyle(overflow: TextOverflow.clip, fontSize: 20),
                       ),
                     ),
                   ),
@@ -273,10 +262,7 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: list),
+        child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: list),
       ),
     );
   }
@@ -289,12 +275,7 @@ class CircleWidget extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  CircleWidget(
-      {required this.radius,
-      required this.text,
-      required this.backgroundColor,
-      required this.value,
-      required this.icon});
+  CircleWidget({required this.radius, required this.text, required this.backgroundColor, required this.value, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -304,9 +285,7 @@ class CircleWidget extends StatelessWidget {
         Container(
           width: radius,
           height: radius,
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: backgroundColor, width: 1)),
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: backgroundColor, width: 1)),
           child: Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -323,8 +302,7 @@ class CircleWidget extends StatelessWidget {
         const SizedBox(
           height: 6,
         ),
-        Text(value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         Text(
           text,
           style: const TextStyle(

@@ -34,9 +34,7 @@ class _PatientScreenState extends State<PatientScreen> {
   @override
   void didChangeDependencies() {
     debugPrint("didChangeDependencies invoked");
-    Provider.of<PatientProvider>(context)
-        .fetchPatientById(widget.patientId)
-        .then((value) {
+    Provider.of<PatientProvider>(context).fetchPatientById(widget.patientId).then((value) {
       if (value != null) {
         setState(() {
           patient = value;
@@ -44,9 +42,7 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
 
-    Provider.of<PatientProvider>(context)
-        .getAccount(widget.patientId)
-        .then((accountObj) {
+    Provider.of<PatientProvider>(context).getAccount(widget.patientId).then((accountObj) {
       if (accountObj != null) {
         setState(() {
           account = accountObj;
@@ -54,10 +50,7 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
 
-    Provider.of<PrescriptionProvider>(context)
-        .getPrescriptionsByPatientIdWithDetails(widget.patientId,
-            pageNum: 0, pageSize: 1)
-        .then((prescriptionObj) {
+    Provider.of<PrescriptionProvider>(context).getPrescriptionsByPatientIdWithDetails(widget.patientId, pageNum: 0, pageSize: 1).then((prescriptionObj) {
       if (prescriptionObj.isNotEmpty && prescriptionObj[0] != null) {
         setState(() {
           prescription = prescriptionObj[0]!;
@@ -68,12 +61,9 @@ class _PatientScreenState extends State<PatientScreen> {
   }
 
   void updateNextVisit(DateTime newDate) async {
-    await Provider.of<PatientProvider>(context, listen: false)
-        .updateScheduledDate(widget.patientId, newDate.toIso8601String());
+    await Provider.of<PatientProvider>(context, listen: false).updateScheduledDate(widget.patientId, newDate.toIso8601String());
 
-    Provider.of<PatientProvider>(context, listen: false)
-        .fetchPatientById(widget.patientId)
-        .then((value) {
+    Provider.of<PatientProvider>(context, listen: false).fetchPatientById(widget.patientId).then((value) {
       if (value != null) {
         setState(() {
           patient = value;
@@ -81,9 +71,7 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
 
-    Provider.of<PatientProvider>(context, listen: false)
-        .getAccount(widget.patientId)
-        .then((accountObj) {
+    Provider.of<PatientProvider>(context, listen: false).getAccount(widget.patientId).then((accountObj) {
       if (accountObj != null) {
         setState(() {
           account = accountObj;
@@ -91,10 +79,7 @@ class _PatientScreenState extends State<PatientScreen> {
       }
     });
 
-    Provider.of<PrescriptionProvider>(context, listen: false)
-        .getPrescriptionsByPatientIdWithDetails(widget.patientId,
-            pageNum: 0, pageSize: 1)
-        .then((prescriptionObj) {
+    Provider.of<PrescriptionProvider>(context, listen: false).getPrescriptionsByPatientIdWithDetails(widget.patientId, pageNum: 0, pageSize: 1).then((prescriptionObj) {
       if (prescriptionObj.isNotEmpty && prescriptionObj[0] != null) {
         setState(() {
           prescription = prescriptionObj[0]!;
@@ -120,8 +105,7 @@ class _PatientScreenState extends State<PatientScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                PrescriptionScreen(patientId: patient!.id, patient: patient!),
+            builder: (context) => PrescriptionScreen(patientId: patient!.id, patient: patient!),
           ),
         );
       }
@@ -130,9 +114,7 @@ class _PatientScreenState extends State<PatientScreen> {
 
   void onPatientUpdate(Patient response) async {
     if (patient != null) {
-      bool isUpdated =
-          await Provider.of<PatientProvider>(context, listen: false)
-              .updatePatientByPatientId(response);
+      bool isUpdated = await Provider.of<PatientProvider>(context, listen: false).updatePatientByPatientId(response);
       if (isUpdated == true) {
         updateScreen(response.id);
       }
@@ -140,13 +122,10 @@ class _PatientScreenState extends State<PatientScreen> {
   }
 
   void updateScreen(int patientId) {
-    Provider.of<PatientProvider>(context, listen: false)
-        .fetchPatientById(patientId)
-        .then((value) {
+    Provider.of<PatientProvider>(context, listen: false).fetchPatientById(patientId).then((value) {
       if (value != null) {
         setState(() {
-          Provider.of<PatientProvider>(context, listen: false)
-              .updatePatientInList(value);
+          Provider.of<PatientProvider>(context, listen: false).updatePatientInList(value);
           patient = value;
         });
       }
@@ -155,9 +134,7 @@ class _PatientScreenState extends State<PatientScreen> {
 
   void onGuardianUpdate(Patient response) async {
     if (patient != null) {
-      bool isUpdated =
-          await Provider.of<PatientProvider>(context, listen: false)
-              .updateGuardianByPatientId(response);
+      bool isUpdated = await Provider.of<PatientProvider>(context, listen: false).updateGuardianByPatientId(response);
       if (isUpdated == true) {
         updateScreen(response.id);
       }
@@ -202,9 +179,7 @@ class _PatientScreenState extends State<PatientScreen> {
                 content: [
                   Text('Name: ${patient?.name}'),
                   Text('Mobile: ${patient?.mobileNumber}'),
-                  if (patient?.gender != null)
-                    Text(
-                        'Gender: ${Patient.parseGenderToString(patient!.gender)}'),
+                  if (patient?.gender != null) Text('Gender: ${Patient.parseGenderToString(patient!.gender)}'),
                   Text('Address: ${patient?.address}'),
                   const Separator(),
                   const Text(
@@ -244,9 +219,7 @@ class _PatientScreenState extends State<PatientScreen> {
                 content: [
                   Text('Name: ${patient?.guardianName}'),
                   Text('Mobile: ${patient?.guardianMobileNumber}'),
-                  if (patient?.guardianGender != null)
-                    Text(
-                        'Gender: ${Patient.parseGenderToString(patient!.guardianGender!)}'),
+                  if (patient?.guardianGender != null) Text('Gender: ${Patient.parseGenderToString(patient!.guardianGender!)}'),
                   if (patient?.guardianGender == null) const Text('Gender:'),
                   Text('Address: ${patient?.guardianAddress}'),
                 ],
@@ -320,19 +293,9 @@ class _PatientScreenState extends State<PatientScreen> {
                     height: 10,
                   ),
                   if (patient != null && patient!.createdDate != null)
-                    RowWithLabelAndValueSet(
-                        label1: 'First Visit',
-                        value1: DateFormat('dd/MM/yyyy')
-                            .format(patient!.createdDate!),
-                        label2: '- ',
-                        value2: timeago.format(patient!.createdDate!)),
+                    RowWithLabelAndValueSet(label1: 'First Visit', value1: DateFormat('dd/MM/yyyy').format(patient!.createdDate!), label2: '- ', value2: timeago.format(patient!.createdDate!)),
                   if (patient != null && patient!.updatedDate != null)
-                    RowWithLabelAndValueSet(
-                        label1: 'Last Visit',
-                        value1: DateFormat('dd/MM/yyyy')
-                            .format(patient!.updatedDate!),
-                        label2: '- ',
-                        value2: timeago.format(patient!.updatedDate!)),
+                    RowWithLabelAndValueSet(label1: 'Last Visit', value1: DateFormat('dd/MM/yyyy').format(patient!.updatedDate!), label2: '- ', value2: timeago.format(patient!.updatedDate!)),
                   Typography1(
                     label: 'Next Visit',
                     value: scheduledDate,
@@ -358,10 +321,17 @@ class _PatientScreenState extends State<PatientScreen> {
             viewPrescriptionListener();
           }
           if (val == 2) {
+            DateTime firstDate = patient!.createdDate!;
+            if (patient != null && patient!.scheduledDate != null) {
+              firstDate = patient!.scheduledDate!;
+            } else if (patient != null && patient!.updatedDate != null) {
+              firstDate = patient!.updatedDate;
+            }
+
             await showDatePicker(
               context: context,
-              initialDate: patient?.scheduledDate ?? DateTime.now(),
-              firstDate: DateTime.now(),
+              initialDate: patient?.scheduledDate,
+              firstDate: firstDate,
               lastDate: DateTime(2101),
             ).then((selected) {
               if (selected != null) {
@@ -456,9 +426,7 @@ class _PatientScreenState extends State<PatientScreen> {
   }
 
   Future<List<Prescription>> getMyPrescriptions(int pId) async {
-    List<Prescription> pList =
-        await Provider.of<PrescriptionProvider>(context, listen: false)
-            .getPrescriptionsByPatientIdWithDetails(pId);
+    List<Prescription> pList = await Provider.of<PrescriptionProvider>(context, listen: false).getPrescriptionsByPatientIdWithDetails(pId);
     return pList;
   }
 }

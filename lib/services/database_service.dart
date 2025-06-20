@@ -1,28 +1,29 @@
 // database_service.dart
+import 'dart:io';
 import 'package:dispensary/models/patient.dart';
+import 'package:dispensary/utils.dart/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-//import 'package:path_provider/path_provider.dart';
 
 class DatabaseService {
   late Database _database;
+  static String getDatabaseName() {
+    return 'clinic.db';
+  }
 
   Future<void> initializeDatabase() async {
     // Get the path to the documents directory
     var documentsDirectory = await getDatabasesPath();
-    String dbPath = join(
-        documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
-    debugPrint("------DB PAth $dbPath------");
+    String databaseLocation = join(documentsDirectory, DatabaseService.getDatabaseName());
+    debugPrint('Database location $databaseLocation');
 
     // Open the database
     _database = await openDatabase(
-      dbPath,
+      databaseLocation,
       version: 1,
       onCreate: (db, version) {
-        debugPrint("-----------Database is created-----------");
-        // Create tables and schema
+        debugPrint("database created successfully");
         db.execute('''
           CREATE TABLE IF NOT EXISTS patients(
             id INTEGER PRIMARY KEY,
@@ -36,11 +37,14 @@ class DatabaseService {
             guardianGender TEXT,
             guardianAddress TEXT,
             guardianRelation TEXT,
-            created_date TEXT,
-            updated_date TEXT,
-            scheduled_date TEXT
+            created_date INTEGER,
+            updated_date INTEGER,
+            scheduled_date INTEGER
           )
         ''');
+        db.execute('CREATE INDEX idx_created_date ON patients(created_date)');
+        db.execute('CREATE INDEX idx_scheduled_date ON patients(scheduled_date)');
+        db.execute('CREATE INDEX idx_updated_date ON patients(updated_date)');
         db.execute('''
           CREATE TABLE IF NOT EXISTS prescriptions (
             sys_prescription_id INTEGER PRIMARY KEY,
@@ -53,6 +57,8 @@ class DatabaseService {
             paid_amount REAL
             )
           ''');
+        db.execute('CREATE INDEX idx_sys_prescription_id ON prescriptions(sys_prescription_id)');
+        db.execute('CREATE INDEX idx_patient_id ON prescriptions(patient_id)');
         db.execute('''
           CREATE TABLE IF NOT EXISTS medicines (
             sys_medicine_id INTEGER PRIMARY KEY,
@@ -76,8 +82,6 @@ class DatabaseService {
             FOREIGN KEY (prescription_id) REFERENCES prescriptions(sys_prescription_id)
          )
          ''');
-
-        // ...
       },
     );
   }
@@ -94,9 +98,9 @@ class DatabaseService {
     required String guardianGender,
     required String guardianAddress,
     required String guardianRelation,
-    required String updatedDate,
-    required String createdDate,
-    required String? scheduledDate,
+    required String? isoUpdatedDate,
+    required String isoCreatedDate,
+    required String? isoScheduledDate,
   }) async {
     await _database.insert('patients', {
       'name': _wrapWithQuotes(name),
@@ -109,16 +113,14 @@ class DatabaseService {
       'guardianGender': _wrapWithQuotes(guardianGender),
       'guardianAddress': _wrapWithQuotes(guardianAddress),
       'guardianRelation': _wrapWithQuotes(guardianRelation),
-      'created_date': _wrapWithQuotes(createdDate),
-      'updated_date': _wrapWithQuotes(updatedDate),
-      'scheduled_date': _wrapWithQuotes(scheduledDate ?? ""),
+      'created_date': convertISODateStringToUnixTimestampInSeconds(isoCreatedDate),
+      'updated_date': convertISODateStringToUnixTimestampInSeconds(isoUpdatedDate!),
+      'scheduled_date': isNullOrBlank(isoScheduledDate) ? 0 : convertISODateStringToUnixTimestampInSeconds(isoScheduledDate!),
     });
   }
 
-  Future<int> updatePatientByPatientId(
-      {required int id, required Map<String, String> obj}) async {
-    int rowEffected = await _database
-        .update('patients', obj, where: "id = ?", whereArgs: [id]);
+  Future<int> updatePatientByPatientId({required int id, required Map<String, dynamic> obj}) async {
+    int rowEffected = await _database.update('patients', obj, where: "id = ?", whereArgs: [id]);
     return rowEffected;
   }
 
@@ -134,41 +136,28 @@ class DatabaseService {
 
 // Fetch a paginated list of patients from the database
   Future<List<Patient>> fetchPaginatedPatients(int offset, int pageSize) async {
-    if (_database == null) {
-      throw Exception(
-          'Database not initialized. Call initializeDatabase first.');
-    }
-    List<Map<String, dynamic>> result = await _database.query('patients',
-        orderBy: "updated_date DESC", limit: pageSize, offset: offset);
-    return result.map((map) => Patient.fromMap(map)).toList();
+    List<Map<String, dynamic>> result = await _database.query('patients', orderBy: "updated_date DESC", limit: pageSize, offset: offset);
+    Map<String, dynamic> record;
+    return result.map((map) {
+      record = Map.from(map);
+      record['created_date'] = convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] = convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      record['scheduled_date'] = convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      return Patient.fromMap(record);
+    }).toList();
   }
 
   Future<void> deleteAllPatients() async {
-    if (_database == null) {
-      throw Exception(
-          'Database not initialized. Call initializeDatabase first.');
-    }
-
     // Your SQL query to delete all records from the patients table
-    final String sql = 'DELETE FROM patients';
-
+    const String sql = 'DELETE FROM patients';
     await _database.execute(sql);
   }
 
   Future<int> getPatientsCount() async {
-    if (_database == null) {
-      throw Exception(
-          'Database not initialized. Call initializeDatabase first.');
-    }
-
-    // Your SQL query to get the count
-    final String sql = 'SELECT COUNT(*) FROM patients';
-
+    const String sql = 'SELECT COUNT(*) FROM patients';
     final List<Map<String, dynamic>> result = await _database.rawQuery(sql);
-
     // Extract the count from the result
     final int count = Sqflite.firstIntValue(result) ?? 0;
-
     return count;
   }
 
@@ -192,7 +181,16 @@ class DatabaseService {
     // Check if the results list is not empty
     if (results.isNotEmpty) {
       // Convert the result to a Patient object
-      return Patient.fromMap(results.first);
+      Map<String, dynamic> record = Map.from(results.first);
+      record['created_date'] = convertUnixTimeStampToDatetime(record['created_date']).toIso8601String();
+      record['updated_date'] = convertUnixTimeStampToDatetime(record['updated_date']).toIso8601String();
+      if (record['scheduled_date'] > 100) {
+        record['scheduled_date'] = convertUnixTimeStampToDatetime(record['scheduled_date']).toIso8601String();
+      } else {
+        record['scheduled_date'] = "";
+      }
+
+      return Patient.fromMap(record);
     }
 
     // If patient not found, return null
@@ -201,24 +199,175 @@ class DatabaseService {
 
   // Function to delete the database and clear its contents
   Future<void> deleteDatabaseAndClear() async {
-    debugPrint("deleteDatabaseAndClear: Invoked");
-    debugPrint("deleteDatabaseAndClear: Start");
+    debugPrint("Deleting database...");
     var documentsDirectory = await getDatabasesPath();
-    String databasePath = join(
-        documentsDirectory, dotenv.env['DB_PATH'] ?? 'default_database.db');
-    debugPrint("deleteDatabaseAndClear: path $documentsDirectory");
-    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
-    debugPrint("closing db");
+    String databasePath = join(documentsDirectory, getDatabaseName());
     // Close the database before deleting
     if (_database.isOpen) {
+      debugPrint("Closing database...");
       await _database.close();
     }
-    debugPrint("isDatabaseOpen:  ${_database.isOpen}");
-    debugPrint("------Deleting Db------");
-    // Delete the database file
+
     await deleteDatabase(databasePath);
-    // Reinitialize the database if needed
-    debugPrint("------Re creating Db------");
+    debugPrint("Database deleted successfully");
+    debugPrint("Re-initializing database....");
     await initializeDatabase();
+  }
+
+  static Future<String> calculateDatabaseSize() async {
+    debugPrint('calculating file size on disk...');
+    String databaseDirectory = await getDatabasesPath();
+    String filePath = join(databaseDirectory, DatabaseService.getDatabaseName());
+    final file = File(filePath);
+    debugPrint('Check if the file exists');
+    if (await file.exists()) {
+      debugPrint('Get the file size in bytes');
+      final int bytes = await file.length();
+      String fileSize;
+      if (bytes < 1024) {
+        fileSize = '${bytes}B'; // Bytes
+      } else if (bytes < 1024 * 1024) {
+        fileSize = '${(bytes / 1024).toStringAsFixed(2)} KB'; // Kilobytes
+      } else if (bytes < 1024 * 1024 * 1024) {
+        fileSize = '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'; // Megabytes
+      } else {
+        fileSize = '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB'; // Gigabytes
+      }
+      return fileSize;
+    } else {
+      debugPrint('file does not exists on disk');
+      return 'Invalid';
+    }
+  }
+
+  Future<Map<String, dynamic>> calculateTotalsInBatches(int batchSize) async {
+    int offset = 0;
+    double total = 0;
+    double paid = 0;
+    DateTime today = DateTime.now().toUtc();
+    DateTime startDate = DateTime.utc(today.year, today.month, today.day);
+    DateTime tomorrow = startDate.add(Duration(days: 1));
+    DateTime dayAfterTomorrow = startDate.add(Duration(days: 2));
+    final tomorrowSec = tomorrow.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowSec = dayAfterTomorrow.millisecondsSinceEpoch ~/ 1000;
+    // finally date will stored in UTC
+    while (true) {
+      // Fetch patient IDs in batches
+      final patientIds = await db.rawQuery('''
+      SELECT id 
+      FROM patients 
+      WHERE scheduled_date >= ? AND scheduled_date <  ?
+      LIMIT ? OFFSET ?
+    ''', [tomorrowSec, dayAfterTomorrowSec, batchSize, offset]);
+
+      // Break the loop if no more patient IDs are found
+      if (patientIds.isEmpty) break;
+
+      // Extract patient IDs for the current batch
+      final idList = patientIds.map((row) => row['id']).toList();
+
+      // Calculate the totals for the current batch of patient IDs
+      final batchResult = await db.rawQuery('''
+      SELECT 
+        SUM(total_amount) AS batchTotal,
+        SUM(paid_amount) AS batchPaid
+      FROM prescriptions
+      WHERE patient_id IN (${List.filled(idList.length, '?').join(',')})
+    ''', idList);
+
+      // Add the batch results to the running totals
+      final batchTotal = batchResult.first['batchTotal'] as double? ?? 0;
+      final batchPaid = batchResult.first['batchPaid'] as double? ?? 0;
+
+      total += batchTotal;
+      paid += batchPaid;
+
+      // Move to the next batch
+      offset += batchSize;
+    }
+
+    // Calculate the pending amount
+    final pending = total - paid;
+
+    // Return the final result
+    return {'total': total, 'paid': paid, 'pending': pending};
+  }
+
+  Future<int> getTotalappointmentScheduledNextDayV1() async {
+    final today = DateTime.now().toUtc();
+    DateTime startDate = DateTime.utc(today.year, today.month, today.day);
+    DateTime tomorrow = startDate.add(const Duration(days: 1));
+    DateTime dayAfterTomorrow = startDate.add(const Duration(days: 2));
+    final tomorrowSec = tomorrow.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowSec = dayAfterTomorrow.millisecondsSinceEpoch ~/ 1000;
+
+    // finally date will stored in UTC
+    // Fetch patient IDs in batches
+    final result = await db.rawQuery('''
+      SELECT count(id) as totalPatients 
+      FROM patients 
+      WHERE scheduled_date >= ? AND scheduled_date <  ?
+    ''', [tomorrowSec, dayAfterTomorrowSec]);
+
+    // Add the batch results to the running totals
+    final totalPatients = result.first['totalPatients'] as int? ?? 0;
+
+    // Return the final result
+    return totalPatients;
+  }
+
+  Future<Map<String, int>> getCountsV1() async {
+    final Map<String, int> map = {};
+
+    final now = DateTime.now().toUtc();
+
+    final todayStart = DateTime.utc(now.year, now.month, now.day);
+    final tomorrowStart = todayStart.add(Duration(days: 1));
+    final dayAfterTomorrowStart = todayStart.add(Duration(days: 2));
+
+    // Convert to seconds
+    final todayStartSec = todayStart.millisecondsSinceEpoch ~/ 1000;
+    final tomorrowStartSec = tomorrowStart.millisecondsSinceEpoch ~/ 1000;
+    final dayAfterTomorrowStartSec = dayAfterTomorrowStart.millisecondsSinceEpoch ~/ 1000;
+
+    final result = await db.rawQuery('''
+    SELECT
+      SUM(CASE
+          WHEN created_date >= ? AND created_date < ?
+          THEN 1 ELSE 0 END
+      ) AS created_today,
+
+      SUM(CASE
+          WHEN scheduled_date >= ? AND scheduled_date < ?
+          THEN 1 ELSE 0 END
+      ) AS scheduled_today,
+
+      SUM(CASE
+          WHEN scheduled_date >= ? AND scheduled_date < ?
+          THEN 1 ELSE 0 END
+      ) AS scheduled_next_day,
+
+      SUM(CASE
+          WHEN updated_date >= ? AND updated_date < ?
+           AND created_date < ?
+          THEN 1 ELSE 0 END
+      ) AS followups_today
+    FROM patients
+  ''', [
+      todayStartSec, tomorrowStartSec, // created_today
+      todayStartSec, tomorrowStartSec, // scheduled_today
+      tomorrowStartSec, dayAfterTomorrowStartSec, // scheduled_next_day
+      todayStartSec, tomorrowStartSec, // updated_date range
+      todayStartSec // created_date cutoff
+    ]);
+
+    final row = result.first;
+    print(row);
+    return {
+      'created_today': (row['created_today'] as num?)?.toInt() ?? 0,
+      'scheduled_today': (row['scheduled_today'] as num?)?.toInt() ?? 0,
+      'scheduled_next_day': (row['scheduled_next_day'] as num?)?.toInt() ?? 0,
+      'followups_today': (row['followups_today'] as num?)?.toInt() ?? 0,
+    };
   }
 }
