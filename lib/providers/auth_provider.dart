@@ -85,14 +85,29 @@ class AuthProvider with ChangeNotifier {
     return backupService.showAllBackups(currentUser!);
   }
 
-  Future<void> createBackup(BuildContext context) async {
-    backupService.uploadBackup(context, currentUser!);
+  Future<void> createBackup() async {
+    await backupService.uploadBackup(currentUser!);
+    await Future.delayed(const Duration(seconds: 3));
   }
 
   Future<bool> deleteFile(String fileId) async {
     try {
-      backupService.deleteFile(currentUser!, fileId!);
-      Future.delayed(Duration(seconds: 3));
+      await backupService.deleteFile(currentUser!, fileId!);
+      await Future.delayed(const Duration(seconds: 3));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void updateProgressWhenApplying(double progress) {
+    debugPrint('Progress $progress');
+  }
+
+  Future<bool> onApply(String fileId, int totalBytes) async {
+    try {
+      await backupService.applyBackup(
+          currentUser!, fileId!, totalBytes, updateProgressWhenApplying);
       return true;
     } catch (e) {
       return false;

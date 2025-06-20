@@ -343,9 +343,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               relation: Patient.parseRelationToString(relation),
               createdDate: DateTime.now(),
               updatedDate: DateTime.now(),
-              scheduledDate: null);
-      await Provider.of<DashboardScreenProvider>(context, listen: false)
-          .getPatientsCreatedToday();
+          scheduledDate: null);
       _navigateToReview();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -1,11 +1,14 @@
 // search_screen.dart
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:dispensary/common/seperator.dart';
 import 'package:dispensary/common/typography.dart';
 import 'package:dispensary/providers/auth_provider.dart';
+import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/healthcare/v1.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -17,8 +20,13 @@ class ManageBackup extends StatefulWidget {
 
 class _ManageBackupState extends State<ManageBackup> {
   late List<drive.File> driveFiles = [];
+  late String dbSize = '';
 
   Future<void> onLoad() async {
+    setState(() {
+      driveFiles = [];
+    });
+
     var fileList = await Provider.of<AuthProvider>(context, listen: false).showBackups();
 
     if (fileList == null) {
@@ -35,9 +43,30 @@ class _ManageBackupState extends State<ManageBackup> {
   }
 
   Future<void> onDelete(String fileId) async {
-    await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
-    await Provider.of<AuthProvider>(context, listen: false).deleteFile(fileId);
-    await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.blockScreen(context);
+    await authProvider.deleteFile(fileId);
+    await onLoad();
+    if (context.mounted) {
+      await authProvider.unblockScreen(context);
+    }
+  }
+
+  Future<void> onApply(String fileId, int totalBytes) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.blockScreen(context);
+    await authProvider.onApply(fileId, totalBytes);
+    if (context.mounted) {
+      authProvider.unblockScreen(context);
+    }
+  }
+
+  Future<void> calculateDatabaseSize() async {
+    String size = await DatabaseService.calculateDatabaseSize();
+    setState(() {
+      dbSize = size;
+      debugPrint('convertToBytes($dbSize)');
+    });
   }
 
   Future<void> onClear() async {
@@ -49,6 +78,7 @@ class _ManageBackupState extends State<ManageBackup> {
   @override
   void initState() {
     super.initState();
+    calculateDatabaseSize();
     onLoad();
   }
 
@@ -60,6 +90,7 @@ class _ManageBackupState extends State<ManageBackup> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             pageHeaderContainer(context),
+            createBackup(context),
             Expanded(
                 child: ListView.builder(
               itemCount: driveFiles.length,
@@ -68,47 +99,67 @@ class _ManageBackupState extends State<ManageBackup> {
                 return BackupResult(
                   file: file,
                   onLoad: onLoad,
-                  onDelete: onDelete,
+                  onDeletePressed: onDelete,
                   onClear: onClear,
+                  onRestoreBackupPressed: onApply,
                 );
               },
             )),
-            createBackup(context),
           ],
         ));
   }
 
   Container createBackup(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      width: MediaQuery.of(context).size.width,
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width,
+    var boxDecoration = BoxDecoration(
+      borderRadius: const BorderRadius.all(
+        Radius.circular(6.0),
       ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size(MediaQuery.of(context).size.width * 80 / 100, 53)),
-                onPressed: () async {
-                  await Provider.of<AuthProvider>(context, listen: false).createBackup(context);
-                  await onLoad();
-                },
-                child: const Text('Create New Backup'),
-              ),
-            ],
-          ),
-        ],
+      border: Border.all(
+        color: Colors.black,
+        width: 1.0,
       ),
     );
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        width: MediaQuery.of(context).size.width,
+        decoration: boxDecoration,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width,
+        ),
+        child: Column(children: [
+          Container(
+            padding: const EdgeInsets.all(5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Expanded(
+                  child: RowWithLabelAndValue(label: 'Size', value: dbSize, isOverflow: false),
+                ),
+                // Add space between RowWithLabelAndValue widgets
+                Expanded(
+                    child: TextButton(
+                  child: const Text('Create Backup'),
+                  onPressed: () async {
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    await authProvider.blockScreen(context);
+                    await authProvider.createBackup();
+                    await onLoad();
+                    // Safely unblock the screen if the context is still valid
+                    if (context.mounted) {
+                      authProvider.unblockScreen(context);
+                    }
+                  },
+                )),
+              ],
+            ),
+          )
+        ]));
   }
 
   Container pageHeaderContainer(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       width: MediaQuery.of(context).size.width,
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
@@ -118,16 +169,36 @@ class _ManageBackupState extends State<ManageBackup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'All Backups: ${driveFiles.length}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Text(
+                    'Available Snapshot',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(Icons.circle,
+                          size: 25, color: Color(0xff6750a4)), // Badge background
+                      Text((driveFiles.length).toString(),
+                          style: const TextStyle(fontSize: 10, color: Colors.white)), // Number
+                    ],
+                  ),
+                ],
               ),
-              TextButton(
-                  onPressed: () async {
-                    onClear();
-                    onLoad();
-                  },
-                  child: const Text('Refresh'))
+              IconButton(
+                iconSize: 32,
+                icon: const Icon(Icons.refresh),
+                tooltip: "Refresh",
+                onPressed: () async {
+                  await Provider.of<AuthProvider>(context, listen: false).blockScreen(context);
+                  await onLoad();
+                  await Provider.of<AuthProvider>(context, listen: false).unblockScreen(context);
+                },
+              ),
             ],
           ),
         ],
@@ -136,24 +207,27 @@ class _ManageBackupState extends State<ManageBackup> {
   }
 }
 
+String getFileSizeString({required int bytes, int decimals = 0}) {
+  const suffixes = ["b", "kb", "mb", "gb", "tb"];
+  if (bytes == 0) return '0${suffixes[0]}';
+  var i = (log(bytes) / log(1024)).floor();
+  return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
+}
+
 class BackupResult extends StatelessWidget {
   const BackupResult(
       {super.key,
       required this.file,
       required this.onLoad,
-      required this.onDelete,
+      required this.onDeletePressed,
+      required this.onRestoreBackupPressed,
       required this.onClear});
 
   final drive.File file;
   final Function onLoad;
   final Function onClear;
-  final Function(String fileId) onDelete;
-  String getFileSizeString({required int bytes, int decimals = 0}) {
-    const suffixes = ["b", "kb", "mb", "gb", "tb"];
-    if (bytes == 0) return '0${suffixes[0]}';
-    var i = (log(bytes) / log(1024)).floor();
-    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) + suffixes[i];
-  }
+  final Function(String fileId, int totalSize) onRestoreBackupPressed;
+  final Function(String fileId) onDeletePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -190,13 +264,16 @@ class BackupResult extends StatelessWidget {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       TextButton(
         child: const Text('Apply this backup'),
-        onPressed: () {},
+        onPressed: () async {
+          if (file.size != null || file.size != '' || file.id != null || file.id != '') {
+            await onRestoreBackupPressed(file.id!, int.parse(file.size!));
+          }
+        },
       ),
       TextButton(
         child: const Text('Delete this backup'),
         onPressed: () async {
-          await onDelete(file.id!);
-          await onLoad();
+          await onDeletePressed(file.id!);
         },
       ),
     ]);

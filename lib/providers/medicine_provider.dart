@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:dispensary/models/medicine_model.dart';
 import 'package:dispensary/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class MedicineProvider extends ChangeNotifier {
   List<Medicine> _medicines = [];
@@ -14,8 +17,7 @@ class MedicineProvider extends ChangeNotifier {
   int get medicineCountInDb => _medicineCountInDb;
   // Medicines CRUD
   Future<void> loadAllMedicines() async {
-    final List<Map<String, dynamic>> maps =
-        await _databaseService.db.query('medicines');
+    final List<Map<String, dynamic>> maps = await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
     notifyListeners();
   }
@@ -28,8 +30,7 @@ class MedicineProvider extends ChangeNotifier {
   }
 
   Future<void> justLoadAllMedicines() async {
-    final List<Map<String, dynamic>> maps =
-        await _databaseService.db.query('medicines');
+    final List<Map<String, dynamic>> maps = await _databaseService.db.query('medicines');
     _medicines = maps.map((e) => Medicine.fromMap(e)).toList();
   }
 
@@ -173,8 +174,7 @@ class MedicineProvider extends ChangeNotifier {
     // Your SQL query to get the count
     const String sql = 'SELECT COUNT(*) FROM medicines';
 
-    final List<Map<String, dynamic>> result =
-        await _databaseService.db.rawQuery(sql);
+    final List<Map<String, dynamic>> result = await _databaseService.db.rawQuery(sql);
 
     // Extract the count from the result
     final int count = Sqflite.firstIntValue(result) ?? 0;
@@ -183,10 +183,9 @@ class MedicineProvider extends ChangeNotifier {
   }
 
   Future<void> fetchNextPage(int startIndex, int pageSize) async {
-    List<Map<String, dynamic>> result = await _databaseService.db
-        .query('medicines', limit: startIndex, offset: pageSize);
-    List<Medicine> nextPage =
-        result.map((map) => Medicine.fromMap(map)).toList();
+    List<Map<String, dynamic>> result =
+        await _databaseService.db.query('medicines', limit: startIndex, offset: pageSize);
+    List<Medicine> nextPage = result.map((map) => Medicine.fromMap(map)).toList();
     if (nextPage.isEmpty != true) {
       _medicines.addAll(nextPage);
     }
