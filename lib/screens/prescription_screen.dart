@@ -1,4 +1,3 @@
-import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_model.dart';
@@ -8,14 +7,14 @@ import 'package:provider/provider.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   final int patientId;
-  Patient patient;
-  PrescriptionScreen({required this.patientId, required this.patient});
+  final Patient patient;
+  const PrescriptionScreen({Key? key, required this.patientId, required this.patient}) : super(key: key);
 
   @override
-  _PrescriptionScreenState createState() => _PrescriptionScreenState();
+  PrescriptionScreenState createState() => PrescriptionScreenState();
 }
 
-class _PrescriptionScreenState extends State<PrescriptionScreen> {
+class PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
   int currentPage = 0;
   bool isLoadingNextPage = false;
@@ -34,8 +33,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     if (initScreenUponLoad == false) {
       initScreenUponLoad = true;
       _prescriptionProvider = Provider.of<PrescriptionProvider>(context);
-      await _prescriptionProvider
-          .countPrescriptionsByPatientId(widget.patientId);
+      await _prescriptionProvider.countPrescriptionsByPatientId(widget.patientId);
       await _prescriptionProvider.initPrescriptionList(widget.patientId);
     }
   }
@@ -67,12 +65,10 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
           Expanded(
             child: Consumer<PrescriptionProvider>(
               builder: (context, prescriptionProvider, child) {
-                List<Prescription> prescriptions =
-                    prescriptionProvider.getPrescriptionList;
+                List<Prescription> prescriptions = prescriptionProvider.getPrescriptionList;
                 if (prescriptions.isNotEmpty) {
                   debugPrint("prescriptions.length ${prescriptions.length}");
-                  int itemCount = getItemCount(
-                      prescriptions.length, prescriptionProvider.dbCount);
+                  int itemCount = getItemCount(prescriptions.length, prescriptionProvider.dbCount);
                   return ListView.builder(
                     itemCount: itemCount,
                     itemBuilder: (context, index) {
@@ -81,8 +77,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                         //Now load new data if data are there in db.
                         debugPrint('-----reached at end-----');
                         if (index < prescriptionProvider.dbCount) {
-                          debugPrint(
-                              '-index: $index < prescriptionsCount: ${prescriptionProvider.dbCount} = true-------');
+                          debugPrint('-index: $index < prescriptionsCount: ${prescriptionProvider.dbCount} = true-------');
                           // stop incrementing calling loadOtherPage untill current req is completed.
                           if (isLoadingNextPage == false) {
                             debugPrint('Before calling loadMore');
@@ -103,8 +98,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                       if (index < prescriptions.length) {
                         return PrescriptionWidget(
                           patientName: widget.patient.name,
-                          sysPrescriptionId:
-                              prescriptions[index].sysPrescriptionId,
+                          sysPrescriptionId: prescriptions[index].sysPrescriptionId,
                           patientId: prescriptions[index].patientId,
                           diagnosis: prescriptions[index].diagnosis,
                           chiefComplaint: prescriptions[index].chiefComplaint,
@@ -116,8 +110,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                         );
                       } else {
                         return const Center(
-                          child:
-                              Text("Ohh, Is there any more data? Refreash it"),
+                          child: Text("Ohh, Is there any more data? Refreash it"),
                         );
                       }
                     },
