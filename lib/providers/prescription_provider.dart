@@ -30,8 +30,7 @@ class PrescriptionProvider extends ChangeNotifier {
         await txn.insert('prescriptions', prescriptionWithoutId);
 
         // Retrieve the sysPrescriptionId of the inserted prescription
-        final prescriptionId =
-            await txn.query('prescriptions', orderBy: 'sys_prescription_id DESC', limit: 1);
+        final prescriptionId = await txn.query('prescriptions', orderBy: 'sys_prescription_id DESC', limit: 1);
         if (prescriptionId.isNotEmpty) {
           final sysPrescriptionId = prescriptionId.first['sys_prescription_id'] as int;
 
@@ -45,8 +44,7 @@ class PrescriptionProvider extends ChangeNotifier {
             await txn.insert('prescription_line', line);
           }
         }
-        int timestamp =
-            convertISODateStringToUnixTimestampInSeconds(DateTime.now().toIso8601String());
+        int timestamp = convertISODateStringToUnixTimestampInSeconds(DateTime.now().toIso8601String());
         // below update is to keep track of follow up counts
         await txn.update(
           'patients',
@@ -62,8 +60,7 @@ class PrescriptionProvider extends ChangeNotifier {
     });
   }
 
-  Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(int patientId,
-      {int pageNum = 0, int pageSize = AppConfig.PrescriptionSize}) async {
+  Future<List<Prescription>> getPrescriptionsByPatientIdWithDetails(int patientId, {int pageNum = 0, int pageSize = AppConfig.PrescriptionSize}) async {
     final List<Map<String, dynamic>> prescriptionsData = await _databaseService.db.query(
       'prescriptions',
       where: 'patient_id = ?',
@@ -119,23 +116,8 @@ class PrescriptionProvider extends ChangeNotifier {
     }
   }
 
-  Future<int> countPrescriptionsByPatientId(int patientId) async {
-    final List<Map<String, dynamic>> result = await _databaseService.db.query(
-      'prescriptions',
-      columns: ['COUNT(*) as count'],
-      where: 'patient_id = ?',
-      whereArgs: [patientId],
-    );
-
-    final count = result.firstWhere((map) => true)['count'] as int?;
-    dbCount = count ?? 0;
-    notifyListeners();
-    return dbCount;
-  }
-
   Future<void> addFakePrescriptions(int patientId) async {
-    Prescription fakePrescription =
-        await FakePrescriptionGenerator.generateFakePrescription(patientId);
+    Prescription fakePrescription = await FakePrescriptionGenerator.generateFakePrescription(patientId);
     await storePrescriptionAndLines(fakePrescription);
     dbCount++;
     notifyListeners();
@@ -147,10 +129,23 @@ class PrescriptionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadNextPage(int patientId, int pageNumber) async {
-    List<Prescription> list = await getPrescriptionsByPatientIdWithDetails(patientId,
-        pageNum: pageNumber, pageSize: AppConfig.PrescriptionSize);
-    _prescriptionList.addAll(list);
+  Future<List<Prescription>> loadNextPage(int patientId, int pageNumber) async {
+    List<Prescription> list = await getPrescriptionsByPatientIdWithDetails(patientId, pageNum: pageNumber, pageSize: AppConfig.PrescriptionSize);
+    return list;
+  }
+
+  Future<void> inItPrescriptionScreen(int patientId) async {
+    List<Prescription> list = await getPrescriptionsByPatientIdWithDetails(patientId);
+    final List<Map<String, dynamic>> result = await _databaseService.db.query(
+      'prescriptions',
+      columns: ['COUNT(*) as count'],
+      where: 'patient_id = ?',
+      whereArgs: [patientId],
+    );
+
+    final count = result.firstWhere((map) => true)['count'] as int?;
+    dbCount = count ?? 0;
+    _prescriptionList = list;
     notifyListeners();
   }
 }
