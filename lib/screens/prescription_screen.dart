@@ -17,7 +17,7 @@ class PrescriptionScreen extends StatefulWidget {
 class PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
   final ScrollController _scrollController = ScrollController();
-  List<Prescription> _items = [];
+  final List<Prescription> _items = [];
   int _page = 0;
   bool _isLoading = false;
 
@@ -57,13 +57,12 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
-    final totalPrescription = context.watch<PrescriptionProvider>().dbCount;
     return Scaffold(
       appBar: AppBar(title: const Text('Prescriptions'), actions: [
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            (pList.length / totalPrescription).toString(),
+            (_items.length).toString(),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
