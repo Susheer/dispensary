@@ -54,29 +54,24 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Prescriptions'), actions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            (_items.length).toString(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+Widget noPrescription() {
+    return const Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.notes,
+          size: 50,
         ),
-      ]),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _items.length + 1,
-              itemBuilder: (context, index) {
+        SizedBox(
+          height: 16,
+        ),
+        Text("No Prescription found"),
+      ],
+    ));
+  }
+
+  Widget _buildPrescriptionItem(BuildContext context, int index) {
                 if (index == _items.length) {
                   return _isLoading
                       ? const Padding(
@@ -97,7 +92,30 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
                   paidAmount: _items[index].paidAmount,
                   lines: _items[index].prescriptionLines,
                 );
-              },
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Prescriptions'), actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            (_items.length).toString(),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ]),
+      body: _items.isEmpty
+          ? noPrescription()
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(controller: _scrollController, itemCount: _items.length + 1, itemBuilder: _buildPrescriptionItem 
             ),
           )
         ],

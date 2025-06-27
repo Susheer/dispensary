@@ -145,7 +145,6 @@ class PatientProvider extends ChangeNotifier {
   }
 
   Future<void> registerDummyPatient() async {
-    print("registerDummyPatient invoked");
     const int numberOfPatients = 5;
     int start = 0;
     List<Map<String, dynamic>> list = await _databaseService.db.query('patients', columns: ['id'], limit: 1, orderBy: 'id desc');
