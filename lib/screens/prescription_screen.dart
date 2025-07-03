@@ -17,7 +17,7 @@ class PrescriptionScreen extends StatefulWidget {
 class PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
   final ScrollController _scrollController = ScrollController();
-  final List<Prescription> _items = [];
+  List<Prescription> _items = [];
   int _page = 0;
   bool _isLoading = false;
 
@@ -38,12 +38,22 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
   }
 
   Future<void> _fetchMore(int patientId, int page) async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2)); // Simulate API delay
+    setState(() => _isLoading = true); // Simulate API delay
     final newItems = await _prescriptionProvider.loadNextPage(patientId, page);
     setState(() {
       _items.addAll(newItems);
       _page++;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _reloadList(int patientId) async {
+    setState(() => _isLoading = true); // Simulate API delay
+    final newItems = await _prescriptionProvider.loadNextPage(patientId, 0);
+    setState(() {
+      _items = []; // blank
+      _items.addAll(newItems);
+      _page = 1;
       _isLoading = false;
     });
   }
@@ -54,7 +64,7 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
     super.dispose();
   }
 
-Widget noPrescription() {
+  Widget noPrescription() {
     return const Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -72,74 +82,78 @@ Widget noPrescription() {
   }
 
   Widget _buildPrescriptionItem(BuildContext context, int index) {
-                if (index == _items.length) {
-                  return _isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      : const SizedBox();
-                }
-                return PrescriptionWidget(
-                  patientName: widget.patient.name,
-                  sysPrescriptionId: _items[index].sysPrescriptionId,
-                  patientId: _items[index].patientId,
-                  diagnosis: _items[index].diagnosis,
-                  chiefComplaint: _items[index].chiefComplaint,
-                  createdDate: _items[index].createdDate,
-                  updatedDate: _items[index].updatedDate,
-                  totalAmount: _items[index].totalAmount,
-                  paidAmount: _items[index].paidAmount,
-                  lines: _items[index].prescriptionLines,
-                );
+    if (index == _items.length) {
+      return _isLoading
+          ? const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          : const SizedBox();
+    }
+    return PrescriptionWidget(
+      patientName: widget.patient.name,
+      sysPrescriptionId: _items[index].sysPrescriptionId,
+      patientId: _items[index].patientId,
+      diagnosis: _items[index].diagnosis,
+      chiefComplaint: _items[index].chiefComplaint,
+      createdDate: _items[index].createdDate,
+      updatedDate: _items[index].updatedDate,
+      totalAmount: _items[index].totalAmount,
+      paidAmount: _items[index].paidAmount,
+      lines: _items[index].prescriptionLines,
+    );
+  }
+
+  BottomAppBar bottomAppbar() {
+    return BottomAppBar(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              // Add your button click logic here
+              setState(() {});
+            },
+            child: const Text('Refresh'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Provider.of<PrescriptionProvider>(context, listen: false).addFakePrescriptions(widget.patientId).then((res) {
+                _reloadList(widget.patientId);
+              });
+            },
+            child: const Text('Add Mock Prescription'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     //final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
     return Scaffold(
-      appBar: AppBar(title: const Text('Prescriptions'), actions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            (_items.length).toString(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        appBar: AppBar(title: const Text('Prescriptions'), actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              (_items.length).toString(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-      ]),
-      body: _items.isEmpty
-          ? noPrescription()
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(controller: _scrollController, itemCount: _items.length + 1, itemBuilder: _buildPrescriptionItem 
-            ),
-          )
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                // Add your button click logic here
-                setState(() {});
-              },
-              child: const Text('Refresh'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Provider.of<PrescriptionProvider>(context, listen: false).addFakePrescriptions(widget.patientId);
-              },
-              child: const Text('Add Fake Prescription'),
-            ),
-          ],
-        ),
-      ),
-    );
+        ]),
+        body: _items.isEmpty
+            ? noPrescription()
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(controller: _scrollController, itemCount: _items.length + 1, itemBuilder: _buildPrescriptionItem),
+                  )
+                ],
+              ),
+        bottomNavigationBar: bottomAppbar());
   }
 }

@@ -54,7 +54,7 @@ class PrescriptionProvider extends ChangeNotifier {
         );
       } catch (error) {
         // If an error occurs, the transaction will be rolled back
-        print('Error storing prescription and lines: $error');
+        debugPrint('Error storing prescription and lines: $error');
         rethrow; // Rethrow the error to let the caller handle it
       }
     });
@@ -119,8 +119,6 @@ class PrescriptionProvider extends ChangeNotifier {
   Future<void> addFakePrescriptions(int patientId) async {
     Prescription fakePrescription = await FakePrescriptionGenerator.generateFakePrescription(patientId);
     await storePrescriptionAndLines(fakePrescription);
-    dbCount++;
-    notifyListeners();
   }
 
   Future<void> initPrescriptionList(int patientId) async {

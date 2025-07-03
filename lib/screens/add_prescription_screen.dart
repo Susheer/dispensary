@@ -201,10 +201,26 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
     return medicines;
   }
 
-  Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
-    await Provider.of<MedicineProvider>(context, listen: false)
-        .justLoadAllMedicines();
+Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
+    await Provider.of<MedicineProvider>(context, listen: false).justLoadAllMedicines();
     List<Medicine> medicines = await getMedicinesFromDb();
+    if (!mounted) return;
+    if (medicines.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('No Medicines Found'),
+          content: const Text('Please add medicines before adding a prescription.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     invokeBottomSheet(medicines);
   }
 
