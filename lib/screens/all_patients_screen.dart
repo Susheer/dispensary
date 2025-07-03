@@ -7,6 +7,8 @@ import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/common/patient_details_widget.dart';
 import 'package:dispensary/appConfig.dart';
 
+enum Filter { PatientsWithPendingBalance, NoFilter }
+
 class AllPatientsScreen extends StatefulWidget {
   @override
   State<AllPatientsScreen> createState() => _AllPatientsScreenState();
@@ -17,6 +19,7 @@ class _AllPatientsScreenState extends State<AllPatientsScreen> {
   int currentPage = 0;
   bool isLoading = false;
   bool initScreenUponLoad = false;
+  late Filter filter;
 
   @override
   void didChangeDependencies() {
