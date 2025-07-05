@@ -33,6 +33,80 @@ class _LandingScreenState extends State<LandingScreen> {
     AllMedicineScreen(), // 5
     ManageBackup(),
   ];
+
+  List<Widget> devDrawerMenus() {
+    return [
+      ListTile(
+        leading: const Icon(Icons.view_headline_outlined),
+        title: const Text('Reset App'),
+        subtitle: const Text("clear app data"),
+        onTap: () {
+          Provider.of<LandingScreenProvider>(context, listen: false).deleteDatabaseAndClear();
+          Navigator.pop(context); // Close the drawer
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.post_add_outlined),
+        title: const Text('Add Medecine'),
+        subtitle: const Text("fake drugs"),
+        onTap: () {
+          Provider.of<MedicineProvider>(context, listen: false).insertsDummyMedicines();
+          Navigator.pop(context); // Close the drawer
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.remove_from_queue),
+        title: const Text('Clear Medecine'),
+        subtitle: const Text("delete drugs"),
+        onTap: () {
+          Provider.of<MedicineProvider>(context, listen: false).deleteAllMedicines();
+          Navigator.pop(context); // Close the drawer
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.person_outline),
+        title: const Text('Add Patient'),
+        subtitle: const Text("fake data"),
+        onTap: () {
+          Provider.of<PatientProvider>(context, listen: false).registerDummyPatient();
+          Navigator.pop(context); // Close the drawer
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.remove_circle_outline),
+        title: const Text('Delete Patient'),
+        subtitle: const Text("clear all"),
+        onTap: () {
+          Provider.of<PatientProvider>(context, listen: false).deleteAllPatients();
+          Navigator.pop(context); // Close the drawer
+        },
+      ),
+      if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
+        ListTile(
+          leading: const Icon(Icons.upload_file),
+          title: const Text('Manage Backup'),
+          onTap: () {
+            Navigator.pop(context);
+            Provider.of<LandingScreenProvider>(context, listen: false).index = 6;
+          },
+        ),
+    ];
+  }
+
+  List<Widget> prodDrawerMenus() {
+    return [
+      if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
+        ListTile(
+          leading: const Icon(Icons.upload_file),
+          title: const Text('Manage Backup'),
+          onTap: () {
+            Navigator.pop(context);
+            Provider.of<LandingScreenProvider>(context, listen: false).index = 6;
+          },
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<LandingScreenProvider>(builder: (context, landingProvider, child) {
@@ -104,82 +178,17 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ],
         ),
-        drawer: Drawer(
+
+        drawer: AppConfig.isProd == true
+            ? null
+            : Drawer(
           width: MediaQuery.of(context).size.width * 70 / 100,
           child: Column(
             children: [
-              DrawerHeader(
-                  decoration: const BoxDecoration(color: Color(0xff6750a4)),
-                  child: Container(
-                      constraints: const BoxConstraints.expand(), child: const UserName())),
+              DrawerHeader(decoration: const BoxDecoration(color: Color(0xff6750a4)), child: Container(constraints: const BoxConstraints.expand(), child: const UserName())),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Container(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.view_headline_outlined),
-                          title: const Text('Reset App'),
-                          subtitle: const Text("clear app data"),
-                          onTap: () {
-                            Provider.of<LandingScreenProvider>(context, listen: false)
-                                .deleteDatabaseAndClear();
-                            Navigator.pop(context); // Close the drawer
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.post_add_outlined),
-                          title: const Text('Add Medecine'),
-                          subtitle: const Text("fake drugs"),
-                          onTap: () {
-                            Provider.of<MedicineProvider>(context, listen: false)
-                                .insertsDummyMedicines();
-                            Navigator.pop(context); // Close the drawer
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.remove_from_queue),
-                          title: const Text('Clear Medecine'),
-                          subtitle: const Text("delete drugs"),
-                          onTap: () {
-                            Provider.of<MedicineProvider>(context, listen: false)
-                                .deleteAllMedicines();
-                            Navigator.pop(context); // Close the drawer
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.person_outline),
-                          title: const Text('Add Patient'),
-                          subtitle: const Text("fake data"),
-                          onTap: () {
-                            Provider.of<PatientProvider>(context, listen: false)
-                                .registerDummyPatient();
-                            Navigator.pop(context); // Close the drawer
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.remove_circle_outline),
-                          title: const Text('Delete Patient'),
-                          subtitle: const Text("clear all"),
-                          onTap: () {
-                            Provider.of<PatientProvider>(context, listen: false)
-                                .deleteAllPatients();
-                            Navigator.pop(context); // Close the drawer
-                          },
-                        ),
-                        
-                        if (Provider.of<AuthProvider>(context, listen: true).isAuthorised)
-                          ListTile(
-                            leading: const Icon(Icons.upload_file),
-                            title: const Text('Manage Backup'),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Provider.of<LandingScreenProvider>(context, listen: false).index = 6;
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
+                        child: Column(children: AppConfig.isProd == true ? prodDrawerMenus() : devDrawerMenus()),
                 ),
               ),
               const DrawerFooter(),
