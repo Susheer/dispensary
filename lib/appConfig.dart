@@ -17,6 +17,5 @@ class AppConfig {
   static String regNO = dotenv.env['reg_no'] ?? "";
   static String degree = dotenv.env['degree'] ?? "";
   static String position = dotenv.env['position'] ?? "";
- 
-  
+  static bool isProd = dotenv.env['environment'] == 'PRODUCTION';
 }
