@@ -89,7 +89,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
           },
           steps: [
             Step(
-              title: const Text('Prescription Details'),
+              title: const Text('Medication Details'),
               content: Form(
                 key: _formPrescriptionDetails,
                 child: Column(
@@ -98,7 +98,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                       controller: chiefComplaintController,
                       validator: onValidate,
                       decoration:
-                          const InputDecoration(labelText: 'Chief Complaint'),
+                          const InputDecoration(labelText: 'Complaints Off'),
                     ),
                     TextFormField(
                       controller: diagnosisController,
@@ -171,7 +171,7 @@ class _AddPrescriptionScreenState extends State<AddPrescriptionScreen> {
                   children: [
                     const SizedBox(height: 10),
                     if (prescriptionLines.isNotEmpty)
-                      const Text('Prescription Lines:',
+                      const Text('Medications Lines:',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                     for (var line in prescriptionLines)
                       ListTile(
@@ -210,7 +210,7 @@ Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('No Medicines Found'),
-          content: const Text('Please add medicines before adding a prescription.'),
+          content: const Text('Please add medicines before adding a Medications.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -241,7 +241,7 @@ Future<void> _showAddMedicationBottomSheet(BuildContext context) async {
     try {
       Provider.of<PrescriptionProvider>(context, listen: false)
           .storePrescriptionAndLines(prescription);
-      displayMessage("Prescription added");
+      displayMessage("Medication added");
     } on Exception catch (e) {
       displayMessage("Failed! please re-start app and try again");
     }

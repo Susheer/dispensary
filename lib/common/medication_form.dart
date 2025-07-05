@@ -139,7 +139,7 @@ class _MedicationFormState extends State<MedicationForm> {
               TextFormField(
                 controller: notesController,
                 validator: onValidate,
-                decoration: const InputDecoration(labelText: 'Notes (SoP)'),
+                decoration: const InputDecoration(labelText: 'Notes (SoS)'),
               ),
               const SizedBox(height: 16),
               Row(

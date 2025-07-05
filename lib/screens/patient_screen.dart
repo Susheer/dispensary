@@ -243,7 +243,7 @@ class _PatientScreenState extends State<PatientScreen> {
               const SizedBox(height: 20),
               if (prescription != null)
                 buildSection(
-                    title: 'Recent Prescription',
+                    title: 'Recent Medication',
                     isLinkButton: true,
                     linkButton: TextButton(
                       onPressed: () {
@@ -350,7 +350,7 @@ class _PatientScreenState extends State<PatientScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.view_list),
-            label: 'Prescriptions',
+            label: 'Medications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

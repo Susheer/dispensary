@@ -6,8 +6,7 @@ class PrescriptionBody extends StatelessWidget {
   final List<PrescriptionLine> prescriptionLines;
   final String medicalDignosis;
 
-  const PrescriptionBody(
-      {required this.prescriptionLines, required this.medicalDignosis});
+  const PrescriptionBody({required this.prescriptionLines, required this.medicalDignosis});
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +34,21 @@ class PrescriptionBody extends StatelessWidget {
             height: 16,
           ),
           const Text(
-            'Prescription Lines:',
+            'Medication Lines:',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           ...prescriptionLines.map(
             (line) => ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                title: Text(
-                    '${line.medicine.name}${line.strength == null ? "" : "-" + line.strength} '),
+                title: Text('${line.medicine.name}${line.strength == null ? "" : "-" + line.strength} '),
                 subtitle: Container(
                   padding: const EdgeInsets.only(left: 8),
-                  constraints: BoxConstraints(
-                      minWidth: MediaQuery.of(context).size.width),
+                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text('${line.doses} | ${line.duration}'),
-                      Text('Notes: ${line.notes}')
-                    ],
+                    children: [Text('${line.doses} | ${line.duration}'), Text('Notes: ${line.notes}')],
                   ),
                 )),
           ),

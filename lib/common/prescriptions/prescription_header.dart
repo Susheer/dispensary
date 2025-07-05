@@ -42,7 +42,7 @@ class PrescriptionHeader extends StatelessWidget {
           children: [
             RowWithLabelAndValueSet(
                 isOverflow: true,
-                label1: 'Prescription:',
+                label1: 'Medication:',
                 value1: sysPrescriptionId.toString(),
                 label2: 'Updated: ',
                 value2: timeago.format(createdDate)),
@@ -55,7 +55,7 @@ class PrescriptionHeader extends StatelessWidget {
             Typography2(label: 'Patient Name', value: patientName),
             ...[
               const Text(
-                'Chief Complaint:',
+                'Complaints off:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(

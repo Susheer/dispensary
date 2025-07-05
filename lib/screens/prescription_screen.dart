@@ -76,7 +76,7 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
         SizedBox(
           height: 16,
         ),
-        Text("No Prescription found"),
+        Text("No Medication found"),
       ],
     ));
   }
@@ -122,7 +122,7 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
                 _reloadList(widget.patientId);
               });
             },
-            child: const Text('Add Mock Prescription'),
+            child: const Text('Add Mock Medication'),
           ),
         ],
       ),
@@ -133,7 +133,7 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
   Widget build(BuildContext context) {
     //final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
     return Scaffold(
-        appBar: AppBar(title: const Text('Prescriptions'), actions: [
+        appBar: AppBar(title: const Text('Medications'), actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
