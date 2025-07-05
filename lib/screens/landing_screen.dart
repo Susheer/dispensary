@@ -27,11 +27,11 @@ class _LandingScreenState extends State<LandingScreen> {
   final List<Widget> _screens = [
     DashboardScreen(),
     SearchScreen(),
-    AllPatientsScreen(),
+    AllPatientsScreen(), // 2
     SettingsScreen(),
     RegistrationScreen(), // 4
     AllMedicineScreen(), // 5
-    ManageBackup()
+    ManageBackup(),
   ];
   @override
   Widget build(BuildContext context) {

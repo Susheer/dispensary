@@ -1,4 +1,3 @@
-import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_model.dart';
@@ -8,169 +7,153 @@ import 'package:provider/provider.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   final int patientId;
-  Patient patient;
-  PrescriptionScreen({required this.patientId, required this.patient});
+  final Patient patient;
+  const PrescriptionScreen({Key? key, required this.patientId, required this.patient}) : super(key: key);
 
   @override
-  _PrescriptionScreenState createState() => _PrescriptionScreenState();
+  State<PrescriptionScreen> createState() => PrescriptionScreenState();
 }
 
-class _PrescriptionScreenState extends State<PrescriptionScreen> {
+class PrescriptionScreenState extends State<PrescriptionScreen> {
   late PrescriptionProvider _prescriptionProvider;
-  int currentPage = 0;
-  bool isLoadingNextPage = false;
-  bool initScreenUponLoad = false;
+  final ScrollController _scrollController = ScrollController();
+  List<Prescription> _items = [];
+  int _page = 0;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Safe to use after first build phase
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      _prescriptionProvider = Provider.of<PrescriptionProvider>(context, listen: false);
+      await _prescriptionProvider.inItPrescriptionScreen(widget.patientId);
+      _fetchMore(widget.patientId, _page);
+      _scrollController.addListener(() {
+        if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && !_isLoading) {
+          _fetchMore(widget.patientId, _page);
+        }
+      });
+    });
+  }
+
+  Future<void> _fetchMore(int patientId, int page) async {
+    setState(() => _isLoading = true); // Simulate API delay
+    final newItems = await _prescriptionProvider.loadNextPage(patientId, page);
+    setState(() {
+      _items.addAll(newItems);
+      _page++;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _reloadList(int patientId) async {
+    setState(() => _isLoading = true); // Simulate API delay
+    final newItems = await _prescriptionProvider.loadNextPage(patientId, 0);
+    setState(() {
+      _items = []; // blank
+      _items.addAll(newItems);
+      _page = 1;
+      _isLoading = false;
+    });
+  }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
-    isLoadingNextPage = false;
-    initScreenUponLoad = false;
   }
 
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    if (initScreenUponLoad == false) {
-      initScreenUponLoad = true;
-      _prescriptionProvider = Provider.of<PrescriptionProvider>(context);
-      await _prescriptionProvider
-          .countPrescriptionsByPatientId(widget.patientId);
-      await _prescriptionProvider.initPrescriptionList(widget.patientId);
-    }
-  }
-
-  int getItemCount(int snapshotLength, int totalAvailableCount) {
-    if ((snapshotLength + 1) < totalAvailableCount) {
-      return snapshotLength + 1;
-    }
-    return totalAvailableCount; // reached to the end of list
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Prescriptions'), actions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            '${_prescriptionProvider.getPrescriptionList.length}/${_prescriptionProvider.dbCount}',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+  Widget noPrescription() {
+    return const Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.notes,
+          size: 50,
         ),
-      ]),
-      body: Column(
+        SizedBox(
+          height: 16,
+        ),
+        Text("No Medication found"),
+      ],
+    ));
+  }
+
+  Widget _buildPrescriptionItem(BuildContext context, int index) {
+    if (index == _items.length) {
+      return _isLoading
+          ? const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          : const SizedBox();
+    }
+    return PrescriptionWidget(
+      patientName: widget.patient.name,
+      sysPrescriptionId: _items[index].sysPrescriptionId,
+      patientId: _items[index].patientId,
+      diagnosis: _items[index].diagnosis,
+      chiefComplaint: _items[index].chiefComplaint,
+      createdDate: _items[index].createdDate,
+      updatedDate: _items[index].updatedDate,
+      totalAmount: _items[index].totalAmount,
+      paidAmount: _items[index].paidAmount,
+      lines: _items[index].prescriptionLines,
+    );
+  }
+
+  BottomAppBar bottomAppbar() {
+    return BottomAppBar(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Expanded(
-            child: Consumer<PrescriptionProvider>(
-              builder: (context, prescriptionProvider, child) {
-                List<Prescription> prescriptions =
-                    prescriptionProvider.getPrescriptionList;
-                if (prescriptions.isNotEmpty) {
-                  debugPrint("prescriptions.length ${prescriptions.length}");
-                  int itemCount = getItemCount(
-                      prescriptions.length, prescriptionProvider.dbCount);
-                  return ListView.builder(
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      if (index == prescriptions.length) {
-                        // All data was available in 'prescriptions' has been displayed.
-                        //Now load new data if data are there in db.
-                        debugPrint('-----reached at end-----');
-                        if (index < prescriptionProvider.dbCount) {
-                          debugPrint(
-                              '-index: $index < prescriptionsCount: ${prescriptionProvider.dbCount} = true-------');
-                          // stop incrementing calling loadOtherPage untill current req is completed.
-                          if (isLoadingNextPage == false) {
-                            debugPrint('Before calling loadMore');
-                            // now stop calling next page
-                            isLoadingNextPage = true;
-                            currentPage = currentPage + 1;
-                            int nextPage = currentPage;
-                            loadOtherPage(nextPage);
-                            debugPrint('After calling loadMore');
-                          }
-                        }
-                      }
-                      if (isLoadingNextPage == true) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (index < prescriptions.length) {
-                        return PrescriptionWidget(
-                          patientName: widget.patient.name,
-                          sysPrescriptionId:
-                              prescriptions[index].sysPrescriptionId,
-                          patientId: prescriptions[index].patientId,
-                          diagnosis: prescriptions[index].diagnosis,
-                          chiefComplaint: prescriptions[index].chiefComplaint,
-                          createdDate: prescriptions[index].createdDate,
-                          updatedDate: prescriptions[index].updatedDate,
-                          totalAmount: prescriptions[index].totalAmount,
-                          paidAmount: prescriptions[index].paidAmount,
-                          lines: prescriptions[index].prescriptionLines,
-                        );
-                      } else {
-                        return const Center(
-                          child:
-                              Text("Ohh, Is there any more data? Refreash it"),
-                        );
-                      }
-                    },
-                  );
-                }
-                return const Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.notes,
-                      size: 50,
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
-                    Text("No Prescription found"),
-                  ],
-                ));
-              },
-            ),
+          ElevatedButton(
+            onPressed: () {
+              // Add your button click logic here
+              setState(() {});
+            },
+            child: const Text('Refresh'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Provider.of<PrescriptionProvider>(context, listen: false).addFakePrescriptions(widget.patientId).then((res) {
+                _reloadList(widget.patientId);
+              });
+            },
+            child: const Text('Add Mock Medication'),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                // Add your button click logic here
-                setState(() {});
-              },
-              child: const Text('Refresh'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _prescriptionProvider.addFakePrescriptions(widget.patientId);
-              },
-              child: const Text('Add Fake Prescription'),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Future<void> loadOtherPage(nextPage) async {
-    debugPrint('loadOtherPage invoked');
-    debugPrint('loading page:- ${nextPage}');
-    await await Future.delayed(const Duration(seconds: 1));
-    await _prescriptionProvider.loadNextPage(widget.patientId, nextPage);
-    isLoadingNextPage = false;
-    debugPrint('loading page: completed');
+  @override
+  Widget build(BuildContext context) {
+    //final pList = context.watch<PrescriptionProvider>().getPrescriptionList;
+    return Scaffold(
+        appBar: AppBar(title: const Text('Medications'), actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              (_items.length).toString(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ]),
+        body: _items.isEmpty
+            ? noPrescription()
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(controller: _scrollController, itemCount: _items.length + 1, itemBuilder: _buildPrescriptionItem),
+                  )
+                ],
+              ),
+        bottomNavigationBar: bottomAppbar());
   }
 }
