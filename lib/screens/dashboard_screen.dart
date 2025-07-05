@@ -1,3 +1,4 @@
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/common/user_greet.dart';
 import 'package:dispensary/providers/dashboard_provider.dart';
 import 'package:dispensary/providers/landing_provider.dart';
@@ -103,26 +104,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(
                 height: 8,
               ),
-              Container(
-                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: btnStyle,
-                      onPressed: () {
-                        // Implement the logic to send reminders
-                      },
-                      child: const Text("Send Reminder for Tomorrow"),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
+              if (AppConfig.isProd == false)
+                Container(
+                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        style: btnStyle,
+                        onPressed: () {
+                          // Implement the logic to send reminders
+                        },
+                        child: const Text("Send Reminder for Tomorrow"),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-
               // Patient management
               const SizedBox(
                 height: 22,
