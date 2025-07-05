@@ -1,3 +1,4 @@
+import 'package:dispensary/appConfig.dart';
 import 'package:dispensary/common/prescriptions/prescription_widget.dart';
 import 'package:dispensary/models/patient.dart';
 import 'package:dispensary/models/prescription_model.dart';
@@ -9,7 +10,7 @@ class PrescriptionScreen extends StatefulWidget {
   final int patientId;
   final Patient patient;
   const PrescriptionScreen({Key? key, required this.patientId, required this.patient}) : super(key: key);
-
+  
   @override
   State<PrescriptionScreen> createState() => PrescriptionScreenState();
 }
@@ -108,7 +109,9 @@ class PrescriptionScreenState extends State<PrescriptionScreen> {
     return BottomAppBar(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
+        children: AppConfig.isProd == true
+            ? []
+            : [
           ElevatedButton(
             onPressed: () {
               // Add your button click logic here

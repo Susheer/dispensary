@@ -178,16 +178,17 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ],
         ),
-        drawer: Drawer(
+
+        drawer: AppConfig.isProd == true
+            ? null
+            : Drawer(
           width: MediaQuery.of(context).size.width * 70 / 100,
           child: Column(
             children: [
               DrawerHeader(decoration: const BoxDecoration(color: Color(0xff6750a4)), child: Container(constraints: const BoxConstraints.expand(), child: const UserName())),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Container(
-                    child: Column(children: devDrawerMenus()),
-                  ),
+                        child: Column(children: AppConfig.isProd == true ? prodDrawerMenus() : devDrawerMenus()),
                 ),
               ),
               const DrawerFooter(),
